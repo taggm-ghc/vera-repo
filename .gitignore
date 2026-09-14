@@ -1,8 +1,18 @@
 # Python virtual environment
 .venv/
+.venv.*/
 
 # Environment variables / secrets
 .env
+
+# anti-pattern
+anti-pattern/
+
+# Syllabus / documentation (track but no secrets)
+syllabus/
+
+# Opencode CLI notes
+opencode.cli/
 
 # Byte-compiled / cache
 __pycache__/
@@ -17,3 +27,6 @@ __pycache__/
 # Private / non-published material (anything marked *-prv)
 *-prv.*
 *-prv/
+
+# Deprecated code kept for reference only — never shipped
+deprecated/

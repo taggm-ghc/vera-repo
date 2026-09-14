@@ -1,0 +1,6 @@
+{
+  "selected_model": "gpt-4o-mini",
+  "selected_at": "2026-09-11",
+  "rationale": "Low per-token cost for a bounded single-turn Q&A endpoint at Week 1 scope, where the deliverable is a working /ask contract with observable tokens_used/cost_usd rather than answer quality tuned across models. Revisit once VERA's evidence-context pipeline (Session 2+) makes response quality, not just cost, a load-bearing evaluation dimension.",
+  "notes": "2026-09-12 finding, not yet acted on: gpt-4o-mini still has a live price on OpenAI's official pricing page but does not appear on the current models catalog page (https://developers.openai.com/api/docs/models), which now lists a newer lineup (e.g. GPT-6 Astra, GPT-5.6 Sol/Terra/Luna). This likely explains the separate discrepancy where the Week 1 course slide deck names gpt-5.5/gpt-5.4-mini while every assignment doc and this project use gpt-4o-mini. Whether to switch is a distinct decision from this file's cost rationale and has not been made."
+}
