@@ -14,8 +14,10 @@ PORT="${1:-${PORT:-8001}}"
 HOST="${HOST:-127.0.0.1}"
 
 # Pre-flight: bail out if something is already listening on the target port.
-if (exec 3<>"/dev/tcp/${HOST}/${PORT}") 2>/dev/null; then
-    exec 3>&- 3<&-
+# Bounded with `timeout` because a bare /dev/tcp connect attempt can hang for
+# a long time (SYN retries) in sandboxed environments where an unused port
+# is neither refused nor reachable, instead of failing fast.
+if timeout 1 bash -c "exec 3<>\"/dev/tcp/${HOST}/${PORT}\"" 2>/dev/null; then
     if curl -sf -m 2 "http://${HOST}:${PORT}/health" >/dev/null 2>&1; then
         echo "VERA already appears to be running at http://${HOST}:${PORT}/health"
     else
@@ -35,5 +37,9 @@ fi
 echo "Starting uvicorn on http://${HOST}:${PORT}"
 echo "  health check: http://${HOST}:${PORT}/health"
 echo "  API docs:     http://${HOST}:${PORT}/docs"
+
+# Record the active address so streamlit_app.py can default to it instead of
+# a hardcoded port that drifts whenever this is started on a non-default one.
+echo "http://${HOST}:${PORT}" > .vera-local-url
 
 exec uvicorn main:app --reload --host "$HOST" --port "$PORT"

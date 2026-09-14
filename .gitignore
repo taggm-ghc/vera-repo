@@ -20,6 +20,7 @@ __pycache__/
 
 # Local server logs / scratch
 *.log
+.vera-local-url
 
 # Windows "mark of the web" alternate-data-stream cruft (WSL)
 *:Zone.Identifier
