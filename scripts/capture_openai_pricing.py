@@ -16,7 +16,7 @@ one scoped container (confirmed 2026-09-12 — see that doc's "Completeness
 pass" section for how this was established, including the two false starts
 recorded there so they aren't repeated).
 
-Requires Playwright + Chromium (local .venv only; not in requirements.txt).
+Requires Playwright + Chromium (see requirements-dev.txt; not in requirements.txt).
 
 Usage:
     python scripts/capture_openai_pricing.py [--out-dir captures]
