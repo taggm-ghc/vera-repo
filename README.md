@@ -108,6 +108,14 @@ POST /ask
 `POST /ask` is the primary research-question interface and serves as the
 entry point to VERA.
 
+## Model Choice
+
+VERA currently uses OpenAI's `gpt-4.1-nano`. At this stage the deliverable
+is a reliable, cost-observable `/ask` contract rather than answer quality
+tuned across models, so the cheapest acceptable model is used rather than
+a flagship one; this is revisited once response quality becomes a
+load-bearing evaluation dimension.
+
 ## Running Locally
 
 ### Requirements
