@@ -1,206 +1,35 @@
-# VERA
+# VERA documentation index
 
-## Verifiable Evidence-based Research Answers
+*Rewritten 2026-10-01 (R7a author, R11a record role). This file previously duplicated the root
+README; that copy is archived at
+`../AI-Internship/p3m3/history/2026-10-01-cleanup-archive-6/vera__docs-README.md`. The project overview,
+status, run instructions and environment description are in the root [README.md](../README.md).*
 
-**VERA is a provenance-grounded agentic context-engineering system that
-discovers, critically evaluates, registers, and organizes evidence into
-an auditable reasoning context to produce research responses measurably
-superior to direct leading-LLM baselines.**
+## Documents in this folder
 
-VERA is being developed as a capstone project for TAI Labs' Agentic AI
-Engineering program.
+Status tags: LIVE (current, maintained), RECORD (kept as written, dated annotations only), SUPERSEDED, BACKLOG (parked, not built). Listing verified against the directory 2026-10-02. Files named `*-prv.*` are private and gitignored (`.gitignore`: `*-prv.*`), so they exist locally only.
 
-## The Problem
+| Document | Purpose | Status |
+|---|---|---|
+| [vera-design.md](vera-design.md) | Full design, governing invariants, Addendum A (MVP boundary, milestone table, A.11 status and replan, status addendum). Original milestone targets preserved per the Provenance invariant. | LIVE |
+| [VERA-OCT-15-SPRINT-PLAN.md](VERA-OCT-15-SPRINT-PLAN.md) | Oct 15 - Nov 1 sprint plan (2026-09-30). Fallback plan, superseded in part by the 2026-10-03 MVP target. | SUPERSEDED (in part; fallback) |
+| [pre-session-checkin.md](pre-session-checkin.md) | Capstone seed and pre-session check-in (8 September 2026). | RECORD |
+| [vera-v06-design-prv.md](vera-v06-design-prv.md) | Earlier private design, Refined Version 06 (9 September 2026); vera-design.md is current. | RECORD |
+| [vera-retrieval-quality-digest-prv.md](vera-retrieval-quality-digest-prv.md) | Retrieval-quality layer digest (18 September); nothing implemented, deferred by A.9. | BACKLOG |
+| [vera-retrieval-vocabulary-reconciliation-prv.md](vera-retrieval-vocabulary-reconciliation-prv.md) | Maps the digest's terms onto Gate A/B/C; still cited by vera-design.md A.9 (verified 2026-10-02). | LIVE (vocabulary only) |
+| [vera-multimodal-extraction-backlog-prv.md](vera-multimodal-extraction-backlog-prv.md) | Parked OCR/table/figure extraction work; scope decision pending. | BACKLOG |
+| [vera-privileged-mediation-annotated-bibliography-prv.md](vera-privileged-mediation-annotated-bibliography-prv.md) | Annotated bibliography for the privileged-mediation security framework (September 2026). Not reviewed in this pass; the file is root-owned and read-only to the maintainer, so it carries no annotation. | RECORD |
+| `vera-eigenprojection-distribution-retrieval-design-prv.docx` | Word design note (24 September); not Markdown, not reviewed here. | RECORD (UNVERIFIED content) |
 
-Large language models can produce fluent research answers without making
-the underlying evidence-selection process sufficiently inspectable.
+The design-notes files at the repo root (`../ask-guardrail-design-prv.md`, `../pricing-scraper-design-prv.md`) and the folders `../opencode.cli/` and `../refactor-prv/` are RECORD material; each has its own README or dated annotations.
 
-A plausible answer is not necessarily a well-supported answer.
-Conversely, an elaborate research process has limited value if its final
-answer is no better than what a leading model can produce directly.
+Database documentation: [../db/README.md](../db/README.md). Environment variables and accounts, described
+without secrets: [../.env.example](../.env.example).
 
-VERA therefore treats both **evidentiary defensibility** and **response
-quality** as requirements.
+## Planning records (sibling repo, `AI-Internship/p3m3/`)
 
-The project examines a bounded question:
+Status, plan, flows, state report and the longitudinal evaluation design are listed with links in the
+"Documentation Index" section of the root [README.md](../README.md), together with the dated history
+archive folders (`2026-10-01-cleanup-archive` through `-archive-10`).
 
-> Can deliberate, auditable evidence acquisition, critical evaluation,
-> and context construction cause a frontier model to produce a
-> materially better research response than it produces directly?
-
-## What VERA Does
-
-Given a bounded research question, VERA:
-
--   discovers and critically evaluates relevant evidence;
--   preserves evidence provenance;
--   constructs a deliberately selected research context;
--   produces a grounded research response; and
--   evaluates the resulting response against a direct leading-model
-    baseline.
-
-At a public architectural level:
-
-``` text
-Research Question
-       |
-       v
-Evidence Discovery and Evaluation
-       |
-       v
-Provenance-Grounded Context
-       |
-       v
-Research Synthesis
-       |
-       v
-Evaluation
-       |
-       v
-Auditable Research Answer
-```
-
-The internal decision structures, representations, scoring methods,
-orchestration mechanisms, and other implementation details used to
-perform these functions are outside the scope of this public repository.
-
-## Design Objectives
-
-VERA is designed around four public objectives:
-
-**Grounding.** Research claims should be supported by relevant evidence
-rather than generated solely from model parameters.
-
-**Provenance.** Consequential evidence should remain traceable to its
-source.
-
-**Auditability.** Evidence-selection and evaluation decisions should be
-inspectable.
-
-**Response quality.** Provenance and auditability are requirements, but
-they do not compensate for an inferior final answer.
-
-## Comparative Evaluation
-
-VERA is evaluated against direct responses to the same bounded research
-question from leading language models.
-
-The central question is whether supplying a deliberately constructed,
-critically evaluated evidence context produces a materially better
-research response than direct model generation.
-
-Evaluation considers the quality of the resulting answer as well as the
-traceability of its supporting evidence.
-
-## API
-
-VERA is implemented as a Python service using FastAPI.
-
-The application interface includes:
-
-``` text
-GET  /health
-POST /ask
-```
-
-`GET /health` provides a basic service health check.
-
-`POST /ask` is the primary research-question interface and serves as the
-entry point to VERA.
-
-## Model Choice
-
-VERA currently uses OpenAI's `gpt-4.1-nano`. At this stage the deliverable
-is a reliable, cost-observable `/ask` contract rather than answer quality
-tuned across models, so the cheapest acceptable model is used rather than
-a flagship one; this is revisited once response quality becomes a
-load-bearing evaluation dimension.
-
-## Running Locally
-
-### Requirements
-
--   Python 3.11+
--   Python virtual environment
--   required Python dependencies
--   required API credentials stored locally in `.env`
-
-Do not commit `.env` or API credentials to source control.
-
-Start the development service with:
-
-``` bash
-./run.sh
-```
-
-The default local address is:
-
-``` text
-http://127.0.0.1:8001
-```
-
-Health check:
-
-``` text
-http://127.0.0.1:8001/health
-```
-
-FastAPI documentation:
-
-``` text
-http://127.0.0.1:8001/docs
-```
-
-A different port can be supplied when starting the service:
-
-``` bash
-./run.sh 8000
-```
-
-## Current Status
-
-VERA is under active development.
-
-The project is progressing from architecture and MVP definition into
-implementation. The current service foundation supports incremental
-development toward the capstone demonstration.
-
-Target capstone demonstration: **October 2026**.
-
-## Demo-Day Success Criterion
-
-The project succeeds if VERA can demonstrate that it:
-
-> produces a grounded research response significantly superior in
-> quality to direct responses to the same research question from GPT-6
-> Astra and other leading LLMs, while making its evidence-selection
-> process inspectable and auditable.
-
-Every consequential evidence decision should be traceable to its source,
-evidence, provenance, and evaluation method.
-
-A sophisticated and auditable process that produces an inferior research
-answer does not satisfy the project's success criterion.
-
-## Public Disclosure Boundary
-
-This repository is publicly accessible for educational demonstration,
-evaluation, and portfolio purposes.
-
-It describes VERA's purpose, public capabilities, interfaces,
-development status, and evaluation objectives. It intentionally does not
-document proprietary internal representations, decision structures,
-scoring methods, algorithms, orchestration, feedback mechanisms, private
-architectures, or other non-public implementation details.
-
-Public availability of this repository should not be interpreted as
-disclosure of those non-public mechanisms.
-
-## Project
-
-**VERA: Verifiable Evidence-based Research Answers**
-
-TAI Labs Agentic AI Engineering Capstone\
-2026
-
-Copyright © 2026 Tagg Maiwald. All rights reserved.
+*Annotation 2026-10-02 (R11a, round 3): index completed (it previously omitted the private files) and status tags added. Pre-edit copy: `../AI-Internship/p3m3/history/2026-10-01-cleanup-archive-10/vera-repo-docs_README.md`. The pipeline cannot yet run end to end; live plans are in the sibling repo's local `AI-Internship/p3m3/`.*

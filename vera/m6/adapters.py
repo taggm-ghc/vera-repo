@@ -11,17 +11,16 @@ Gate A lives on candidates (M2); pass it in, otherwise auditability cannot reach
 """
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
-FREEZE_PATH = Path(__file__).resolve().parent.parent.parent / "config" / "vera_eval_freeze.json"
+from vera.eval_config import FREEZE_PATH, RUN_PATH, load_eval_config  # noqa: E402  (FREEZE_PATH re-exported)
 
 
-def load_freeze(path: Path = FREEZE_PATH) -> dict:
-    d = json.loads(Path(path).read_text())
-    if len(d.get("objections", [])) < 4 or not d.get("requirements"):
-        raise ValueError(f"{path}: need >=1 requirement and K>=4 objections.")
-    return d
+def load_freeze(path: Path = FREEZE_PATH, run_path: Path = RUN_PATH) -> dict:
+    """The frozen file's content (question, requirements, objections, success_criteria), loaded through the
+    one validated loader (vera.eval_config): pin-checked against the run config and validated at load.
+    Return shape is unchanged (a dict of the freeze file only), so M7 and load_from_db are unaffected."""
+    return dict(load_eval_config(path, run_path).raw)
 
 
 def build_corpus(m3_corpus: dict, freeze: dict, extra_spans: list[dict] | None = None) -> dict:

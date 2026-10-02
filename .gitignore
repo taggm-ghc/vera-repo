@@ -1,6 +1,7 @@
 # Python virtual environment
 .venv/
 .venv.*/
+venv/
 
 # Environment variables / secrets
 .env
@@ -31,3 +32,6 @@ __pycache__/
 
 # Deprecated code kept for reference only — never shipped
 deprecated/
+
+# VERA slim live MVP runner: per-run reports and the register (never commit)
+.vera-runs/

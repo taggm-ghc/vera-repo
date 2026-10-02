@@ -432,6 +432,10 @@ Capabilities such as richer bias analysis, full meta-drift implementation, gener
 - **Feedback invariant:** Historical source, method, and evaluator statistics may inform later prioritization but never substitute for current-run evidence, coverage, method, or uncertainty.
 - **Resource invariant:** Every consumed resource — model/API calls, tokens, compute, wall-clock latency, and cross-instance or cross-process state — is finite and propagates or settles at a bounded, nonzero rate; no component may assume free, instant, or unbounded access to any of them. No component may consume a costed or rate-limited resource beyond what is strictly necessary to produce its required result, and no control's correctness may silently depend on unbounded consumption or instantaneous shared state across instances. Where bounded consumption or true cross-instance consistency cannot yet be guaranteed, the limitation is stated explicitly rather than presented as resolved.
 - **Value invariant:** Grounding and auditability are necessary constraints, not substitutes for response quality. If the engineered pipeline adds material cost and complexity but produces a response no better than the direct leading-model baseline, it has not demonstrated sufficient incremental value for that task.
+- **Source-custody invariant (2026-10-01):** No raw external source documents are kept in the repository. Acquired sources are stored in the database as immutable `sources` rows and nowhere else.
+- **Licence invariant (2026-10-01):** Sources are gated by licence before use. A declared NC or ND licence is precluded; an unknown licence is held for human review (HitL), never admitted by default. The original source's licence governs, and only if the original source is used. News pages are allowed when every use is cited in-line and source-referenced.
+- **Quotation invariant (2026-10-01):** Outputs, including demo output, carry only targeted, relevant short quotes, never significant portions of source text, each with a source reference.
+- **Authority invariant:** Retrieved or acquired content is evidence, not instruction. No text obtained through search, fetch, or evidence retrieval may directly authorize a tool call, filesystem change, network action, secret disclosure, memory write, configuration change, or message send; authority remains with deterministic policy and explicit tool schemas, never with retrieved data.
 
 ## Public disclosure boundary
 
@@ -564,17 +568,19 @@ The following remain part of the full design but are not required to establish t
 
 Milestones are outcome gates rather than promises to implement every subsystem in the full design. A milestone is complete only when its artifact works end to end at the stated boundary.
 
-| Milestone | Target | Deliverable | Exit criterion |
-| --- | --- | --- | --- |
-| M0 — Scope freeze | 9 Sep | Freeze the full design as the envelope and this addendum as the MVP boundary. Select the first bounded research question and baseline model. | No new feature enters MVP unless it improves response quality or auditability. |
-| M1 — Service and records | 10–13 Sep | Working `/health` and `/ask`; validated schemas; minimal persistent records for question/run/candidate/source. | One request persists and returns structured output with stable IDs. |
-| M2 — Search and provenance | 14–19 Sep | Search, Gate A, selective fetch, staging/hash, source/version provenance. | A question produces registered candidates and acquired immutable source versions. |
-| M3 — Evidence and Gate B | 20–25 Sep | Evidence extraction, fixed critical-appraisal rubric, admit/qualify/reject decisions. | Every admitted/qualified evidence span has a source/version/span, assessment, rationale, method, and provenance. |
-| M4 — Gate C and context | 26 Sep–1 Oct | Evidence-requirements coverage, bounded adequacy check, one search-again loop, compact reasoning-context construction. | System either constructs adequate context, searches once for a named gap, or returns insufficient evidence. |
-| M5 — Synthesis and repair | 2–5 Oct | Grounded draft generation, claim-to-evidence links, answer critique, one bounded revision. | Final answer is cited, claim-traceable, and passes the MVP answer-quality checks or is explicitly qualified. |
-| M6 — Baseline and eval | 6–8 Oct | Direct same-model baseline plus comparative evaluation harness. Curate initial evaluation cases. | For the Demo question, both conditions are stored and scored on the predefined dimensions with rationale. |
-| M7 — Demo hardening | 9–10 Oct | Compact UI/audit view, deterministic demo path, latency/error handling, cached fallback artifacts where appropriate. | A three-minute rehearsal completes without hidden manual steps and exposes the evidence-decision trace. |
-| M8 — Freeze and rehearse | 11–12 Oct | Code/content freeze except critical defects; repeat evaluation and Demo Day rehearsal. | Reproducible final run, preserved baseline comparison, known limitations documented, demo ready. |
+| Milestone | Target | Deliverable | Exit criterion | Status (18 Sep 2026) |
+| --- | --- | --- | --- | --- |
+| M0 — Scope freeze | 9 Sep | Freeze the full design as the envelope and this addendum as the MVP boundary. Select the first bounded research question and baseline model. | No new feature enters MVP unless it improves response quality or auditability. | Done |
+| M1 — Service and records | 10–13 Sep | Working `/health` and `/ask`; validated schemas; minimal persistent records for question/run/candidate/source. | One request persists and returns structured output with stable IDs. | Partial — service and schemas work; no persistence layer exists at all |
+| M2 — Search and provenance | 14–19 Sep | Search, Gate A, selective fetch, staging/hash, source/version provenance. | A question produces registered candidates and acquired immutable source versions. | Missed — window closed with none of this built; see A.11 |
+| M3 — Evidence and Gate B | 20–25 Sep | Evidence extraction, fixed critical-appraisal rubric, admit/qualify/reject decisions. | Every admitted/qualified evidence span has a source/version/span, assessment, rationale, method, and provenance. | Not started — blocked on M2 |
+| M4 — Gate C and context | 26 Sep–1 Oct | Evidence-requirements coverage, bounded adequacy check, one search-again loop, compact reasoning-context construction. | System either constructs adequate context, searches once for a named gap, or returns insufficient evidence. | Not started |
+| M5 — Synthesis and repair | 2–5 Oct | Grounded draft generation, claim-to-evidence links, answer critique, one bounded revision. | Final answer is cited, claim-traceable, and passes the MVP answer-quality checks or is explicitly qualified. | Not started |
+| M6 — Baseline and eval | 6–8 Oct | Direct same-model baseline plus comparative evaluation harness. Curate initial evaluation cases. | For the Demo question, both conditions are stored and scored on the predefined dimensions with rationale. | Not started |
+| M7 — Demo hardening | 9–10 Oct | Compact UI/audit view, deterministic demo path, latency/error handling, cached fallback artifacts where appropriate. | A three-minute rehearsal completes without hidden manual steps and exposes the evidence-decision trace. | Not started |
+| M8 — Freeze and rehearse | 11–12 Oct | Code/content freeze except critical defects; repeat evaluation and Demo Day rehearsal. | Reproducible final run, preserved baseline comparison, known limitations documented, demo ready. | Not started |
+
+Original targets above are preserved as originally written, per the Provenance invariant; see **A.11** for the recorded slippage and near-term replan.
 
 ## A.8 Stretch milestones after MVP stability
 
@@ -583,7 +589,7 @@ Milestones are outcome gates rather than promises to implement every subsystem i
 | S1 | Add bounded lateral source verification for consequential sources. | Only after M5 is stable and source credibility is a demonstrated quality bottleneck. |
 | S2 | Add simple evidence-lineage/independence grouping beyond shared-origin flags. | When apparent corroboration materially affects conclusions. |
 | S3 | Restore two-axis meta-drift at candidate, evidence, and answer stages. | When scope/relevance errors appear in evaluation cases. |
-| S4 | Add one deterministic prompt-injection/content-integrity detector and synthetic test. | When Session 3 / tooling requirements are otherwise satisfied. |
+| S4 | Add one deterministic prompt-injection/content-integrity detector and synthetic test. See `docs/vera-retrieval-quality-digest-prv.md` for a ready-made deterministic check list (zero-width chars, homoglyphs, hidden HTML, instruction-like patterns). | When Session 3 / tooling requirements are otherwise satisfied. |
 | S5 | Expand evaluation from the Demo question to a 10–20 question blinded or model-independent comparison set. | After the end-to-end pipeline is stable. |
 | S6 | Add persistent derived source/method feedback for Session 5 memory. | After current-run evidence precedence and provenance are verified. |
 | S7 | Optimize latency, token use, model routing, and acquisition cost. | After quality lift is demonstrated; optimization must not erase the measured advantage. |
@@ -600,3 +606,32 @@ Milestones are outcome gates rather than promises to implement every subsystem i
 ## A.10 Relationship to the full design
 
 This addendum does not supersede the full design. It defines the implementation boundary for the capstone MVP. The full design continues to govern conceptual semantics, provenance invariants, evidence and reasoning distinctions, and post-MVP evolution. Where this addendum simplifies a construct, the simplification is an implementation deferral rather than a conceptual redefinition.
+
+## A.11 Status and replan (18 September 2026)
+
+Actual status against A.7 is recorded in that table's Status column rather than by altering the original targets, per the Provenance invariant. Summary:
+
+- **M0** — done.
+- **M1** — partial. `GET /health` and validated `POST /ask` run; the "minimal persistent records for question/run/candidate/source" exit criterion is unmet — the running service has no persistence layer of any kind.
+- **M2** — missed. No search, Gate A, selective fetch, staging/hashing, or source/version provenance exists. The window closed 19 Sep with none of this built.
+- **M3 onward** — not started, and cannot meaningfully start until M2's foundation exists.
+
+**Infra blocker underneath M1 and M2.** `main.py` already documents why model-pricing configuration is version-controlled JSON rather than a runtime database: Render's filesystem is ephemeral and does not survive a redeploy. The same constraint applies to every record M1–M3 need to persist. Closing M1's persistence gap and M2's provenance requirement therefore requires provisioning a real hosted database (e.g. Render managed Postgres) before any Gate A/B code can log a decision. This is an external provisioning step with its own lead time and has not been started — it should be treated as the first concrete action, ahead of writing Gate A/B logic itself.
+
+**Governing rule invoked.** Per the A.9 stop/go rule — "if a proposed feature does not improve answer quality, evidence adequacy, or traceability, defer it" — the retrieval-quality digest's fuller scope (`docs/vera-retrieval-quality-digest-prv.md`: retrieval history, hybrid BM25/RRF, reranking) is deferred past M2/M3. It has been reconciled against this document's Gate A/B/C vocabulary in `docs/vera-retrieval-vocabulary-reconciliation-prv.md` so that whenever it is picked up, it extends rather than duplicates the gates above; implementing it now would build refinement onto a retrieval/evidence layer that does not yet exist.
+
+**Near-term catch-up target.** Provision hosted persistence and complete the M2 slice (search, Gate A, selective fetch, provenance registration) by **23 September 2026** — a 4-day compression of M2's original 6-day window, reflecting the 4 days already elapsed since M2's original start with no output. Remaining milestones (M3–M8) should shift by the same delta rather than being individually re-dated here; assigning precise dates to work not yet scoped against real M2 output would be false precision. If 12 October is a fixed external date and this compression proves insufficient once M2 actually lands, the correct response per A.9 is to cut scope — defer S1–S7 stretch items further, or narrow M4's adequacy loop — before extending further into the M7/M8 freeze-and-rehearse window.
+
+**Database host is course-scoped, not the long-term commitment (noted 2026-09-18, no code change).** The Render-managed Postgres instance referenced above is the near-term persistence layer for this course's remaining timeline. VERA's actual longer-term production home is expected to move to a non-Render installation eventually — but PostgreSQL itself is the durable decision, independent of host: whatever infrastructure VERA eventually runs on, the persistence layer stays Postgres, not a change in database technology. `vera/db.py`'s `INTERNAL_DB_URL`/`EXTERNAL_DB_URL` split is a Render-specific mechanism (keying off Render's own private-network URL distinction) that will need to be revisited at that migration — not because Postgres changes, but because the internal/external URL split is specific to Render's own networking model. No action needed now; recorded so a future session doesn't mistake the current Render wiring for a permanent architectural commitment to Render itself.
+
+### A.11 addendum: status as of 2026-10-01 (R11a records)
+
+The A.7 Status column above is the 18 September snapshot and is kept as written. Later events, from the planning records (`AI-Internship/p3m3/VERA-TODO-DIGEST.md` is canonical):
+
+- **Replan overtaken.** The R1 directive of 2026-09-30 lifted the pause and approved starting M1-M7 immediately. M1-M7 code now exists under `vera/` with tests (`pytest tests`: 178 passed, 2 skipped on 2026-10-01; an earlier 166 figure predates added tests). The "no persistence layer" statements in A.7 and A.11 above describe 18 September: the `vera_vjay` Postgres schema now exists (migrations 001-005, `db/README.md`).
+- **Still true of M8 and of the whole programme:** no end-to-end live run of M2-M6 has been made; M8 (freeze and rehearse) is not started. MVP target Oct 3 is aggressive; the Oct 15 - Nov 1 plan is the fallback.
+- **Version control.** Only B1 (`28aae11`) and B2 (`9fef487`) are committed; everything else is uncommitted pending the owner's validation.
+- **Database accounts (2026-10-01).** Three accounts were applied (dev read/write, production write-only, production read-only); dev and production share one instance and schema, an accepted divergence. See `db/README.md`.
+- **Evaluation design.** The comparative evaluation (A.4 and the "Comparative frontier-model evaluation" section) is planned as a longitudinal, quarterly series: 8 runs, 2 tests per agent/model per run, as-of stamping by code, a config fingerprint, and retro-run contamination controls. Design only; stamps unconfirmed; see `AI-Internship/p3m3/VERA-EVAL-BEST-PRACTICES.md`. It does not alter the A.4 contract; any change to it would be made by an explicit decision.
+- **Open decisions (none decided here):** demo question; baseline prompt lock; Anthropic key (DROPPED 2026-10-02: no Anthropic key will be used; judge defaults to Groq/Mistral, see annotation below); critique pass versus accepted divergence; deletion of test row `question_id=7`; confirmation of the 8 stamps; staged live run; requirements freeze; provider-chain wiring; pg_dump and non-Render host (deferred to 2026-10-13..16; the Render database expires 2026-10-17; PostgreSQL remains the engine).
+- **Annotation 2026-10-02 (R11a, round 3):** the Anthropic-key decision above was made on 2026-10-02 (dropped); the critique pass has direction D1 (a critique informed by claim-verification divergences, feeding the existing bounded revision), plan only, nothing built; the pipeline still cannot run end to end. The `syllabus/` directory was removed from the repo on 2026-10-02. `docs/VERA-OCT-15-SPRINT-PLAN.md` is the fallback plan, superseded in part by the 2026-10-03 MVP target. Live plans are in `AI-Internship/p3m3/` (sibling repo, local only). Pre-edit copy: `AI-Internship/p3m3/history/2026-10-01-cleanup-archive-10/vera-repo-docs_vera-design.md`.

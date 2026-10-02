@@ -5,3 +5,6 @@
 # screenshot capture for the pricing page). Also run scripts/chromium-deps.sh
 # and `playwright install chromium` after installing this.
 playwright==1.62.0
+
+# Test runner (tests are dev-only; the deployed image does not need it)
+pytest==9.1.1

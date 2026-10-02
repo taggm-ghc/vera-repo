@@ -1,0 +1,135 @@
+{
+  "status": "VERSIONED",
+  "schema_version": 1,
+  "run_config_version": "2",
+  "created_at": "2026-10-02",
+  "created_by": "goal #2 implementation (plan p3m3/vera-plan-config-single-source.md; D1 option 2, D2 pool, decided by R1 2026-10-02)",
+  "notes": "Versioned companion to the IMMUTABLE config/vera_eval_freeze.json. Every change here is a new run_config_version and a new run fingerprint. success_criteria are read from the freeze file and are never copied here. v2 (2026-10-02): adds the search block (M2 redo, keyless arXiv first route, disclosed seed fallback).",
+  "freeze_pin": {
+    "path": "config/vera_eval_freeze.json",
+    "file_sha256": "661400d265e2c17b1f68700f1ae36fd15e2bf4d007947ebdf3eb00f4d8027b49",
+    "line_endings": "sha256 is computed over the file bytes with CRLF normalised to LF and a UTF-8 BOM removed",
+    "requirements_hash16": "637d247a50217128"
+  },
+  "scoring": {
+    "grounding_max_fabricated": 0
+  },
+  "budget": {
+    "cost_usd": 1.0,
+    "latency_s": 600.0,
+    "decided_by": "R1 A4 2026-10-01: $1.00 and 600 s per run"
+  },
+  "generator": {
+    "model": "gpt-4.1-nano"
+  },
+  "judge": {
+    "pool": {
+      "providers": [
+        "groq"
+      ]
+    },
+    "selection": {
+      "rule": "preference-order-v1",
+      "family_preference": [
+        "qwen",
+        "meta-llama",
+        "moonshot",
+        "deepseek",
+        "google",
+        "mistral"
+      ],
+      "max_canary_attempts": 3,
+      "canary_max_tokens": 256,
+      "listing_timeout_s": 15
+    },
+    "family_patterns": {
+      "refuse_openai": [
+        "gpt",
+        "openai"
+      ],
+      "non_chat": [
+        "guard",
+        "whisper",
+        "tts",
+        "embed",
+        "compound",
+        "distill"
+      ],
+      "generic": [
+        [
+          "qwen",
+          "qwen"
+        ],
+        [
+          "llama",
+          "meta-llama"
+        ],
+        [
+          "kimi",
+          "moonshot"
+        ],
+        [
+          "deepseek",
+          "deepseek"
+        ],
+        [
+          "gemma",
+          "google"
+        ],
+        [
+          "mistral",
+          "mistral"
+        ],
+        [
+          "mixtral",
+          "mistral"
+        ]
+      ]
+    },
+    "forbidden_env_overrides": [
+      "VERA_JUDGE_ALLOW_SAME_FAMILY",
+      "VERA_JUDGE_GROQ_MODEL",
+      "VERA_JUDGE_PRICE_IN",
+      "VERA_JUDGE_PRICE_OUT"
+    ]
+  },
+  "model_families": {
+    "gpt-4.1-nano": {
+      "family": "openai",
+      "source": "https://platform.openai.com/docs/models (OpenAI-published model; also config/model-selection.json)"
+    },
+    "openai/gpt-oss-20b": {
+      "family": "openai",
+      "source": "https://console.groq.com/docs/models (OpenAI-published open-weight model hosted on Groq; refused as the generator's family)"
+    },
+    "openai/gpt-oss-120b": {
+      "family": "openai",
+      "source": "https://console.groq.com/docs/models (OpenAI-published open-weight model hosted on Groq; refused as the generator's family)"
+    }
+  },
+  "pipeline": {},
+  "search": {
+    "providers": [
+      "arxiv"
+    ],
+    "min_candidates": 5,
+    "fallback_seed": {
+      "path": null,
+      "sha256": null
+    },
+    "arxiv": {
+      "endpoint": "https://export.arxiv.org/api/query",
+      "min_interval_s": 3.0,
+      "max_concurrency": 1,
+      "max_response_bytes": 2097152,
+      "terms_source": "https://info.arxiv.org/help/api/tou.html (read via research summary 2026-10-02, NOT verbatim; the one-request-per-3s limit is labelled for legacy APIs, re-check at L1)",
+      "query": {
+        "max_terms": 8,
+        "min_term_chars": 2,
+        "operator": "OR",
+        "submitted_from": "2023-01-01",
+        "submitted_to": "2026-12-31"
+      }
+    }
+  }
+}
