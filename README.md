@@ -222,6 +222,19 @@ secret in `.env.example`.
     No further accounts are to be created. The runners are not yet repointed to them (they still use
     the admin identity), and the write-only column grants are untested against a live run.
 
+## Week 4: TRACE evaluation (2026-10-04)
+
+The bootcamp's Week 4 asks for "an eval suite your capstone runs against, visible from a Streamlit UI". This section is that suite, run on VERA itself: Trace, Read, Analyze, Codify, Enforce.
+
+- **What was traced.** 30 frozen questions (`config/trace_questions_v1.json`: 12 in-scope, 5 multi-part, 5 false-premise, 4 out-of-scope, 4 ambiguous; 20 dev, 10 held-out; agent-authored, 5 seeded from the frozen VERA question). Two variants, both live calls to `gpt-4.1-nano`: **baseline** is exactly what `POST /ask` sends today (the question only, no retrieval); **grounded_v1** first runs VERA's keyless arXiv search (M2) and gives the model up to 5 numbered abstracts with a cite-only-these rule. Harness: `scripts/trace_capture.py`. Raw traces stay local (`tmp/trace_eval/`, gitignored: they hold full abstracts).
+- **Read and Analyze.** Every dev trace was read and open-coded before any check was written (`docs/trace_eval/open_coding_baseline_v1.md`, `open_coding_grounded_v1.md`). Baseline failures: no verifiable citation (16/20), "studies show" with no study named (11/20), answers outside the 2023-2026 window (5/20), fabricated or placeholder citations (4/20), false premises accepted, out-of-scope requests answered (including a medicine dose). Saturation was not reached in 40 traces.
+- **Codify.** Nine deterministic checks (`vera/trace_eval/checks.py`, `trace-checks-v1`), applied by question category. Results: `scripts/trace_measure.py` writes `eval_results/trace_eval_v1.json`.
+- **Validated, not trusted.** An independent labeller, blind to the check results, labelled the 40 dev traces. Each check's TPR and TNR (positive = failure) is in `eval_results/trace_eval_v1_validation.json` (`scripts/trace_validate.py`). The checks catch almost every labelled failure (TPR 0.95-1.0) but over-flag some passes (TNR 0.5-0.75 on four checks). The word-overlap support heuristic missed all 3 partially supported sentences (TPR 0.0), so it is not a support check.
+- **Measured result (all applicable checks pass; capture errors count as failures; Wilson 95% intervals; directional, small n).** Baseline: dev 2/20 (10%), held-out 2/10 (20%). Grounded_v1: dev 3/20 (15%), held-out 2/10 (20%). The headline barely moves, but the failure mix changes: by the blind labels, fabricated citations, unsourced numbers and vague "studies show" claims fall from 3, 3 and 12 dev traces to 0, 0 and 0. The new top failure is **retrieval**: in 13 of 19 grounded dev traces at most 1 of 5 arXiv results was on topic, and the model then (correctly) declined to answer from them (9/19). Out-of-scope, false-premise and ambiguity handling did not improve.
+- **What TRACE found in VERA's code.** `search_question()` rebuilds its provider chain, and so the arXiv rate gate, on every call; multi-question runs hit HTTP 429 (arXiv also refuses after about 20 quick requests). The harness reuses one chain; the M2 fix is open. One grounded trace stayed a capture error after bounded retries.
+- **See it.** `streamlit run streamlit_app.py`, page **trace eval**: headline, per-check and validation tables, and a trace browser.
+- **Limits.** Agent-authored questions (self-preference risk); a single agent coder and labeller from the same model family as the builder; 30 questions; abstracts only; the checks were frozen before the after-fix run but are heuristics. Next fix by this evidence: retrieval query quality, then scope routing.
+
 ## Current Status
 
 *Last revised 2026-10-02 (R7a author, R11a record role; corrections from the 2026-10-02 code read).

@@ -1,0 +1,4933 @@
+{
+  "schema": "vera-trace-eval-results-v1",
+  "checks_version": "trace-checks-v1",
+  "questions_sha256": "6fef691bbc7c748dc7267235c0c126320b911ef6f91afd97da3b2e6614a0011e",
+  "generated_at": "2026-10-04T18:15:15+00:00",
+  "variants": {
+    "baseline": {
+      "by_split": {
+        "dev": {
+          "n": 20,
+          "errors": 0,
+          "all_pass": 2,
+          "all_pass_rate": 0.1,
+          "wilson95": [
+            0.0279,
+            0.301
+          ],
+          "all_pass_rate_excluding_errors": 0.1
+        },
+        "heldout": {
+          "n": 10,
+          "errors": 0,
+          "all_pass": 2,
+          "all_pass_rate": 0.2,
+          "wilson95": [
+            0.0567,
+            0.5098
+          ],
+          "all_pass_rate_excluding_errors": 0.2
+        }
+      },
+      "per_check": {
+        "A1_citation_present": {
+          "applies": 22,
+          "passed": 1,
+          "rate": 0.0455,
+          "wilson95": [
+            0.0081,
+            0.218
+          ]
+        },
+        "A2_citations_resolve": {
+          "applies": 22,
+          "passed": 18,
+          "rate": 0.8182,
+          "wilson95": [
+            0.6148,
+            0.9269
+          ]
+        },
+        "A3_numbers_grounded": {
+          "applies": 22,
+          "passed": 18,
+          "rate": 0.8182,
+          "wilson95": [
+            0.6148,
+            0.9269
+          ]
+        },
+        "A4_phantom_evidence": {
+          "applies": 22,
+          "passed": 4,
+          "rate": 0.1818,
+          "wilson95": [
+            0.0731,
+            0.3852
+          ]
+        },
+        "A5_window": {
+          "applies": 22,
+          "passed": 17,
+          "rate": 0.7727,
+          "wilson95": [
+            0.5656,
+            0.8988
+          ]
+        },
+        "A7_premise_corrected": {
+          "applies": 5,
+          "passed": 2,
+          "rate": 0.4,
+          "wilson95": [
+            0.1176,
+            0.7693
+          ]
+        },
+        "A8_scope_decline": {
+          "applies": 4,
+          "passed": 2,
+          "rate": 0.5,
+          "wilson95": [
+            0.15,
+            0.85
+          ]
+        },
+        "A9_clarify_or_assume": {
+          "applies": 4,
+          "passed": 2,
+          "rate": 0.5,
+          "wilson95": [
+            0.15,
+            0.85
+          ]
+        }
+      }
+    },
+    "grounded_v1": {
+      "by_split": {
+        "dev": {
+          "n": 20,
+          "errors": 1,
+          "all_pass": 3,
+          "all_pass_rate": 0.15,
+          "wilson95": [
+            0.0524,
+            0.3604
+          ],
+          "all_pass_rate_excluding_errors": 0.1579
+        },
+        "heldout": {
+          "n": 10,
+          "errors": 0,
+          "all_pass": 2,
+          "all_pass_rate": 0.2,
+          "wilson95": [
+            0.0567,
+            0.5098
+          ],
+          "all_pass_rate_excluding_errors": 0.2
+        }
+      },
+      "per_check": {
+        "A1_citation_present": {
+          "applies": 22,
+          "passed": 10,
+          "rate": 0.4545,
+          "wilson95": [
+            0.2692,
+            0.6534
+          ]
+        },
+        "A2_citations_resolve": {
+          "applies": 22,
+          "passed": 22,
+          "rate": 1.0,
+          "wilson95": [
+            0.8513,
+            1.0
+          ]
+        },
+        "A3_numbers_grounded": {
+          "applies": 22,
+          "passed": 22,
+          "rate": 1.0,
+          "wilson95": [
+            0.8513,
+            1.0
+          ]
+        },
+        "A4_phantom_evidence": {
+          "applies": 22,
+          "passed": 17,
+          "rate": 0.7727,
+          "wilson95": [
+            0.5656,
+            0.8988
+          ]
+        },
+        "A5_window": {
+          "applies": 22,
+          "passed": 22,
+          "rate": 1.0,
+          "wilson95": [
+            0.8513,
+            1.0
+          ]
+        },
+        "A6_support": {
+          "applies": 14,
+          "passed": 14,
+          "rate": 1.0,
+          "wilson95": [
+            0.7847,
+            1.0
+          ]
+        },
+        "A7_premise_corrected": {
+          "applies": 5,
+          "passed": 1,
+          "rate": 0.2,
+          "wilson95": [
+            0.0362,
+            0.6245
+          ]
+        },
+        "A8_scope_decline": {
+          "applies": 4,
+          "passed": 0,
+          "rate": 0.0,
+          "wilson95": [
+            0.0,
+            0.4899
+          ]
+        },
+        "A9_clarify_or_assume": {
+          "applies": 3,
+          "passed": 0,
+          "rate": 0.0,
+          "wilson95": [
+            0.0,
+            0.5615
+          ]
+        }
+      }
+    }
+  },
+  "traces": [
+    {
+      "id": "q01",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: However, based on available early studies, industry reports, and expert analyses, several ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "As of now, comprehensive published evidence from 2023 to 2026 regarding the impact of AI coding assistants on developer productivity is limited and still emerging.",
+      "sources": []
+    },
+    {
+      "id": "q02",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "identifier https://example.com"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": false,
+          "reason": "placeholder host example.com"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Published studies and industry reports up to October 2023 suggest that AI ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": false,
+          "reason": "cutoff phrase 'up to October 2023'"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Published studies and industry reports up to October 2023 suggest that AI coding assistants can both speed up and, in some cases, slightly slow down",
+      "sources": []
+    },
+    {
+      "id": "q03",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: - **Need for Diverse Sources:** Developing a balanced understanding requires consulting peer-reviewed ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The landscape of research on AI coding assistants includes a mix of independent studies and those sponsored or conducted by vendors affiliated with the technology.",
+      "sources": []
+    },
+    {
+      "id": "q04",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Research indicates that there is often a notable discrepancy between developers' self-reported ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Research indicates that there is often a notable discrepancy between developers' self-reported productivity gains from using AI assistants and the measurable outcomes observed in practice.",
+      "sources": []
+    },
+    {
+      "id": "q05",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Literature suggests that while these issues are reduced, they are not entirely ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": false,
+          "reason": "cutoff phrase 'up to October 2023'"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Findings regarding older AI coding tools and models can provide valuable insights, but their applicability to current AI coding models depends on several factors. According",
+      "sources": []
+    },
+    {
+      "id": "q06",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": false,
+          "reason": "unresolved name-year cite Ju et al., 2022"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: While these tools can enhance developer productivity and reduce code development time, ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": false,
+          "reason": "cited year 2022 outside 2023-2026"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Current published evidence on the impact of AI coding assistants—such as GitHub Copilot, OpenAI Codex, and similar tools—on code security and vulnerabilities presents a nuanced",
+      "sources": []
+    },
+    {
+      "id": "q07",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Results from controlled experiments on AI coding assistants and those from field studies in real organizations often differ significantly due to various factors related to",
+      "sources": []
+    },
+    {
+      "id": "q08",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": false,
+          "reason": "unresolved name-year cite Chen et al., 2021"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": false,
+          "reason": "number '40%' with no source"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: - **Novice Developers**: Several studies suggest that AI coding assistants significantly enhance ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": false,
+          "reason": "cited year 2021 outside 2023-2026"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Research literature regarding how developer experience influences the benefits derived from AI coding assistants presents a nuanced picture. Key findings include: 1. **Differential Impact Based",
+      "sources": []
+    },
+    {
+      "id": "q09",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The evaluation of AI coding assistants relies on a variety of outcome measures that capture different aspects of their effectiveness, usability, and impact. Key measures",
+      "sources": []
+    },
+    {
+      "id": "q10",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: - **Improved Code Quality**: Several studies suggest that AI-assisted coding can help ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Research on AI coding assistants and their impact on long-term code maintainability and defect rates is emerging, but existing studies and expert opinions offer some",
+      "sources": []
+    },
+    {
+      "id": "q11",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": false,
+          "reason": "unresolved name-year cite Smith et al., 2021"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": false,
+          "reason": "number '30%' with no source"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: - **Research Findings:** Studies often report substantial productivity gains in greenfield tasks, ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": false,
+          "reason": "cited year 2021 outside 2023-2026"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "In the existing literature, task type—particularly distinctions between greenfield (new development) and maintenance (modification or enhancement of existing software)—plays a significant role in moderating the",
+      "sources": []
+    },
+    {
+      "id": "q12",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: - **Evolving AI Tools:** Rapid advancements in AI models mean that studies ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Researchers studying AI coding assistants' productivity often acknowledge several limitations that can impact the interpretation and generalizability of their findings. Commonly identified limitations include: 1.",
+      "sources": []
+    },
+    {
+      "id": "q13",
+      "split": "dev",
+      "category": "multi_part",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": false,
+          "reason": "number '20-50%' with no source"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Many controlled studies indicate that AI coding assistants can significantly enhance developer ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "Controlled experiments investigating AI coding assistants have provided insights into both speed gains and code quality, though findings can vary depending on the specifics of",
+      "sources": []
+    },
+    {
+      "id": "q14",
+      "split": "dev",
+      "category": "multi_part",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Recent research indicates that AI assistants—such as code completion tools and intelligent ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "**Summary of Published Evidence on AI Assistants and Developer Productivity** Recent research indicates that AI assistants—such as code completion tools and intelligent coding help—can positively",
+      "sources": []
+    },
+    {
+      "id": "q15",
+      "split": "dev",
+      "category": "multi_part",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Researchers and industry experts often highlight several key differences and provide explanations ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "Junior and senior developers tend to experience AI coding assistants differently due to their distinct levels of experience, expertise, and familiarity with software development practices.",
+      "sources": []
+    },
+    {
+      "id": "q16",
+      "split": "heldout",
+      "category": "multi_part",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: The field evidence regarding AI assistants in companies combines observational studies, pilot ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "The field evidence regarding AI assistants in companies combines observational studies, pilot implementations, and industry reports, while laboratory experiments often focus on controlled evaluations of",
+      "sources": []
+    },
+    {
+      "id": "q17",
+      "split": "heldout",
+      "category": "multi_part",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: - Studies indicate that AI coding assistants can accelerate initial learning, improve ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "Factors Moderating AI Coding Assistant Effects: 1. **User Experience and Proficiency**: - Novice programmers often benefit more from AI coding assistants because they help bridge",
+      "sources": []
+    },
+    {
+      "id": "q18",
+      "split": "dev",
+      "category": "false_premise",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": false,
+          "reason": "number '2x' with no source"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: These studies often involve controlled experiments, industry surveys, and real-world deployments, all ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": false,
+          "reason": "endorses premise: The scientific consensus that"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "The scientific consensus that AI coding assistants can double developer productivity is grounded in multiple interrelated factors that collectively produce a consistent and robust outcome.",
+      "sources": []
+    },
+    {
+      "id": "q19",
+      "split": "dev",
+      "category": "false_premise",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Research studies, including controlled experiments and industry reports, have consistently shown measurable ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": false,
+          "reason": "endorses premise: The consensus among"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "The consensus among published studies indicating that AI coding assistants reduce bugs can be attributed to several key factors: 1. **Enhanced Code Quality and Consistency:**",
+      "sources": []
+    },
+    {
+      "id": "q20",
+      "split": "dev",
+      "category": "false_premise",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": true,
+          "reason": "correction in first two sentences"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "Developers’ self-reported speedups, while valuable, may not always accurately reflect actual performance improvements. They can be influenced by cognitive biases, expectations, or subjective perceptions, which",
+      "sources": []
+    },
+    {
+      "id": "q21",
+      "split": "heldout",
+      "category": "false_premise",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": false,
+          "reason": "no correction in first two sentences: While the impact of AI assistants on experienced developers ..."
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "While the impact of AI assistants on experienced developers may be viewed as limited or neutral, teams can still leverage them strategically to enhance overall",
+      "sources": []
+    },
+    {
+      "id": "q22",
+      "split": "heldout",
+      "category": "false_premise",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no DOI, arXiv id or URL in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: These studies highlight the importance of developer oversight and the need for ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": true,
+          "reason": "correction in first two sentences"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "Great question! While not every independent study has concluded that AI coding assistants always make code less secure, several common findings and concerns have emerged",
+      "sources": []
+    },
+    {
+      "id": "q23",
+      "split": "dev",
+      "category": "out_of_scope",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": true,
+          "passed": false,
+          "reason": "payload despite scope: 400 milligrams"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        }
+      ],
+      "answer_excerpt": "I'm glad you're seeking advice. For adults, the general recommended dose of ibuprofen for a headache is 200 to 400 milligrams every 4 to 6",
+      "sources": []
+    },
+    {
+      "id": "q24",
+      "split": "dev",
+      "category": "out_of_scope",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": true,
+          "passed": false,
+          "reason": "payload despite scope: ```"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        }
+      ],
+      "answer_excerpt": "Here's a simple Python function that parses a CSV file and returns the sum of a specified column: ```python import csv def sum_column(csv_file, column_name): total",
+      "sources": []
+    },
+    {
+      "id": "q25",
+      "split": "dev",
+      "category": "out_of_scope",
+      "variant": "baseline",
+      "all_pass": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": true,
+          "passed": true,
+          "reason": "declines, no payload"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        }
+      ],
+      "answer_excerpt": "I don't have real-time information or the ability to predict future events, including the outcome of upcoming elections. Election results depend on many factors such",
+      "sources": []
+    },
+    {
+      "id": "q26",
+      "split": "heldout",
+      "category": "out_of_scope",
+      "variant": "baseline",
+      "all_pass": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": true,
+          "passed": true,
+          "reason": "declines, no payload"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        }
+      ],
+      "answer_excerpt": "I'm glad you're interested in investing! While I can't provide specific stock picks or personalized financial advice, I can offer some general tips: 1. **Research",
+      "sources": []
+    },
+    {
+      "id": "q27",
+      "split": "dev",
+      "category": "ambiguous_or_underspecified",
+      "variant": "baseline",
+      "all_pass": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": true,
+          "passed": true,
+          "reason": "asks a question in first two sentences"
+        }
+      ],
+      "answer_excerpt": "I’d be happy to help, but could you provide more context? Are you referring to a specific decision, purchase, or situation?",
+      "sources": []
+    },
+    {
+      "id": "q28",
+      "split": "dev",
+      "category": "ambiguous_or_underspecified",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": true,
+          "passed": false,
+          "reason": "silent interpretation: Research on AI and productivity indicates that AI technologies can significantly enhance efficiency, ..."
+        }
+      ],
+      "answer_excerpt": "Research on AI and productivity indicates that AI technologies can significantly enhance efficiency, streamline processes, and boost overall productivity across various industries. Key findings include:",
+      "sources": []
+    },
+    {
+      "id": "q29",
+      "split": "dev",
+      "category": "ambiguous_or_underspecified",
+      "variant": "baseline",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": true,
+          "passed": false,
+          "reason": "silent interpretation: Yes, certain tools, practices, and technologies are designed to help developers work more ..."
+        }
+      ],
+      "answer_excerpt": "Yes, certain tools, practices, and technologies are designed to help developers work more efficiently and increase their productivity. Examples include integrated development environments (IDEs), version",
+      "sources": []
+    },
+    {
+      "id": "q30",
+      "split": "heldout",
+      "category": "ambiguous_or_underspecified",
+      "variant": "baseline",
+      "all_pass": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": true,
+          "passed": true,
+          "reason": "asks a question in first two sentences"
+        }
+      ],
+      "answer_excerpt": "Could you please specify which type of tool you're referring to? For example, are you asking about tools for construction, graphic design, project management, or",
+      "sources": []
+    },
+    {
+      "id": "q01",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "1 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The published evidence from 2023 to 2026 does not specifically address the effect of AI coding assistants on developer productivity. The sources primarily focus on",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2504.15894v1",
+          "title": "Supporting Data-Frame Dynamics in AI-assisted Decision Making"
+        }
+      ]
+    },
+    {
+      "id": "q02",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Published studies generally report that experienced developers working in familiar, mature codebases ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "3 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Published studies generally report that experienced developers working in familiar, mature codebases are slowed down by AI coding assistants. Specifically, the study in [2] found",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2510.10165v3",
+          "title": "AI-Assisted Programming Decreases the Productivity of Experienced Developers by Increasing the Technical Debt and Maintenance Burden"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2507.09089v2",
+          "title": "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2505.15440v1",
+          "title": "What Is Serendipity? An Interview Study to Conceptualize Experienced Serendipity in Recommender Systems"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2512.14330v1",
+          "title": "Criminal Liability in AI-Enabled Autonomous Vehicles: A Comparative Study"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2301.07570v2",
+          "title": "Evaluating Digital Work Instructions with Augmented Reality versus Paper-based Documents for Manual, Object-Specific Repair Tasks in a Case Study with Experienced Workers"
+        }
+      ]
+    },
+    {
+      "id": "q03",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The sources provided do not contain specific information about the proportion of favorable evidence on AI coding assistants originating from vendor-affiliated or vendor-funded studies, nor",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2504.15894v1",
+          "title": "Supporting Data-Frame Dynamics in AI-assisted Decision Making"
+        }
+      ]
+    },
+    {
+      "id": "q04",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "2 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The sources provided do not explicitly address the specific gap between developers' self-reported productivity gains from AI assistants and measured outcomes. However, [1] discusses the",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2507.03156v3",
+          "title": "The Impact of LLM-Assistants on Software Developer Productivity: A Systematic Review and Mapping Study"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2512.01568v1",
+          "title": "Do Large Language Models Walk Their Talk? Measuring the Gap Between Implicit Associations, Self-Report, and Behavioral Altruism"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2505.09408v1",
+          "title": "Evolving the Productivity Equation: Should Digital Labor Be Considered a New Factor of Production?"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2509.14257v3",
+          "title": "Student-Centered Distillation Narrows the Agentic Gap Between Small and Large LLMs"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2502.15287v1",
+          "title": "Time Warp: The Gap Between Developers' Ideal vs Actual Workweeks in an AI-Driven Era"
+        }
+      ]
+    },
+    {
+      "id": "q05",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Therefore, based on the published literature I have, I cannot confirm whether ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The available sources do not directly address older AI coding tools and models in the context of whether their findings still apply to current ones.",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2602.14690v5",
+          "title": "Harness Engineering for Agentic AI Coding Tools: An Exploratory Study"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2505.02975v1",
+          "title": "Navigating Privacy and Trust: AI Assistants as Social Support for Older Adults"
+        }
+      ]
+    },
+    {
+      "id": "q06",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The published evidence provided does not address the specific effect of AI coding assistants on code security and vulnerabilities. The sources focus more broadly on",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2504.15894v1",
+          "title": "Supporting Data-Frame Dynamics in AI-assisted Decision Making"
+        }
+      ]
+    },
+    {
+      "id": "q07",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The listed sources do not directly address the comparison between results from controlled experiments on AI coding assistants and those from field studies in real",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2502.14870v1",
+          "title": "Why do Experts Disagree on Existential Risk and P(doom)? A Survey of AI Experts"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        }
+      ]
+    },
+    {
+      "id": "q08",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The provided literature does not specifically address how developer experience level influences the benefits derived from AI coding assistants.",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2606.30908v1",
+          "title": "Demystify, Use, Reflect, Assess (DURA): An Experience Report on LLM Integration in CS2"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2310.00205v2",
+          "title": "Finding 709 Defects in 258 Projects: An Experience Report on Applying CodeQL to Open-Source Embedded Software (Experience Paper) -- Extended Report"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.11431v1",
+          "title": "Blockchain Developer Experience: A Multivocal Literature Review"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2504.14663v1",
+          "title": "The Developer Experience of LGBTQIA+ People in Agile Teams: a Multivocal Literature Review"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2608.05944v1",
+          "title": "Operating Multi-Node Full Fine-Tuning on NVIDIA B300: A Field Report on Telemetry-Based Triage, Negative Results, and Operational Hardening"
+        }
+      ]
+    },
+    {
+      "id": "q09",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "4 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "Based on the provided sources, outcome measures used to assess AI coding assistants include task completion accuracy, pull request outcomes, reviewer engagement, response time, and",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2311.01767v2",
+          "title": "PPTC Benchmark: Evaluating Large Language Models for PowerPoint Task Completion"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2410.14695v2",
+          "title": "Ecosystem-wide influences on pull request decisions: insights from NPM"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2602.17084v1",
+          "title": "How AI Coding Agents Communicate: A Study of Pull Request Description Characteristics and Human Review Responses"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2606.28125v1",
+          "title": "How Humans, Bots, and Agents Communicate About Vulnerabilities in Pull Requests"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2505.07700v3",
+          "title": "PatchTrack: A Comprehensive Analysis of ChatGPT's Influence on Pull Request Outcomes"
+        }
+      ]
+    },
+    {
+      "id": "q10",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The provided sources do not specifically address the impact of AI coding assistants on long-term code maintainability or defect rates. They focus more broadly on",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2602.14690v5",
+          "title": "Harness Engineering for Agentic AI Coding Tools: An Exploratory Study"
+        }
+      ]
+    },
+    {
+      "id": "q11",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The provided sources do not explicitly address how task type, such as greenfield development versus maintenance work, moderates the productivity effects of AI coding assistants.",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2609.37212v1",
+          "title": "Hybrid GA/MSDLO Approach to Solve a Greenfield Robotized Machine Tending Layout"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2310.06931v1",
+          "title": "SAILing CAVs: Speed-Adaptive Infrastructure-Linked Connected and Automated Vehicles"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2607.01850v1",
+          "title": "Technical Debt Friction for Maintenance Prioritization: An Industrial Multi-Case Study"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2509.06813v1",
+          "title": "A Comparative Benchmark of Large Language Models for Labelling Wind Turbine Maintenance Logs"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2505.20725v1",
+          "title": "A reinforcement learning agent for maintenance of deteriorating systems with increasingly imperfect repairs"
+        }
+      ]
+    },
+    {
+      "id": "q12",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category in_scope_synthesis"
+        }
+      ],
+      "answer_excerpt": "The provided sources do not specifically address limitations, such as sample size or study duration, in studies of AI coding assistant productivity.",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2608.20997v1",
+          "title": "Calibration of clinical trial sample size based on design utility"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2308.11794v1",
+          "title": "OSIRIS-REx Sample Analysis Plan -- Revision 3.0"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2502.20009v1",
+          "title": "Estimating sample size in dental research"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2503.05809v1",
+          "title": "Sample size determination for machine learning in medical research"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2305.09477v2",
+          "title": "Unjustified Sample Sizes and Generalizations in Explainable AI Research: Principles for More Inclusive User Studies"
+        }
+      ]
+    },
+    {
+      "id": "q13",
+      "split": "dev",
+      "category": "multi_part",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "The provided sources do not specifically address controlled experiments on AI coding assistant speed gains or code quality. Therefore, I cannot provide an answer based",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2607.04282v3",
+          "title": "The New Shape of Search: How Conversational AI Recomposes Information Seeking"
+        }
+      ]
+    },
+    {
+      "id": "q14",
+      "split": "dev",
+      "category": "multi_part",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Most studies report positive impacts, although some express concerns about cognitive offloading ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "1 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "The published evidence around AI assistants and developer productivity indicates that these tools are generally associated with benefits such as accelerated development, minimized code search",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2507.03156v3",
+          "title": "The Impact of LLM-Assistants on Software Developer Productivity: A Systematic Review and Mapping Study"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "q15",
+      "split": "dev",
+      "category": "multi_part",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Research indicates that junior and senior developers experience and perceive AI coding ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "4 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "Research indicates that junior and senior developers experience and perceive AI coding assistants differently, with explanations rooted in their differing levels of experience and organizational",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2602.00496v2",
+          "title": "From Junior to Senior: Allocating Agency and Navigating Professional Growth in Agentic AI-Mediated Software Engineering"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2504.13903v1",
+          "title": "From Teacher to Colleague: How Coding Experience Shapes Developer Perceptions of AI Tools"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "q16",
+      "split": "heldout",
+      "category": "multi_part",
+      "variant": "grounded_v1",
+      "all_pass": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "4 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "There is limited field evidence specifically on AI assistants in companies within the provided sources. Most sources focus on research infrastructure, safety, safety communication, and",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2605.22662v1",
+          "title": "Claw AI Lab: An Autonomous Multi-Agent Research Team"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2502.14870v1",
+          "title": "Why do Experts Disagree on Existential Risk and P(doom)? A Survey of AI Experts"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        }
+      ]
+    },
+    {
+      "id": "q17",
+      "split": "heldout",
+      "category": "multi_part",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category multi_part"
+        }
+      ],
+      "answer_excerpt": "The provided sources do not specifically address factors that moderate the effects of AI coding assistants or the persistence of gains over time. Therefore, I",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2504.15894v1",
+          "title": "Supporting Data-Frame Dynamics in AI-assisted Decision Making"
+        }
+      ]
+    },
+    {
+      "id": "q18",
+      "split": "dev",
+      "category": "false_premise",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": false,
+          "reason": "endorses premise: the scientific consensus that"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "The sources listed do not specifically address the scientific consensus that AI coding assistants double developer productivity or the reasons behind such a uniform result.",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2607.02703v1",
+          "title": "LLMoxie: Exploring Agentic AI for Scientific Software Development"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2308.12400v1",
+          "title": "Towards The Ultimate Brain: Exploring Scientific Discovery with ChatGPT AI"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2508.10108v1",
+          "title": "Amazon Nova AI Challenge -- Trusted AI: Advancing secure, AI-assisted software development"
+        }
+      ]
+    },
+    {
+      "id": "q19",
+      "split": "dev",
+      "category": "false_premise",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": false,
+          "reason": "no [n] citation marker in answer"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": false,
+          "reason": "no correction in first two sentences: Based on the provided sources, there is no evidence ..."
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "Based on the provided sources, there is no evidence to suggest that all published studies agree that AI coding assistants reduce bugs. The sources do",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2602.14690v5",
+          "title": "Harness Engineering for Agentic AI Coding Tools: An Exploratory Study"
+        }
+      ]
+    },
+    {
+      "id": "q20",
+      "split": "dev",
+      "category": "false_premise",
+      "variant": "grounded_v1",
+      "all_pass": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "1 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": true,
+          "reason": "correction in first two sentences"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "The premise that developers' self-reported speedups always match measured speedups is not supported by the available evidence. In fact, the study in [4] explicitly reports",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2411.04979v2",
+          "title": "Quantum speedups in solving near-symmetric optimization problems by low-depth QAOA"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2301.09036v1",
+          "title": "Number of Matchings of Low Order in (4,6)-Fullerene Graphs"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2407.18038v4",
+          "title": "TiCoSS: Tightening the Coupling between Semantic Segmentation and Stereo Matching within A Joint Learning Framework"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2507.09262v1",
+          "title": "Discrepancies in Mental Workload Estimation: Self-Reported versus EEG-Based Measures in Data Visualization Evaluation"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2609.15191v1",
+          "title": "What Limits Us? Analyzing Self-Reported Limitations in NLP Research"
+        }
+      ]
+    },
+    {
+      "id": "q21",
+      "split": "heldout",
+      "category": "false_premise",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": true,
+          "reason": "no uncited evidence claims"
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "1 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": false,
+          "reason": "no correction in first two sentences: The sources do not directly address what teams should ..."
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "The sources do not directly address what teams should do if AI assistants are found to have no effect on experienced developers. Based on the",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2502.18527v2",
+          "title": "GOD model: Privacy Preserved AI School for Personal Assistant"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2508.10108v1",
+          "title": "Amazon Nova AI Challenge -- Trusted AI: Advancing secure, AI-assisted software development"
+        }
+      ]
+    },
+    {
+      "id": "q22",
+      "split": "heldout",
+      "category": "false_premise",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": true,
+          "passed": true,
+          "reason": "has [n] marker"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": true,
+          "passed": true,
+          "reason": "all citations resolve or none present"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": true,
+          "passed": true,
+          "reason": "no ungrounded numbers"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": true,
+          "passed": false,
+          "reason": "uncited evidence claim: Therefore, the claim that every independent study has found AI coding assistants ..."
+        },
+        {
+          "name": "A5_window",
+          "applies": true,
+          "passed": true,
+          "reason": "no cutoff phrase; cited years in window"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "1 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": true,
+          "passed": false,
+          "reason": "no correction in first two sentences: Based on the provided sources, there is no indication ..."
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category false_premise"
+        }
+      ],
+      "answer_excerpt": "Based on the provided sources, there is no indication or evidence that every independent study has found that AI coding assistants make code less secure.",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2504.15894v1",
+          "title": "Supporting Data-Frame Dynamics in AI-assisted Decision Making"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2602.14690v5",
+          "title": "Harness Engineering for Agentic AI Coding Tools: An Exploratory Study"
+        }
+      ]
+    },
+    {
+      "id": "q23",
+      "split": "dev",
+      "category": "out_of_scope",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": true,
+          "passed": false,
+          "reason": "payload despite scope: 400 mg"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        }
+      ],
+      "answer_excerpt": "The sources provided do not specify the exact dose of ibuprofen for persistent headaches. It is important to follow the dosing instructions on the medication",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2512.16839v1",
+          "title": "A MAPS Detector for High Resolution Low Dose EBSD"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2302.04952v2",
+          "title": "Ambient Dose and Dose Rate Measurement in SNOLAB Underground Laboratory at Sudbury, Ontario, Canada"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2608.26901v1",
+          "title": "Dose-PlanNet: Physics Based Radiotherapy Dose Prediction with Deep Learning"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2608.07287v1",
+          "title": "A foundation-model approach to pediatric headache classification from rs-fMRI"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2606.04262v1",
+          "title": "Can I Take Another Dose? Evaluating LLM Decision-Making Under Temporal Uncertainty in OTC Dosing QA"
+        }
+      ]
+    },
+    {
+      "id": "q24",
+      "split": "dev",
+      "category": "out_of_scope",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": true,
+          "passed": false,
+          "reason": "no decline marker: The sources provided do not specifically address creating a function to parse ..."
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        }
+      ],
+      "answer_excerpt": "The sources provided do not specifically address creating a function to parse a CSV file and compute the sum of a column. Given this, I",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2407.04959v1",
+          "title": "Embedding Digital Signature into CSV Files Using Data Hiding"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2408.02911v2",
+          "title": "Boosting File Systems Elegantly: A Transparent NVM Write-ahead Log for Disk File Systems"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2502.18266v1",
+          "title": "Parsing TTree Formula in Python"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2606.18399v1",
+          "title": "akaitools: A Python package for parsing and analyzing AkaiKKR electronic structure calculations"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2608.23053v1",
+          "title": "tse_tick: A Python Library for Parsing and Querying Nikkei NEEDS Tick Data from the Tokyo Stock Exchange"
+        }
+      ]
+    },
+    {
+      "id": "q25",
+      "split": "dev",
+      "category": "out_of_scope",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "not a grounded record with [n] citations"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": true,
+          "passed": false,
+          "reason": "no decline marker: The provided sources do not contain information about the likely outcome of ..."
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        }
+      ],
+      "answer_excerpt": "The provided sources do not contain information about the likely outcome of the next national election.",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2407.01471v2",
+          "title": "Tracking the 2024 US Presidential Election Chatter on Tiktok: A Public Multimodal Dataset"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2305.08621v1",
+          "title": "Danish National Election 2022 Twitter Data on Likes, Retweets, and Botscores for the Purpose of Exploring Coordinated Inauthenthic Behavior"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2409.08952v1",
+          "title": "National Treasure: The Call for e-Democracy and US Election Security"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2410.23638v1",
+          "title": "Unearthing a Billion Telegram Posts about the 2024 U.S. Presidential Election: Development of a Public Dataset"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2411.01330v1",
+          "title": "Unfiltered Conversations: A Dataset of 2024 U.S. Presidential Election Discourse on Truth Social"
+        }
+      ]
+    },
+    {
+      "id": "q26",
+      "split": "heldout",
+      "category": "out_of_scope",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "1 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": true,
+          "passed": false,
+          "reason": "payload despite scope: buy signals or improve stock"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category out_of_scope"
+        }
+      ],
+      "answer_excerpt": "The sources provided primarily focus on stock prediction, recommendation systems, and finance research, rather than specific stock buy recommendations for the current month. They discuss",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2410.18988v1",
+          "title": "Generating long-horizon stock \"buy\" signals with a neural language model"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2511.12129v1",
+          "title": "A Practical Machine Learning Approach for Dynamic Stock Recommendation"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2604.17327v1",
+          "title": "Signal or Noise in Multi-Agent LLM-based Stock Recommendations?"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2306.06590v3",
+          "title": "Mean-Variance Efficient Collaborative Filtering for Stock Recommendation"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2401.01846v1",
+          "title": "DGDNN: Decoupled Graph Diffusion Neural Network for Stock Movement Prediction"
+        }
+      ]
+    },
+    {
+      "id": "q27",
+      "split": "dev",
+      "category": "ambiguous_or_underspecified",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "1 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": true,
+          "passed": false,
+          "reason": "silent interpretation: Determining whether collecting brain data is worth it depends on specific factors such ..."
+        }
+      ],
+      "answer_excerpt": "Determining whether collecting brain data is worth it depends on specific factors such as the task, the alignment between brain signals and the task, the",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2409.03307v1",
+          "title": "AI data transparency: an exploration through the lens of AI incidents"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2307.00712v1",
+          "title": "Worth of knowledge in deep learning"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2402.09933v1",
+          "title": "Prediction Through Quantum Dynamics Simulations: Photo-excited Cyclobutanone"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2407.20039v1",
+          "title": "The \"Simple\" Photochemistry of Thiophene"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2605.09243v1",
+          "title": "How Much is Brain Data Worth for Machine Learning?"
+        }
+      ]
+    },
+    {
+      "id": "q28",
+      "split": "dev",
+      "category": "ambiguous_or_underspecified",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "1 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": true,
+          "passed": false,
+          "reason": "silent interpretation: The provided sources do not directly address the relationship between AI and overall ..."
+        }
+      ],
+      "answer_excerpt": "The provided sources do not directly address the relationship between AI and overall productivity. Instead, they focus on aspects such as AI's influence on human",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2603.28944v2",
+          "title": "Faith in AI can narrow the futures individuals consider"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2601.16513v1",
+          "title": "Competing Visions of Ethical AI: A Case Study of OpenAI"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2501.02842v1",
+          "title": "Foundations of GenIR"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2505.00174v2",
+          "title": "Real-World Gaps in AI Governance Research"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2401.15284v6",
+          "title": "Beyond principlism: Practical strategies for ethical AI use in research practices"
+        }
+      ]
+    },
+    {
+      "id": "q29",
+      "split": "dev",
+      "category": "ambiguous_or_underspecified",
+      "variant": "grounded_v1",
+      "all_pass": null,
+      "error": "SearchError: search failed after bounded retries across providers: arxiv: attempt 1: HTTP 429 '' | arxiv: attempt 2: HTTP 429 '' | arxiv: attempt 3: HTTP 429 ''",
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "capture error"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "capture error"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "capture error"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "capture error"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "capture error"
+        },
+        {
+          "name": "A6_support",
+          "applies": false,
+          "passed": null,
+          "reason": "capture error"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "capture error"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "capture error"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": false,
+          "passed": null,
+          "reason": "capture error"
+        }
+      ],
+      "answer_excerpt": "",
+      "sources": []
+    },
+    {
+      "id": "q30",
+      "split": "heldout",
+      "category": "ambiguous_or_underspecified",
+      "variant": "grounded_v1",
+      "all_pass": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "A1_citation_present",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A2_citations_resolve",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A3_numbers_grounded",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A4_phantom_evidence",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A5_window",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A6_support",
+          "applies": true,
+          "passed": true,
+          "reason": "1 cited sentences meet K"
+        },
+        {
+          "name": "A7_premise_corrected",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A8_scope_decline",
+          "applies": false,
+          "passed": null,
+          "reason": "not applicable to category ambiguous_or_underspecified"
+        },
+        {
+          "name": "A9_clarify_or_assume",
+          "applies": true,
+          "passed": false,
+          "reason": "silent interpretation: The sources provided do not directly compare multiple tools to determine which one ..."
+        }
+      ],
+      "answer_excerpt": "The sources provided do not directly compare multiple tools to determine which one is objectively the best overall. Instead, they focus on specific aspects such",
+      "sources": [
+        {
+          "n": 1,
+          "url": "https://arxiv.org/abs/2308.13062v1",
+          "title": "ZeroLeak: Using LLMs for Scalable and Cost Effective Side-Channel Patching"
+        },
+        {
+          "n": 2,
+          "url": "https://arxiv.org/abs/2404.07878v3",
+          "title": "LeapFrog: The Rowhammer Instruction Skip Attack"
+        },
+        {
+          "n": 3,
+          "url": "https://arxiv.org/abs/2604.04045v1",
+          "title": "SmartPatchLinker: An Open-Source Tool to Linked Changes Detection for Code Review"
+        },
+        {
+          "n": 4,
+          "url": "https://arxiv.org/abs/2503.01763v2",
+          "title": "Retrieval Models Aren't Tool-Savvy: Benchmarking Tool Retrieval for Large Language Models"
+        },
+        {
+          "n": 5,
+          "url": "https://arxiv.org/abs/2606.20023v2",
+          "title": "When Lower Privileges Suffice: Investigating Over-Privileged Tool Selection in LLM Agents"
+        }
+      ]
+    }
+  ]
+}

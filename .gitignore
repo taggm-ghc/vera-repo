@@ -35,3 +35,6 @@ deprecated/
 
 # VERA slim live MVP runner: per-run reports and the register (never commit)
 .vera-runs/
+
+# Item #70 raw trace captures hold full arXiv abstracts; never committed.
+tmp/trace_eval/

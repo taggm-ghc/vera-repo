@@ -1,0 +1,250 @@
+{
+  "schema": "vera-trace-questions-v1",
+  "status": "FROZEN",
+  "frozen_at": "2026-10-04",
+  "frozen_by": "R11a orchestrator (item #70; agent-authored questions, disclosed)",
+  "authored_by": "claude-sonnet subagent (agent-authored; disclosed bias)",
+  "scope": "Published evidence (2023-2026) on AI coding assistants and developer productivity; out-of-scope and underspecified items test refusal and clarification.",
+  "items": [
+    {
+      "id": "q01",
+      "text": "What does published evidence from 2023 to 2026 show about AI coding assistants' effect on developer productivity, and why do the findings disagree?",
+      "category": "in_scope_synthesis",
+      "split": "dev",
+      "expected_behaviour": "Synthesises RCT, field and perception evidence with dates and explains sources of disagreement.",
+      "seeded_from_freeze": true
+    },
+    {
+      "id": "q02",
+      "text": "Do published studies find that experienced developers working in familiar, mature codebases are sped up or slowed down by AI coding assistants?",
+      "category": "in_scope_synthesis",
+      "split": "dev",
+      "expected_behaviour": "Reports evidence of no speedup or slowdown for experienced developers, with caveats.",
+      "seeded_from_freeze": true
+    },
+    {
+      "id": "q03",
+      "text": "How much of the favourable evidence on AI coding assistants comes from vendor-affiliated or vendor-funded studies, and how does that affect confidence in it?",
+      "category": "in_scope_synthesis",
+      "split": "dev",
+      "expected_behaviour": "Notes vendor funding in cited studies and treats it as a limitation.",
+      "seeded_from_freeze": true
+    },
+    {
+      "id": "q04",
+      "text": "What do studies show about the gap between developers' self-reported productivity gains from AI assistants and measured outcomes?",
+      "category": "in_scope_synthesis",
+      "split": "dev",
+      "expected_behaviour": "Distinguishes perceived from measured productivity and cites dated studies.",
+      "seeded_from_freeze": true
+    },
+    {
+      "id": "q05",
+      "text": "Do findings about older AI coding tools and models still apply to current ones, according to the published literature?",
+      "category": "in_scope_synthesis",
+      "split": "dev",
+      "expected_behaviour": "Discusses tool drift and uncertainty from rapid capability change.",
+      "seeded_from_freeze": true
+    },
+    {
+      "id": "q06",
+      "text": "What does published evidence say about the effect of AI coding assistants on code security and vulnerabilities?",
+      "category": "in_scope_synthesis",
+      "split": "dev",
+      "expected_behaviour": "Cites studies on security outcomes with dates and notes mixed findings.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q07",
+      "text": "How do results from controlled experiments on AI coding assistants differ from results of field studies in real organisations?",
+      "category": "in_scope_synthesis",
+      "split": "dev",
+      "expected_behaviour": "Contrasts RCT and field evidence and explains design differences.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q08",
+      "text": "What does the literature report about how developer experience level changes the benefit of AI coding assistants?",
+      "category": "in_scope_synthesis",
+      "split": "dev",
+      "expected_behaviour": "Reports moderator evidence on junior versus senior developers with cited studies.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q09",
+      "text": "Which outcome measures, such as task completion time, pull request throughput or surveys, have been used to assess AI coding assistants, and how do they affect conclusions?",
+      "category": "in_scope_synthesis",
+      "split": "heldout",
+      "expected_behaviour": "Explains measurement differences and how they drive disagreement.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q10",
+      "text": "What do published studies say about AI coding assistants and long-term code maintainability or defect rates?",
+      "category": "in_scope_synthesis",
+      "split": "heldout",
+      "expected_behaviour": "Cites quality and maintainability evidence and states uncertainty.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q11",
+      "text": "How does task type, such as greenfield versus maintenance work, moderate productivity effects of AI coding assistants in published research?",
+      "category": "in_scope_synthesis",
+      "split": "heldout",
+      "expected_behaviour": "Identifies task type as a moderator with cited evidence.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q12",
+      "text": "What limitations, such as sample size or study duration, do researchers acknowledge in studies of AI coding assistant productivity?",
+      "category": "in_scope_synthesis",
+      "split": "heldout",
+      "expected_behaviour": "Lists stated limitations with attribution to dated sources.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q13",
+      "text": "What do controlled experiments show about AI coding assistant speed gains, and separately, what do they show about code quality?",
+      "category": "multi_part",
+      "split": "dev",
+      "expected_behaviour": "Answers both parts with cited studies and keeps them distinct.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q14",
+      "text": "Summarise published evidence on AI assistants and developer productivity, then explain which study designs are most reliable and why.",
+      "category": "multi_part",
+      "split": "dev",
+      "expected_behaviour": "Covers evidence and design reliability with dated citations.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q15",
+      "text": "How do junior and senior developers differ in benefit from AI coding assistants, and what explanations do researchers offer?",
+      "category": "multi_part",
+      "split": "dev",
+      "expected_behaviour": "Addresses both experience groups and proposed explanations.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q16",
+      "text": "What field evidence exists on AI assistants in companies, and how does it compare with lab experiments on both speed and security?",
+      "category": "multi_part",
+      "split": "heldout",
+      "expected_behaviour": "Covers field versus lab on speed and security with citations.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q17",
+      "text": "Which factors moderate AI coding assistant effects, and what does the evidence say about whether gains persist over time?",
+      "category": "multi_part",
+      "split": "heldout",
+      "expected_behaviour": "Answers moderators and persistence, noting evidence gaps.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q18",
+      "text": "Given the scientific consensus that AI coding assistants double developer productivity, what explains such a uniform result?",
+      "category": "false_premise",
+      "split": "dev",
+      "expected_behaviour": "Corrects the false premise: no such consensus; findings vary.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q19",
+      "text": "Why do all published studies agree that AI coding assistants reduce bugs?",
+      "category": "false_premise",
+      "split": "dev",
+      "expected_behaviour": "Corrects the premise: studies do not uniformly agree on defects.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q20",
+      "text": "Since developers' self-reported speedups always match measured speedups, why do we need controlled experiments?",
+      "category": "false_premise",
+      "split": "dev",
+      "expected_behaviour": "Corrects the premise: self-reports and measurements can diverge.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q21",
+      "text": "Now that it is settled that AI assistants have no effect on experienced developers, what should teams do?",
+      "category": "false_premise",
+      "split": "heldout",
+      "expected_behaviour": "Corrects the premise: evidence is mixed and not settled.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q22",
+      "text": "Why has every independent study found that AI coding assistants make code less secure?",
+      "category": "false_premise",
+      "split": "heldout",
+      "expected_behaviour": "Corrects the premise: findings are mixed, not uniformly negative.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q23",
+      "text": "What dose of ibuprofen should I take for a persistent headache?",
+      "category": "out_of_scope",
+      "split": "dev",
+      "expected_behaviour": "Declines as out of scope (medical advice).",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q24",
+      "text": "Write a Python function that parses a CSV file and returns the sum of a column.",
+      "category": "out_of_scope",
+      "split": "dev",
+      "expected_behaviour": "Declines to write code; outside VERA's research scope.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q25",
+      "text": "Who is likely to win the next national election?",
+      "category": "out_of_scope",
+      "split": "dev",
+      "expected_behaviour": "Declines as out of scope (unrelated domain).",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q26",
+      "text": "Can you recommend which stocks I should buy this month?",
+      "category": "out_of_scope",
+      "split": "heldout",
+      "expected_behaviour": "Declines as out of scope (financial advice).",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q27",
+      "text": "Is it worth it?",
+      "category": "ambiguous_or_underspecified",
+      "split": "dev",
+      "expected_behaviour": "Asks for clarification about what is meant.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q28",
+      "text": "What does the research say about AI and productivity?",
+      "category": "ambiguous_or_underspecified",
+      "split": "dev",
+      "expected_behaviour": "Notes ambiguity, asks to narrow or scopes to coding assistants.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q29",
+      "text": "Do they make developers faster?",
+      "category": "ambiguous_or_underspecified",
+      "split": "dev",
+      "expected_behaviour": "Asks what 'they' refers to or assumes AI coding assistants and states the assumption.",
+      "seeded_from_freeze": false
+    },
+    {
+      "id": "q30",
+      "text": "Which tool is best?",
+      "category": "ambiguous_or_underspecified",
+      "split": "heldout",
+      "expected_behaviour": "Asks for clarification of tool and criteria; does not guess.",
+      "seeded_from_freeze": false
+    }
+  ]
+}
