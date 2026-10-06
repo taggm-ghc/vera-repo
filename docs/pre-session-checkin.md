@@ -29,3 +29,5 @@ Given a bounded research question, assemble and critically evaluate an adequate 
 ### 4. What would make you proud to demo on Demo Day?
 
 I would be proud to demonstrate that the system produces a grounded research response significantly superior in quality to direct responses to the same research question from GPT-6 Astra and other leading LLMs, while making its evidence-selection process inspectable and auditable. Every consequential evidence decision should be traceable to its source, evidence, provenance, and evaluation method.
+
+> **Annotation 2026-10-04 (R11a orchestrator):** RECORD of 8 September. The Blocker row ('None identified') is superseded: as of 2026-10-04 the main measured problem is retrieval quality (see `vera-design.md`, 2026-10-04 annotation). No Anthropic key is used (dropped 2026-10-02).

@@ -10,6 +10,8 @@ import html
 
 import streamlit as st
 
+from vera.ui_safety import safe_markdown
+
 DIM_LABEL = {"relevance": "Relevance", "grounding": "Grounding", "reasoning_integrity": "Reasoning integrity",
              "auditability": "Auditability", "cost_latency": "Cost / latency"}
 STATUS_ICON = {"supported": "OK", "partial": "PARTIAL", "unsupported": "UNSUPPORTED", "uncited": "UNCITED",
@@ -32,7 +34,7 @@ def _source_info(corpus: dict, span_id: str, audit: dict) -> None:
         return
     src = (corpus.get("sources") or {}).get(sp["source_id"], {})
     _highlight(sp["text"])
-    st.markdown(f"**Source:** {src.get('title') or sp['source_id']}  \n{_safe_link(src.get('url'))}")
+    st.markdown(f"**Source:** {safe_markdown(src.get('title') or sp['source_id'])}  \n{_safe_link(src.get('url'))}")
     st.caption(f"span `{span_id}` chars {sp.get('start')}-{sp.get('end')} | source version {src.get('version')} | "
                f"sha256 `{str(src.get('content_hash') or 'n/a')[:16]}...` | Gate B: {src.get('gate_b_decision')}")
 
@@ -52,20 +54,34 @@ def section_answers(rep: dict) -> None:
     left, right = st.columns(2)
     with left:
         st.markdown("#### Engineered (VERA)")
-        st.markdown(rep["engineered"]["response_text"])
+        st.markdown(safe_markdown(rep["engineered"]["response_text"]))
     with right:
         st.markdown(f"#### Baseline (direct {rep['baseline'].get('model', 'LLM')} call)")
-        st.markdown(rep["baseline"]["response_text"])
+        st.markdown(safe_markdown(rep["baseline"]["response_text"]))
+
+
+def _scholar_link(question: str) -> None:
+    """Human link-out only (item #71 R10-b): the URL is built as a string; VERA never requests it."""
+    try:
+        from vera.eval_config import load_eval_config
+        from vera.search_query import scholar_search_url
+        url = scholar_search_url(question, load_eval_config().search["query_terms"])
+    except Exception as e:  # a missing config must not break the page, but is shown, not hidden
+        st.caption(f"Google Scholar link unavailable: {type(e).__name__}: {e}")
+        return
+    st.link_button("Search Google Scholar yourself", url)
+    st.caption("Opens Google Scholar in your browser; VERA does not query Google Scholar.")
 
 
 def section_engineered(rep: dict) -> None:
     st.header("1. Engineered response, claim by claim")
     st.caption("Open a claim to see the exact evidence span (highlighted), its source, hash and Gate B decision.")
+    _scholar_link(str(rep.get("question") or ""))
     labels = {c["id"]: c["label"] for c in rep["evaluation"]["detail"]["engineered"]["grounding"]["claims"]}
     for c in rep["engineered"].get("claims") or []:
         lab = labels.get(c["id"], c.get("verification_status", "?"))
         with st.expander(f"{c['id']} [{STATUS_ICON.get(lab, lab)}]  {c['text'][:110]}"):
-            st.markdown(c["text"])
+            st.markdown(safe_markdown(c["text"]))
             for sid in c.get("citations", []):
                 _source_info(rep["corpus"], sid, rep["engineered"].get("audit", {}))
             if not c.get("citations"):
@@ -76,7 +92,7 @@ def section_baseline(rep: dict) -> None:
     st.header("2. Baseline response (for contrast)")
     b = rep["baseline"]
     st.caption(b.get("method", ""))
-    st.markdown(b["response_text"])
+    st.markdown(safe_markdown(b["response_text"]))
     g = rep["evaluation"]["detail"]["baseline"]["grounding"]
     st.caption(f"Baseline grounding: {g['traceable_rate']:.0%} of its claims traceable; labels {g.get('label_counts')}.")
 
@@ -96,8 +112,8 @@ def section_eval(rep: dict) -> None:
                "dimension must pass.")
     for d, v in ev["dimension_scores"].items():
         with st.expander(f"Rationale: {DIM_LABEL[d]}"):
-            st.markdown(f"**Engineered:** {v['rationale']}")
-            st.markdown(f"**Baseline:** {v['baseline_rationale']}")
+            st.markdown(f"**Engineered:** {safe_markdown(v['rationale'])}")
+            st.markdown(f"**Baseline:** {safe_markdown(v['baseline_rationale'])}")
     p = ev["scoring_provenance"]
     st.caption(f"Scored by an LLM judge from a different family ({p['judge_family']} / {p['judge_model']}); "
                f"reviewer overrides applied: {p['reviewer_overrides_applied']}; "
@@ -154,7 +170,7 @@ def section_audit(rep: dict) -> None:
                    f"fabricated citations: {g['fabricated']}. Pipeline status: {audit.get('verification_status')}.")
         for c in g["claims"]:
             with st.expander(f"{c['id']}: {STATUS_ICON.get(c['label'], c['label'])}"):
-                st.markdown(c["text"])
+                st.markdown(safe_markdown(c["text"]))
                 st.text(f"Verification: {c['rationale']}")
                 for sid in c.get("citations", []):
                     sp = corpus["spans"].get(sid)

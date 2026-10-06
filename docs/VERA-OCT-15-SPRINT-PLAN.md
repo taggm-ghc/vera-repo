@@ -6,8 +6,12 @@
 
 
 > **Annotation 2026-10-01 (R7a author, R11a records): this plan is now the FALLBACK, not the build plan.** The R1 directive of 2026-09-30 lifted the pause and M1-M7 were built early (see `docs/vera-design.md` A.11 addendum and `AI-Internship/p3m3/VERA-TODO-DIGEST.md`). Track 1 (schema and round-trip test) is done in substance: the `vera_vjay` schema is live (migrations 001-005) and three DB accounts were applied 2026-10-01. Track 2 (demo question) is still OPEN (D0, undecided). Dates below are the original plan and are kept as written. Correction: the "11-day window" wording is wrong; Oct 15 to Nov 1 is 18 days inclusive (corrected in the p3m3 records 2026-10-01); Oct 15, 2026 is a Thursday. Pre-edit copy: `AI-Internship/p3m3/history/2026-10-01-cleanup-archive-6/vera__docs-VERA-OCT-15-SPRINT-PLAN.md`.
+
+> **Annotation 2026-10-05 (R11a orchestrator): still the FALLBACK plan; dates and tracks below are as originally written. Since 2026-10-01: item #72 tranche 1 (scope router, public-mode access control, search fixes, licence gate aligned, release gate, README limitations) is built and uncommitted (HEAD e77e322 pushed; suite 724 passed, 1 skipped). Track 2 demo question: R1 approved the frozen anchor question D0 (2026-10-04 late), so it is no longer open. Not started: grounded `/ask` as public default (R1's citation existence and provenance conditions), the first live end-to-end run and M6 central-claim measurement, deployment (host deferred by R1), Week 5 memory. Course ends 2026-10-12; the Render database expires 2026-10-17. Details: AI-Internship `p3m3/item-72-vera-maturation.md` sections 7-8.**
 >
 > **Annotation 2026-10-02 (R11a, round 3):** the plan is SUPERSEDED IN PART by the 2026-10-03 MVP target (aggressive) and remains the fallback if that slips. The pipeline cannot yet run end to end. Live plans: `AI-Internship/p3m3/VERA-TODO-DIGEST.md` and the `AI-Internship/p3m3/vera-plan-*.md` files (sibling repo, local only). Any "Anthropic key" step is void (dropped 2026-10-02). Pre-edit copy: `AI-Internship/p3m3/history/2026-10-01-cleanup-archive-10/vera-repo-docs_VERA-OCT-15-SPRINT-PLAN.md`.
+
+> **Annotation 2026-10-04 (R11a orchestrator): dates conflict with the course end; flagged, not changed.** The bootcamp ends 2026-10-12 and the Render database expires 2026-10-17, so the Oct 13-14 preparation and the Oct 15 - Nov 1 schedule below fall after the course end and partly after the database expiry. Whether VERA work continues after 2026-10-12 is not decided in this document. Status: M1-M7 exist; Week 4 TRACE on VERA is pushed (HEAD e77e322); the item #71 search build is uncommitted (suite 574 passed, 1 skipped). [Corrected 2026-10-04, late: suite is now 637 passed, 1 skipped; search is no longer a single API (arXiv, OpenAlex, DOAJ, DuckDuckGo Lite discovery only), so the M2 'Integrate search API' and 'two providers' lines below are built in substance; the Demo Day host is still undecided and a live URL is mandatory.] Tavily, if referenced below, is DROPPED. Live plans remain in the sibling repo's `AI-Internship/p3m3/`.
 
 ---
 
@@ -280,4 +284,4 @@ Before 9 AM Oct 15:
 
 ---
 
-**Status: Oct 15 sprint is planned, tracked, and ready to execute. Infrastructure-First + Narrow Question strategy minimizes risk in tight 11-day window.**
+**[Corrected 2026-10-04: stale; see the 2026-10-04 annotation at the top. This plan is the fallback and its dates post-date the 2026-10-12 course end.] Status: Oct 15 sprint is planned, tracked, and ready to execute. Infrastructure-First + Narrow Question strategy minimizes risk in tight 11-day window.**

@@ -85,6 +85,21 @@ def certainty_label(overall: float | None) -> str | None:
     return "high" if overall >= 4.0 else "moderate" if overall >= 3.0 else "low" if overall >= 2.0 else "very_low"
 
 
+def apply_provenance(r: dict) -> dict:
+    """Lift provenance fields onto a source row (in place) so M3 readers (e.g. appraisal_rubric._year) see them."""
+    prov = r.get("provenance") if isinstance(r.get("provenance"), dict) else {}
+    r["url"] = r.pop("source_url", None) or prov.get("url")
+    r["content"] = r.get("content") or ""
+    for k in ("published_date", "published_at", "publication_date", "year", "publisher", "source_type"):
+        if prov.get(k) is not None:
+            r.setdefault(k, prov[k])
+    # G7 (item #71): m2_runner stores the search date as provenance "published"; M3's year reader looks for
+    # published_date/published_at/..., so map it (without overriding an explicit date key).
+    if prov.get("published") is not None:
+        r.setdefault("published_date", prov["published"])
+    return r
+
+
 def load_sources(engine, run_id: int | None = None, limit: int = 100, skip_appraised: bool = False) -> list[dict]:
     """Read M2's acquired sources (joined to their candidate for title/url/run). Bounded by
     `limit`. skip_appraised omits sources that already have any appraisal row."""
@@ -100,12 +115,7 @@ def load_sources(engine, run_id: int | None = None, limit: int = 100, skip_appra
     with engine.connect() as c:
         rows = [dict(r._mapping) for r in c.execute(q)]
     for r in rows:
-        prov = r.get("provenance") if isinstance(r.get("provenance"), dict) else {}
-        r["url"] = r.pop("source_url", None) or prov.get("url")
-        r["content"] = r.get("content") or ""
-        for k in ("published_date", "published_at", "publication_date", "year", "publisher", "source_type"):
-            if prov.get(k) is not None:
-                r.setdefault(k, prov[k])
+        apply_provenance(r)
     return rows
 
 

@@ -39,3 +39,17 @@ def answer_question(question: str, model: str, pricing: PricingRecord) -> AskRes
         tokens_used=usage.total_tokens,
         cost_usd=round(input_cost + output_cost, 6),
     )
+
+
+def answer_in_scope(question: str, model: str, pricing: PricingRecord) -> AskResult:
+    """The /ask entry point (item #72 W1): the scope router runs first; a declined question never reaches the
+    answering model and gets the fixed decline template. answer_question stays the bare model call (the trace
+    harness's baseline shape)."""
+    from vera.scope_router import decline_text, route
+
+    decision = route(question, model, pricing)
+    if not decision.accepted:
+        return AskResult(answer=decline_text(), tokens_used=decision.tokens_used, cost_usd=decision.cost_usd)
+    result = answer_question(question, model, pricing)
+    return AskResult(answer=result.answer, tokens_used=result.tokens_used + decision.tokens_used,
+                     cost_usd=round(result.cost_usd + decision.cost_usd, 6))

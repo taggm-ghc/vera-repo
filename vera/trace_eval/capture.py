@@ -63,9 +63,16 @@ def baseline_messages(question: str) -> list[dict]:
     return [{"role": "user", "content": question}]
 
 
+from vera.source_labels import source_label  # noqa: E402
+
+
 def _format_sources(sources: list[dict]) -> str:
+    # item #71 R6-a / #72 R72-f: shared label helper (attribution/display; no behavioural effect is claimed).
+    def label(s: dict) -> str:
+        lab = source_label(s)
+        return lab + " " if lab else ""
     return "\n\n".join(
-        f"[{s['n']}] {s['title']} (published {s.get('published') or 'unknown'}) {s['url']}\n{s['snippet']}"
+        f"[{s['n']}] {label(s)}{s['title']} (published {s.get('published') or 'unknown'}) {s['url']}\n{s['snippet']}"
         for s in sources
     )
 
@@ -98,7 +105,8 @@ def capture_one(q_item: dict, variant: str, *, chat: ChatFn, search: SearchFn, p
             rec["search_meta"] = dict(getattr(results, "meta", None) or {})
             rec["sources"] = [
                 {"n": i, "url": r.get("url", ""), "title": r.get("title", ""),
-                 "published": r.get("published"), "snippet": r.get("snippet", "")}
+                 "published": r.get("published"), "snippet": r.get("snippet", ""),
+                 "source_type": r.get("source_type"), "source_class": r.get("source_class"), "discovery": r.get("discovery")}
                 for i, r in enumerate(results, 1)
             ]
             messages = grounded_v1_messages(question, rec["sources"])
@@ -158,7 +166,8 @@ def default_chat(model: str) -> ChatFn:
 # Why: search_question() without `providers` rebuilds the chain, and with it each provider's RateGate, on
 # every call, so arXiv's min_interval_s is not enforced ACROSS questions. Found by item #70's first grounded
 # capture (HTTP 429 from question 21 on). The harness therefore builds the chain once per process; the M2
-# defect itself is recorded for VERA (p3m3 item-70 plan, section 9) and not fixed here.
+# defect itself is fixed by p3m3 item #71 (search_question now caches its chain); this cache is kept for
+# explicitness.
 _CHAIN_CACHE: dict = {}
 
 

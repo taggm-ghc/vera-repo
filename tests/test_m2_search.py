@@ -211,9 +211,11 @@ def test_licence_gate_rules():
     assert licence_decision(cand())[0] == "defer"                                   # none declared
     assert licence_decision(cand(meta="CC0-1.0"))[0] == "defer"                     # CC0 metadata != content licence
     assert licence_decision(cand(meta="CC0-1.0", kind="abstract_metadata"))[0] == "allow"
-    for lic in ("CC-BY-NC-4.0", "CC-BY-ND-4.0", "CC BY-NC-ND 4.0", "by-nc-sa"):
+    for lic in ("CC-BY-ND-4.0", "CC BY-NC-ND 4.0"):     # R1 rule: ND rejects; plain NC is accepted (item 72 W4)
         assert licence_decision(cand(content=lic))[0] == "reject", lic
-    assert licence_decision(cand(meta="CC-BY-NC-4.0", content="CC-BY-4.0"))[0] == "reject"
+    for lic in ("CC-BY-NC-4.0", "by-nc-sa"):
+        assert licence_decision(cand(content=lic))[0] == "allow", lic
+    assert licence_decision(cand(meta="CC-BY-ND-4.0", content="CC-BY-4.0"))[0] == "reject"
     assert licence_decision(cand(content="CC-BY-4.0", url="https://arxiv.org/pdf/2401.1"))[0] == "reject"
     assert licence_decision(cand(content="CC-BY-4.0", url="https://arxiv.org/abs/2401.1"))[0] == "allow"
 

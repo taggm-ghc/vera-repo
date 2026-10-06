@@ -33,6 +33,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
+from urllib.parse import urlsplit
 
 _ROOT = Path(__file__).resolve().parent.parent
 # Why: the two files named by R1 (D1 option 2); per-environment overrides are passed as arguments, not env.
@@ -295,7 +296,147 @@ def _check_search(problems: list, s) -> None:
         problems.append("search.fallback_seed: need an object with exactly path and sha256 (both null = no fallback)")
     elif (fb["path"] is None) != (fb["sha256"] is None) or any(v is not None and not (isinstance(v, str) and v.strip()) for v in fb.values()):
         problems.append("search.fallback_seed: path and sha256 must be both null or both non-empty strings (frozen by hash)")
-    a = s.get("arxiv")
+    if s.get("mode") not in ("fan_out", "first_sufficient"):
+        problems.append("search.mode: fan_out or first_sufficient")
+    _num(problems, "search.rrf_k", s.get("rrf_k"), "int", 1, 1000)
+    _check_query_terms(problems, s.get("query_terms"))
+    # per-provider validators (G8): arXiv stays required (the original route); the OpenAlex block is required
+    # exactly when the provider is listed (or the block is present).
+    listed = s["providers"] if isinstance(s.get("providers"), list) else []
+    _check_arxiv(problems, s.get("arxiv"))
+    if "openalex" in listed or "openalex" in s:
+        _check_openalex(problems, s.get("openalex"))
+    if "doaj" in listed or "doaj" in s:
+        _check_doaj(problems, s.get("doaj"))
+    if "duckduckgo_lite" in listed or "duckduckgo_lite" in s:
+        _check_duckduckgo_lite(problems, s.get("duckduckgo_lite"))
+    _check_max_share(problems, s.get("max_share"))
+
+
+def _check_query_terms(problems: list, t) -> None:
+    if not isinstance(t, dict):
+        problems.append("search.query_terms: missing or not an object")
+        return
+    _num(problems, "search.query_terms.min_term_chars", t.get("min_term_chars"), "int", 1, 10)
+    _num(problems, "search.query_terms.max_extra_terms", t.get("max_extra_terms"), "int", 1, 30)
+    if "relax_on_zero" in t and not isinstance(t["relax_on_zero"], bool):
+        problems.append("search.query_terms.relax_on_zero: need true or false (default true when absent)")
+    for k in ("stopwords", "meta_words", "core_phrases"):
+        v = t.get(k)
+        if (not isinstance(v, list) or not v
+                or not all(isinstance(x, str) and x.strip() and x == x.lower() and x == x.strip() for x in v)):
+            problems.append(f"search.query_terms.{k}: need a non-empty list of lowercase, trimmed strings")
+
+
+_SOURCE_CLASSES = {"news", "web_portal", "independent_research", "vendor_claim"}
+_HOST_RE = re.compile(r"^[a-z0-9]([a-z0-9\-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]*[a-z0-9])?)+$")
+
+
+def _check_max_share(problems: list, m) -> None:
+    if m is None:
+        return  # optional: the code default caps duckduckgo_lite at 2
+    if not isinstance(m, dict):
+        problems.append("search.max_share: need an object {provider_name: max items in the final top-n}")
+        return
+    for k, v in m.items():
+        if not isinstance(k, str) or not k.strip():
+            problems.append(f"search.max_share: bad provider name {k!r}")
+        _num(problems, f"search.max_share.{k}", v, "int", 0, 100)
+
+
+def _check_duckduckgo_lite(problems: list, d) -> None:
+    if not isinstance(d, dict):
+        problems.append("search.duckduckgo_lite: missing or not an object")
+        return
+    if not isinstance(d.get("enabled"), bool):
+        problems.append("search.duckduckgo_lite.enabled: must be true or false")
+    if not isinstance(d.get("endpoint"), str) or not d["endpoint"].startswith("https://"):
+        problems.append("search.duckduckgo_lite.endpoint: need an https URL")
+    elif (urlsplit(d["endpoint"]).hostname or "") != "lite.duckduckgo.com":
+        problems.append("search.duckduckgo_lite.endpoint: host must be lite.duckduckgo.com")
+    if not isinstance(d.get("region"), str) or not re.fullmatch(r"[a-z]{2}-[a-z]{2}", d["region"]):
+        problems.append("search.duckduckgo_lite.region: need a kl code such as us-en or wt-wt")
+    ua = d.get("user_agent")
+    if not isinstance(ua, str) or not ua.strip() or "discovery" not in ua.lower():
+        problems.append("search.duckduckgo_lite.user_agent: need an identifying User-Agent that says it is discovery only")
+    _num(problems, "search.duckduckgo_lite.min_interval_s", d.get("min_interval_s"), "float", 5.0, 3600)
+    if d.get("max_concurrency") != 1 or isinstance(d.get("max_concurrency"), bool):
+        problems.append("search.duckduckgo_lite.max_concurrency: must be 1 (single connection)")
+    _num(problems, "search.duckduckgo_lite.daily_query_cap", d.get("daily_query_cap"), "int", 1, 500)
+    _num(problems, "search.duckduckgo_lite.cache_ttl_hours", d.get("cache_ttl_hours"), "float", 0.01, 24 * 365)
+    cd = d.get("cache_dir")
+    if cd is not None and not (isinstance(cd, str) and cd.strip() and not cd.startswith(("/", "~")) and ".." not in cd.split("/")
+                               and cd.startswith("tmp/")):
+        problems.append("search.duckduckgo_lite.cache_dir: must be a repo-relative path under tmp/ (or null = no cache)")
+    _num(problems, "search.duckduckgo_lite.max_response_bytes", d.get("max_response_bytes"), "int", 1024, 8 * 1024 * 1024)
+    _num(problems, "search.duckduckgo_lite.max_query_chars", d.get("max_query_chars"), "int", 100, 2000)
+    _num(problems, "search.duckduckgo_lite.max_queries_per_question", d.get("max_queries_per_question"), "int", 1, 4)
+    g = d.get("site_groups")
+    if not isinstance(g, dict) or not g or not set(g) <= {"news", "portals"}:
+        problems.append("search.duckduckgo_lite.site_groups: need an object with keys from news, portals")
+    else:
+        for name, sites in g.items():
+            if not isinstance(sites, list) or not all(isinstance(x, str) and _HOST_RE.match(x) for x in sites):
+                problems.append(f"search.duckduckgo_lite.site_groups.{name}: need a list of lowercase host names")
+        if not any(isinstance(v, list) and v for v in g.values()):
+            problems.append("search.duckduckgo_lite.site_groups: at least one group needs a site")
+    sc = d.get("source_class_by_domain")
+    if sc is not None:
+        if not isinstance(sc, dict) or not all(isinstance(k, str) and _HOST_RE.match(k) and isinstance(v, str)
+                                               and v in _SOURCE_CLASSES for k, v in sc.items()):
+            problems.append("search.duckduckgo_lite.source_class_by_domain: need {lowercase host: one of "
+                            + ", ".join(sorted(_SOURCE_CLASSES)) + "}")
+    if not isinstance(d.get("terms_source"), str) or not d["terms_source"].strip():
+        problems.append("search.duckduckgo_lite.terms_source: missing (every provider fact needs its source)")
+
+
+def _check_doaj(problems: list, d) -> None:
+    if not isinstance(d, dict):
+        problems.append("search.doaj: missing or not an object")
+        return
+    if not isinstance(d.get("enabled"), bool):
+        problems.append("search.doaj.enabled: must be true or false")
+    if not isinstance(d.get("endpoint"), str) or not d["endpoint"].startswith("https://"):
+        problems.append("search.doaj.endpoint: need an https URL")
+    elif (urlsplit(d["endpoint"]).hostname or "") != "doaj.org":
+        problems.append("search.doaj.endpoint: host must be doaj.org")
+    # DOAJ documents a limit of two requests per second: the gate must stay at or above 0.5 s
+    _num(problems, "search.doaj.min_interval_s", d.get("min_interval_s"), "float", 0.5, 3600)
+    _num(problems, "search.doaj.max_response_bytes", d.get("max_response_bytes"), "int", 1024, 8 * 1024 * 1024)
+    _num(problems, "search.doaj.daily_search_budget", d.get("daily_search_budget"), "int", 1, 100000)
+    _num(problems, "search.doaj.snippet_max_chars", d.get("snippet_max_chars"), "int", 50, 20000)
+    _num(problems, "search.doaj.year_from", d.get("year_from"), "int", 1900, 2100)
+    _num(problems, "search.doaj.year_to", d.get("year_to"), "int", 1900, 2100)
+    if (isinstance(d.get("year_from"), int) and isinstance(d.get("year_to"), int)
+            and not isinstance(d["year_from"], bool) and d["year_from"] > d["year_to"]):
+        problems.append("search.doaj.year_from: must not exceed year_to")
+    if not isinstance(d.get("terms_source"), str) or not d["terms_source"].strip():
+        problems.append("search.doaj.terms_source: missing (every provider fact needs its source)")
+
+
+def _check_openalex(problems: list, o) -> None:
+    if not isinstance(o, dict):
+        problems.append("search.openalex: missing or not an object")
+        return
+    if not isinstance(o.get("endpoint"), str) or not o["endpoint"].startswith("https://"):
+        problems.append("search.openalex.endpoint: need an https URL")
+    _pos_num(problems, "search.openalex.min_interval_s", o.get("min_interval_s"))
+    if o.get("max_concurrency") != 1 or isinstance(o.get("max_concurrency"), bool):
+        problems.append("search.openalex.max_concurrency: must be 1 (single connection)")
+    _num(problems, "search.openalex.max_response_bytes", o.get("max_response_bytes"), "int", 1024, 8 * 1024 * 1024)
+    _num(problems, "search.openalex.daily_search_budget", o.get("daily_search_budget"), "int", 1, 100000)
+    _num(problems, "search.openalex.snippet_max_chars", o.get("snippet_max_chars"), "int", 50, 20000)
+    for k in ("from_publication_date", "to_publication_date"):
+        v = o.get(k)
+        if not (isinstance(v, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", v)):
+            problems.append(f"search.openalex.{k}: YYYY-MM-DD")
+    if not isinstance(o.get("terms_source"), str) or not o["terms_source"].strip():
+        problems.append("search.openalex.terms_source: missing (every provider fact needs its source)")
+    if o.get("mailto") is not None:
+        problems.append("search.openalex.mailto: must be unset (no contact address is approved)")
+
+
+def _check_arxiv(problems: list, a) -> None:
     if not isinstance(a, dict):
         problems.append("search.arxiv: missing or not an object")
         return

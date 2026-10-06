@@ -8,13 +8,14 @@ from fastapi.responses import JSONResponse
 from openai import AuthenticationError, OpenAIError, RateLimitError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from vera.ask_service import answer_question
+from vera.ask_service import answer_in_scope
 from vera.auth import (
     OPENAI_KEY_ERROR_DETAIL,
     classify_openai_api_key,
     classify_vera_api_key,
     verify_api_key,
 )
+from vera.public_mode import enforce_caps, record_request_cost
 from vera.pricing.config import latest_pricing_for, load_model_pricing, load_model_selection
 
 load_dotenv()  # read OPENAI_API_KEY (and anything else) from .env
@@ -115,8 +116,8 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/ask", response_model=AskResponse, dependencies=[Depends(verify_api_key)])
-def ask(req: AskRequest):
+@app.post("/ask", response_model=AskResponse, dependencies=[Depends(verify_api_key), Depends(enforce_caps)])  # W2 caps (public mode)
+def ask(req: AskRequest, request: Request):
     if req.mode is DemoMode.force_bad:
         # Guardrail demo: inject one identified synthetic fault, rejected by real
         # schema validation. No OpenAI call is made — the demo is free and deterministic.
@@ -146,7 +147,7 @@ def ask(req: AskRequest):
         )
 
     try:
-        result = answer_question(req.question, MODEL, CURRENT_PRICING)
+        result = answer_in_scope(req.question, MODEL, CURRENT_PRICING)  # scope router first (item #72 W1)
     except AuthenticationError as exc:
         raise HTTPException(
             status_code=401,
@@ -174,6 +175,7 @@ def ask(req: AskRequest):
         logger.error("OpenAI request failed: %s", exc)
         raise HTTPException(status_code=502, detail="OpenAI request failed. Please try again.") from exc
 
+    record_request_cost(request, result.cost_usd)
     return AskResponse(
         answer=result.answer,
         model=MODEL,

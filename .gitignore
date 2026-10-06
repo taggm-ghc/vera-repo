@@ -38,3 +38,7 @@ deprecated/
 
 # Item #70 raw trace captures hold full arXiv abstracts; never committed.
 tmp/trace_eval/
+tmp/search_eval/
+tmp/search_cache/
+# Item #72 W1 scope-router measurements (per-item decisions); never committed.
+tmp/scope_eval/

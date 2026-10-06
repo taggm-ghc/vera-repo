@@ -2,6 +2,7 @@
 (E1..En), their span_ids, relations, dependencies, gaps and claim-to-evidence pointers.
 Deterministic: same inputs -> same context (auditable for M7)."""
 from vera.m4.common import labels, ordered_spans, sub_questions
+from vera.source_labels import source_label
 
 UNIT_CHARS = 450
 LABEL_FMT = "[E{n}]"
@@ -32,12 +33,16 @@ def build_context_with_index(evidence_corpus: dict, relations: dict, gate_c: dic
             meta = ", ".join(str(x) for x in (s.get("source_title"), s.get("year"), s.get("source_type")) if x)
             text = " ".join(s["text"].split())
             text = text if len(text) <= UNIT_CHARS else text[:UNIT_CHARS].rstrip() + "..."
+            cls = source_label(s)  # R72-f: attribution label (news / vendor claim); no behavioural effect claimed
+            meta = f"{cls} {meta}".strip() if cls else meta
             out.append(f"{LABEL_FMT.format(n=lab[s['span_id']][1:])} span_id={s['span_id']} | {meta} | \"{text}\"")
     rest = [s for s in spans if s["span_id"] not in placed]
     if rest:
         out.append("### unassigned")
         for s in rest:
-            out.append(f"[{lab[s['span_id']]}] span_id={s['span_id']} | \"{' '.join(s['text'].split())[:UNIT_CHARS]}\"")
+            cls = source_label(s)
+            head = f" | {cls}" if cls else ""
+            out.append(f"[{lab[s['span_id']]}] span_id={s['span_id']}{head} | \"{' '.join(s['text'].split())[:UNIT_CHARS]}\"")
 
     edges = [e for e in relations.get("edges", []) if e["span1_id"] in lab and e["span2_id"] in lab]
     if edges:

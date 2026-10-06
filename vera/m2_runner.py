@@ -190,6 +190,7 @@ def run_m2(
         fr.provenance.update(search_query=q, search_provider=c.get("provider"), search_rank=c.get("rank"),
                              run_id=run_id, iteration_no=iteration, gate_a_score=c["gate_a_score"],
                              licence=c.get("licence"), doi=c.get("doi"), published=c.get("published"),
+                             publisher=c.get("publisher"), source_type=c.get("source_type"),
                              provider_endpoint=c.get("provider_endpoint"), retrieved_at=c.get("retrieved_at"),
                              stored_text_kind=c.get("stored_text_kind"), licence_decision=c.get("licence_decision"))
         sid, ver, _new = store.register_source(cid, fr)

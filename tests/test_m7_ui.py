@@ -47,3 +47,17 @@ def test_page_file_renders_with_fixture_env(monkeypatch):
                            default_timeout=30).run()
     assert not at.exception
     assert at.title and "VERA" in at.title[0].value
+
+
+def test_scholar_link_out_button_and_caption_are_present_and_nothing_is_requested(monkeypatch):
+    import requests
+    def boom(*a, **k):
+        raise AssertionError("network used by the demo page")
+    monkeypatch.setattr(requests, "get", boom)
+    monkeypatch.setattr(requests, "post", boom)
+    at = _at(build_fixture_report())
+    assert not at.exception
+    btns = at.get("link_button")
+    assert len(btns) == 1 and btns[0].proto.label == "Search Google Scholar yourself"
+    assert btns[0].proto.url.startswith("https://scholar.google.com/scholar?q=")
+    assert any("VERA does not query Google Scholar" in c.value for c in at.caption)
