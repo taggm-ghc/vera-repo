@@ -222,6 +222,18 @@ secret in `.env.example`.
     No further accounts are to be created. The runners are not yet repointed to them (they still use
     the admin identity), and the write-only column grants are untested against a live run.
 
+## Deploying on Render (2026-10-05)
+
+One image (`Dockerfile`) runs both services; `start.sh api|ui` picks which. Port: Render's `PORT`, else 8000. Secrets live only in Render's environment settings, never in the repo or the image (`.dockerignore` keeps `.env` and `*-prv` files out). Service URLs are not recorded in this repository.
+
+1. Generate a client key locally: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`.
+2. **API service:** New → Web Service → this repo, branch `main`; Runtime Docker; Root Directory blank; plan Free; Health Check Path `/health`; Auto-Deploy Off. Environment: `OPENAI_API_KEY`, `VERA_API_KEY` (the new key). Leave `VERA_PUBLIC_MODE` unset (public mode is the default).
+3. **UI service:** New → Web Service → same repo; Runtime Docker; plan Free; Docker Command `./start.sh ui`; Health Check Path `/_stcore/health`; Auto-Deploy Off. Environment: `VERA_API_BASE_URL` (the API service's `https://` address, no trailing slash; without it the UI calls `127.0.0.1:8001` and fails), `VERA_API_KEY` (same key), `VERA_DEMO_SOURCE=fixture` (demo pages show the labelled fixture; no database on Render yet).
+4. Check: API `/health` returns 200 and `/ask` without the key returns 401; the UI answers one question.
+5. Redeploy after a push: Manual Deploy → Deploy latest commit.
+
+Limits: free services sleep when idle (first request after sleep waits about a minute); public-mode caps are in memory, so they reset whenever a service restarts or wakes; one uvicorn worker by design. Run `python scripts/release_gate.py` before every deploy.
+
 ## Week 4: TRACE evaluation (2026-10-04)
 
 The bootcamp's Week 4 asks for "an eval suite your capstone runs against, visible from a Streamlit UI". This section is that suite, run on VERA itself: Trace, Read, Analyze, Codify, Enforce.
@@ -231,9 +243,39 @@ The bootcamp's Week 4 asks for "an eval suite your capstone runs against, visibl
 - **Codify.** Nine deterministic checks (`vera/trace_eval/checks.py`, `trace-checks-v1`), applied by question category. Results: `scripts/trace_measure.py` writes `eval_results/trace_eval_v1.json`.
 - **Validated, not trusted.** An independent labeller, blind to the check results, labelled the 40 dev traces. Each check's TPR and TNR (positive = failure) is in `eval_results/trace_eval_v1_validation.json` (`scripts/trace_validate.py`). The checks catch almost every labelled failure (TPR 0.95-1.0) but over-flag some passes (TNR 0.5-0.75 on four checks). The word-overlap support heuristic missed all 3 partially supported sentences (TPR 0.0), so it is not a support check.
 - **Measured result (all applicable checks pass; capture errors count as failures; Wilson 95% intervals; directional, small n).** Baseline: dev 2/20 (10%), held-out 2/10 (20%). Grounded_v1: dev 3/20 (15%), held-out 2/10 (20%). The headline barely moves, but the failure mix changes: by the blind labels, fabricated citations, unsourced numbers and vague "studies show" claims fall from 3, 3 and 12 dev traces to 0, 0 and 0. The new top failure is **retrieval**: in 13 of 19 grounded dev traces at most 1 of 5 arXiv results was on topic, and the model then (correctly) declined to answer from them (9/19). Out-of-scope, false-premise and ambiguity handling did not improve.
-- **What TRACE found in VERA's code.** `search_question()` rebuilds its provider chain, and so the arXiv rate gate, on every call; multi-question runs hit HTTP 429 (arXiv also refuses after about 20 quick requests). The harness reuses one chain; the M2 fix is open. One grounded trace stayed a capture error after bounded retries.
+- **What TRACE found in VERA's code.** `search_question()` rebuilds its provider chain, and so the arXiv rate gate, on every call; multi-question runs hit HTTP 429 (arXiv also refuses after about 20 quick requests). The harness reuses one chain; the M2 gate defect is fixed (item #71: one cached chain per process). One grounded trace stayed a capture error after bounded retries.
+- **Why retrieval misses (diagnosed 2026-10-04).** Mostly the question-to-query step, not the corpus: the query keeps the question's first words, so meta-words such as "published", "evidence" and "show" dominate and match almost any paper (on average 0.82 of 5 results on topic over 22 questions). Hand-focused queries on the same questions found relevant studies. Narrow questions and non-arXiv literature are smaller factors. Evidence: `docs/trace_eval/retrieval_diagnosis_2026-10-04.md`. Fixed in code by item #71 (query translation, OpenAlex second provider, rank-fusion fan-out); the after-fix measurement has not been run yet.
+- **Search providers.** arXiv and OpenAlex, plus DOAJ when enabled (scholarly, keyless, merged by reciprocal rank fusion; DOAJ article metadata is released under a CC0 waiver, and VERA keeps only title, abstract and bibliographic fields from it, within a 2 requests per second limit and a daily cap), plus DuckDuckGo Lite as a **discovery-only** provider (item #71): it is used to find source URLs (mainstream news and journal portals without open search APIs, through `site:` groups in `config/vera_eval_run.json` `search.duckduckgo_lite`). VERA keeps only the target URL, the target page's own headline and its domain; it never shows DuckDuckGo snippets, pages or ranking, never auto-fetches discovered pages (no licence is declared, so the licence gate holds them for review), caps them at 2 of the final results, and labels news as grey literature. DuckDuckGo's params page says its parameters are intended for individual use; VERA uses it at low volume (5 s gap, daily cap of 8 queries, and a local per-question cache of URLs and headlines only under the gitignored `tmp/search_cache/`) and treats a challenge page as a failure, never evading it. Switch it off with `search.duckduckgo_lite.enabled: false`. **Google Scholar is a link-out only:** the demo page shows a "Search Google Scholar yourself" button built from VERA's query terms; the person clicks it in their own browser, and VERA never queries, fetches or parses Google Scholar, because Scholar's robots.txt disallows `/scholar` and Google's terms forbid automated access against robots.txt.
 - **See it.** `streamlit run streamlit_app.py`, page **trace eval**: headline, per-check and validation tables, and a trace browser.
-- **Limits.** Agent-authored questions (self-preference risk); a single agent coder and labeller from the same model family as the builder; 30 questions; abstracts only; the checks were frozen before the after-fix run but are heuristics. Next fix by this evidence: retrieval query quality, then scope routing.
+- **Limits.** Agent-authored questions (self-preference risk); a single agent coder and labeller from the same model family as the builder; 30 questions; abstracts only; the checks were frozen before the after-fix run but are heuristics. Next fix by this evidence: retrieval query translation, then scope routing.
+
+## Status and limitations (2026-10-04)
+
+Written as dated observations, not guarantees. Every measured figure carries its caveat; nothing here is a statistical claim.
+
+**What VERA does now**
+
+- **Search providers.** arXiv and OpenAlex (keyless, merged by reciprocal rank fusion). A DOAJ provider exists but is switched off in config: in two blind measurements (2026-10-04) it added no directly relevant result the others missed, and in the second it displaced two relevant ones. Zero-hit query relaxation is also built but off: it lowered strict relevance (directional, one labeller, 22 questions). DuckDuckGo Lite is **discovery-only**: VERA keeps only the target URL, that page's own headline and its domain, at low volume (5 s gap, daily cap of 8 queries, at most 2 of the top 5 results; a challenge page counts as a failure and is never evaded). DuckDuckGo's params page says its parameters are intended for individual use; that terms note is why volume stays low and the provider can be switched off (`search.duckduckgo_lite.enabled: false`). Discovered pages are not auto-fetched. **Google Scholar is a link-out only**: a person clicks a button in their own browser; VERA never queries it. Measured on 22 questions, one AI labeller (item #71, before the OpenAlex and DOAJ additions are separated out): strictly relevant results in the top 5 rose from 0.27 to 0.77 per question; directional, small n, not re-measured since.
+- **Scope router** (`vera/scope_router.py`, `config/scope_router.json`). A deterministic first layer plus an optional small-model classifier; declined questions never reach search or the answering model. On the frozen 50-item scope set (`config/scope_set_v1.json`, sha256-frozen, AI-authored): false refusals 1/24 (Wilson 95% 0.007 to 0.202) and false accepts 0/26 (0.000 to 0.129), identical for layer 1 alone and with the classifier. **Directional, small n.** The one false refusal cites a 2025 study that the classifier called a future date.
+- **Public mode and caps** (`vera/public_mode.py`, `config/public_mode.json`). Public mode is the default when `VERA_PUBLIC_MODE` is unset. The upstream URL comes from server configuration only, the key stays server-side and is never put in a widget, request and daily-cost caps return a generic 429 with no provider text, and model text is rendered through `safe_markdown`. Caps today are proposals: 6 requests per minute and 40 per day per client, 400 per day overall, USD 2.00 per day overall and USD 0.25 per client.
+- **Licence rule (approved by R1, 2026-10-04).** The gate rejects only ND, no-educational-use and fee-only terms; plain NC is accepted; an undeclared or unclear licence is held for review. Checked on 7 hand-written cases (`vera/licence_gate.py`).
+- **Release gate** (`python scripts/release_gate.py`). Offline: full suite, sha256 of the two frozen question files, static safety checks (no environment key passed to a widget, no `unsafe_allow_html` on model text, public mode default). `--live` additionally re-runs scope layer 1 only (zero cost) and fails on any false accept (directional, small n).
+
+**What VERA does NOT do yet**
+
+- The full pipeline (M2 to M6) has **not been run live end to end**; the tests use fakes and fixtures.
+- The central claim (VERA's engineered answer beats a direct model answer) is **unmeasured**.
+- Grounded `/ask` is **not** the public default; `/ask` today answers from the model alone after the scope check. R1 approved making it the default only when, for every answer: each cited source is a record retrieved in that request (identifiers checked to resolve; DuckDuckGo-discovered URLs shown only as "discovered, not verified"); each citation carries provider, identifier, retrieval time and licence decision; citations that map to no retrieved record are removed (and an answer with none is replaced by an insufficient-evidence reply); each cited claim is checked against the cited record's text (not the word-overlap heuristic, measured TPR 0.0); and, on the 30-question trace set, unresolvable citations are 0 and the unsupported-claim rate is reported with Wilson 95% intervals, directional, small n.
+- Week 5 memory is not built. The service is **not deployed**; no public URL exists yet.
+
+**Accepted residuals (risks named, not removed)**
+
+- A poisoned or misleading abstract from an allowed source is not detected (OWASP LLM04 and LLM08).
+- Misinformation (LLM09): the support-check heuristic is unusable, so unsupported claims can pass until the grounded-default criteria above are met.
+- Clients behind one IP share a limit (identity is the remote address; proxy headers are off by default).
+- The title-family dedupe key can merge two different papers with the same main title in the same year; every merge is logged with its reason, so a wrong merge is visible.
+- Some `/ask` 401/402/429 error details still name the provider.
+- Links inside model answers are not validated beyond the citation check (LLM05).
 
 ## Current Status
 
