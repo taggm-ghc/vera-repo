@@ -3,11 +3,12 @@
 .venv.*/
 venv/
 
-# Environment variables / secrets: every .env file except the blank templates
-.env
-.env.*
-!.env.example
-!.env.render.*.example
+# Environment files: never commit real ones; only blank templates (*.example, *.template, *.sample, *.dist).
+.env*
+!.env*.example
+!.env*.template
+!.env*.sample
+!.env*.dist
 
 # anti-pattern
 anti-pattern/
