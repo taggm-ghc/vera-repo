@@ -3,8 +3,11 @@
 .venv.*/
 venv/
 
-# Environment variables / secrets
+# Environment variables / secrets: every .env file except the blank templates
 .env
+.env.*
+!.env.example
+!.env.render.*.example
 
 # anti-pattern
 anti-pattern/
@@ -42,3 +45,9 @@ tmp/search_eval/
 tmp/search_cache/
 # Item #72 W1 scope-router measurements (per-item decisions); never committed.
 tmp/scope_eval/
+
+# Personal social posts (LinkedIn etc.), drafts or final, are never committed (R1, 2026-10-05).
+*linkedin-post*
+*linkedin*post*.md
+*build-in-public-post*.md
+*maven-post*.md
