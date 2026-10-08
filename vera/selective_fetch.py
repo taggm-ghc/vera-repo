@@ -119,6 +119,54 @@ class HostPacer:
 _DEFAULT_PACER = HostPacer()
 
 
+def _download(url, *, timeout_s, http_get, url_check, pacer):
+    """Guarded GET shared by fetch_candidate and fetch_html: public-URL check on every hop, per-host pacing,
+    manual redirects (at most MAX_REDIRECTS), text content types only, MAX_BYTES cap.
+    Returns (raw, ctype, final_url, hops, encoding, error); error is None on success."""
+    current, hops = url, 0
+    try:
+        while True:
+            ok, why = url_check(current)
+            if not ok:
+                return None, None, None, hops, None, f"blocked: {why}"
+            (pacer or _DEFAULT_PACER).wait(current)
+            resp = http_get(current, headers={"User-Agent": USER_AGENT}, timeout=timeout_s,
+                            allow_redirects=False, stream=True)
+            if resp.status_code in (301, 302, 303, 307, 308) and resp.headers.get("Location"):
+                hops += 1
+                if hops > MAX_REDIRECTS:
+                    return None, None, None, hops, None, f"too many redirects (>{MAX_REDIRECTS})"
+                current = urljoin(current, resp.headers["Location"])
+                continue
+            break
+        if resp.status_code != 200:
+            return None, None, None, hops, None, f"http {resp.status_code}"
+        ctype = resp.headers.get("Content-Type", "").split(";")[0].strip().lower()
+        if ctype not in TEXT_TYPES:
+            return None, None, None, hops, None, f"unsupported content-type {ctype or 'missing'!r}"
+        chunks, size = [], 0
+        for chunk in resp.iter_content(65536):
+            size += len(chunk)
+            if size > MAX_BYTES:
+                return None, None, None, hops, None, f"body exceeds {MAX_BYTES} bytes"
+            chunks.append(chunk)
+        raw = b"".join(chunks)
+    except requests.RequestException as exc:
+        return None, None, None, hops, None, f"{type(exc).__name__}: {exc}"
+    return raw, ctype, current, hops, getattr(resp, "encoding", None) or "utf-8", None
+
+
+def fetch_html(url: str, *, timeout_s: float = 8.0, http_get=requests.get, url_check=is_public_url,
+               pacer: HostPacer | None = None) -> tuple[str | None, str | None, str | None]:
+    """Raw decoded body (markup kept, for link and metadata extraction) under the same guards.
+    Returns (body, final_url, error)."""
+    raw, _ctype, final, _hops, enc, err = _download(url, timeout_s=timeout_s, http_get=http_get,
+                                                     url_check=url_check, pacer=pacer)
+    if err:
+        return None, None, err
+    return raw.decode(enc, errors="replace"), final, None
+
+
 def fetch_candidate(
     url: str,
     *,
@@ -128,38 +176,10 @@ def fetch_candidate(
     ledger: CostLedger | None = None,
     pacer: HostPacer | None = None,
 ) -> FetchResult:
-    current, hops = url, 0
-    try:
-        while True:
-            ok, why = url_check(current)
-            if not ok:
-                return _fail(url, f"blocked: {why}", ledger)
-            (pacer or _DEFAULT_PACER).wait(current)
-            resp = http_get(current, headers={"User-Agent": USER_AGENT}, timeout=timeout_s,
-                            allow_redirects=False, stream=True)
-            if resp.status_code in (301, 302, 303, 307, 308) and resp.headers.get("Location"):
-                hops += 1
-                if hops > MAX_REDIRECTS:
-                    return _fail(url, f"too many redirects (>{MAX_REDIRECTS})", ledger)
-                current = urljoin(current, resp.headers["Location"])
-                continue
-            break
-        if resp.status_code != 200:
-            return _fail(url, f"http {resp.status_code}", ledger)
-        ctype = resp.headers.get("Content-Type", "").split(";")[0].strip().lower()
-        if ctype not in TEXT_TYPES:
-            return _fail(url, f"unsupported content-type {ctype or 'missing'!r}", ledger)
-        chunks, size = [], 0
-        for chunk in resp.iter_content(65536):
-            size += len(chunk)
-            if size > MAX_BYTES:
-                return _fail(url, f"body exceeds {MAX_BYTES} bytes", ledger)
-            chunks.append(chunk)
-        raw = b"".join(chunks)
-    except requests.RequestException as exc:
-        return _fail(url, f"{type(exc).__name__}: {exc}", ledger)
-
-    enc = getattr(resp, "encoding", None) or "utf-8"
+    raw, ctype, current, hops, enc, err = _download(url, timeout_s=timeout_s, http_get=http_get,
+                                                    url_check=url_check, pacer=pacer)
+    if err:
+        return _fail(url, err, ledger)
     text = extract_text(raw.decode(enc, errors="replace"), ctype)
     if not text.strip():
         return _fail(url, "no extractable text", ledger)

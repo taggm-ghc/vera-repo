@@ -20,8 +20,9 @@ Deployment order for this DB: done. For a fresh DB: 001, 002, then 003 at M3.
   last section). The working-tree 005 differs from the committed one: the `evidence_relations.run_id` backfill was
   removed (spans have no `run_id`; the table was empty at apply time). M4 owns setting `run_id` on new rows;
   that ownership is to be confirmed by R1. The 005 header comment was corrected 2026-10-02 to say so (comment-only).
-- Three login accounts were applied 2026-10-01 (see "Accounts and password hashing"). The runners are not yet
-  repointed to them, and the write-only column grants are untested against a live run.
+- Three login accounts were applied 2026-10-01 (see "Accounts and password hashing"). The pipeline runners are
+  not yet repointed to them; the write-only grants were exercised for `/ask` corpus admission on 2026-10-07 (see
+  "Update 2026-10-07" below).
 - Migration states, read from the files 2026-10-02: 001 and 002 are fresh-install files (not applied on this database; 001u replaced them); 001u applied; 003 and 004 applied; 005 applied. The 005 grants (UPDATE on `appraisals` and `evidence_relations`, UPDATE on `runs` for the rw group) mean those two tables are **not** append-only by grant; only `sources` and `canonical_sources` are immutable (trigger plus grants).
 - Dev and production share this one schema (account distinction only). Nothing under `db/` is committed
   except what B1 committed; commit only after the owner validates.
@@ -107,7 +108,14 @@ changed by us, so always run `SET password_encryption = 'scram-sha-256';` in the
 (the three accounts were re-saved this way on 2026-10-01). Accepted divergence: the server default stays md5; the hash type is not
 catalog-verified because `pg_authid` is denied to the admin account.
 
-Verification facts (2026-10-01): applied via the admin `vera_vjay_user`; privilege matrix 9/9 as expected; all three logins tested. Only these 3 accounts were created (no more are to be created). Column grants of `vera_pipeline_wo` are UNTESTED against a live `m2_runner.py` run. Dev and prod share one schema (accepted divergence).
+Verification facts (2026-10-01): applied via the admin `vera_vjay_user`; privilege matrix 9/9 as expected; all three logins tested. Only these 3 accounts were created (no more are to be created).
+
+Update 2026-10-07:
+- **Write-only grants exercised.** `/ask` corpus admission (`vera/corpus_admission.py`) ran as `vera_pipeline_wo` in a rolled-back transaction. INSERT ... RETURNING works on questions, runs, candidates, canonical_sources and sources, and UPDATE works on candidates. `ON CONFLICT` is refused (it needs SELECT on the conflict columns), so the code uses savepoints and treats a unique violation as "exists".
+- **Password rotated.** `vera_pipeline_wo`'s password was set by the admin as a SCRAM verifier.
+- **.env repointed.** VERA's `.env` now points `EXTERNAL_DB_URL`, `INTERNAL_DB_URL` and `VERA_DB_URL_RW` at `vera_claude_code_rw` and `VERA_DB_URL_WO` at `vera_pipeline_wo`. They previously used an AI-Internship account, which is refused on `vera_vjay`.
+- **Read-only URL added.** `VERA_DB_URL_RO` (`vera_eval_ro`) was added for the corpus description (`GET /corpus-summary`, item #83). The read-only SQL contract test now uses VERA's own `EXTERNAL_DB_URL` host, not another project's file.
+- **Still open.** `run_m2` under the write-only account (see above) is still unrun. Column grants of `vera_pipeline_wo` are UNTESTED against a live `m2_runner.py` run. Dev and prod share one schema (accepted divergence).
 
 ## Live verification and contract test (2026-10-01)
 - B1 (migration 005, commit 28aae11) and B2 (eval freeze, 9fef487) verified live, read-only: the 005 columns exist (`runs.run_label`, `evaluated_at`, `engineered_score`, `baseline_score`, `question`; `appraisals.rubric_version`/`policy_version`; `evidence_relations.run_id`); the frozen question text equals `questions.question_id=2`. `question_id=7` is a test row pending an approved deletion.

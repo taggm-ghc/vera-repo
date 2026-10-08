@@ -7,6 +7,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from vera.public_mode import is_public_mode, post_ask, upstream_base_url
+from vera.sources_sidebar import render_sources, render_sources_sidebar
 from vera.ui_safety import safe_markdown
 
 load_dotenv()  # picks up VERA_API_KEY from the local .env, same as main.py
@@ -21,6 +22,19 @@ PUBLIC = is_public_mode()
 # rendered. In public mode this is the only key the UI uses; in dev mode it is NOT used at all
 # (a dev types their own key), so a user-editable URL can never receive the server key.
 _SERVER_KEY = os.getenv("VERA_API_KEY", "")
+
+def _show_triage(base_url: str) -> None:
+    """Item #83: ordered, host-free triage after a failed call (ported from AI-Internship)."""
+    from vera.api_triage import earliest_failure, triage_api
+
+    with st.status("Checking the connection to VERA's API…", expanded=True) as box:
+        steps = triage_api(base_url, "/ask")
+        for step in steps:
+            st.write(("✅ " if step["ok"] else "❌ ") + f"{step['step']}: {step['detail']}")
+        first = earliest_failure(steps)
+        box.update(label=f"Earliest failure: {first['step']}" if first else "The API is reachable now; ask again",
+                   state="error" if first else "complete")
+
 
 st.title("VERA - Question Answering Service")
 
@@ -37,6 +51,7 @@ else:
         help="Blank by default. Type the key for the API above; it is never pre-filled.")
 
 # Force bad demo toggle
+render_sources_sidebar(st)
 st.sidebar.subheader("Guardrail Demo")
 force_bad = st.sidebar.checkbox("Show guardrail demo (force_bad)", value=False)
 
@@ -66,6 +81,7 @@ if st.button("Ask", type="primary"):
                     # Display answer
                     st.markdown("### ✅ Answer")
                     st.success(safe_markdown(data["answer"]))
+                    render_sources(st, data.get("sources") or [], data.get("traced_sources") or [], data.get("claim_check"))
 
                     # Display metrics
                     st.markdown("### 💰 Metrics")
@@ -87,6 +103,8 @@ if st.button("Ask", type="primary"):
 
                 elif PUBLIC:
                     st.error("The service could not answer this request. Please try again later.")
+                    if response.status_code >= 500:  # item #83: find the earliest failing step
+                        _show_triage(api_base_url)
 
                 elif response.status_code == 401:
                     st.error("API key error. Check the key typed in the sidebar matches the server's VERA_API_KEY.")
@@ -97,6 +115,7 @@ if st.button("Ask", type="primary"):
             except requests.exceptions.RequestException as e:
                 if PUBLIC:
                     st.error("The service is unavailable. Please try again later.")
+                    _show_triage(api_base_url)
                 else:
                     st.error(f"Request failed: {type(e).__name__}")
                     st.info("Make sure the API is running: `./run.sh`")

@@ -24,7 +24,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA = "vera_vjay"
-ACCOUNTS_ENV = Path("/home/dev-tagg/work/edu/tailabs.ai/AI-Internship/ai-engineering-bootcamp-v2/week-1v2/.env.db-accounts")
 RO_ACCOUNT = "vera_eval_ro"
 
 KEYWORDS = set("""select from where and or not null is in as on join left right inner outer full cross insert into values
@@ -143,11 +142,13 @@ def ro_connection():
     import psycopg2
     env = _read_kv(ROOT / ".env")
     pw = os.getenv("VERA_DB_PASSWORD_vera_eval_ro") or env.get("VERA_DB_PASSWORD_vera_eval_ro")
-    acc = _read_kv(ACCOUNTS_ENV)
-    host, suffix, name = acc.get("DB_HOST"), acc.get("DB_HOST_EXTERNAL_SUFFIX", ""), acc.get("DB_NAME")
+    # Host and database name come from VERA's own EXTERNAL_DB_URL (no dependency on another project's files).
+    from urllib.parse import urlsplit
+    base = urlsplit(os.getenv("EXTERNAL_DB_URL") or env.get("EXTERNAL_DB_URL") or "")
+    host, port, name = base.hostname, base.port, base.path.lstrip("/")
     if not (pw and host and name):
         return None
-    conn = psycopg2.connect(host=host + suffix, dbname=name, user=RO_ACCOUNT, password=pw,
+    conn = psycopg2.connect(host=host, port=port or 5432, dbname=name, user=RO_ACCOUNT, password=pw,
                             connect_timeout=10, sslmode="require")
     conn.set_session(readonly=True, autocommit=True)
     return conn

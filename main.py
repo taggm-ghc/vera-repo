@@ -3,11 +3,14 @@ import os
 from enum import Enum
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from openai import AuthenticationError, OpenAIError, RateLimitError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from vera.corpus_admission import admit as admit_to_corpus, llm_call_for, store_from_env
+from vera.corpus_description import CorpusDescriber, generate_with_chain, load_cfg as load_corpus_description_cfg
+from vera.grounded_ask import load_corpus_cfg, load_grounding, public_sources, retrieve_all
 from vera.inference_chain import answer_via_chain, load_chain
 from vera.auth import (
     OPENAI_KEY_ERROR_DETAIL,
@@ -41,6 +44,10 @@ _model_pricing = load_model_pricing()
 MODEL = _model_selection.selected_model if _model_selection else "gpt-4o-mini"
 CURRENT_PRICING = latest_pricing_for(MODEL, _model_pricing)
 ASK_CHAIN = load_chain(MODEL, CURRENT_PRICING)  # item #77: free-tier providers first, OpenAI last
+GROUNDING = load_grounding()  # item #79: live scholarly retrieval for /ask (None = ungrounded)
+CORPUS = load_corpus_cfg()  # item #79 phase C: corpus admission settings (None = disabled)
+_DESC_CFG = load_corpus_description_cfg()  # item #83
+CORPUS_DESCRIBER = CorpusDescriber(_DESC_CFG) if _DESC_CFG else None
 
 if CURRENT_PRICING is None:
     logger.warning(
@@ -77,11 +84,26 @@ class AskRequest(APIModel):
     mode: DemoMode = DemoMode.normal
 
 
+class AskSource(BaseModel):
+    n: int
+    title: str
+    url: str
+    published: str | None = None
+    source_type: str | None = None
+    provider: str | None = None  # item #79: per-citation provenance (R1 criterion)
+    identifier: str | None = None
+    retrieved_at: str | None = None
+    licence_decision: str | None = None
+
+
 class AskResponse(BaseModel):
     answer: str
     model: str
     tokens_used: int
     cost_usd: float
+    sources: list[AskSource] = []  # item #79: what the answer was grounded in (no abstracts)
+    traced_sources: list[AskSource] = []  # item #79: originals traced from links but with no free abstract (not used)
+    claim_check: dict | None = None  # item #79: how many cited claims were checked, kept, marked or removed
 
 
 class SyntheticFault(str, Enum):
@@ -112,13 +134,36 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
+class CorpusDescription(BaseModel):
+    source_count: int | None = None
+    corpus_updated_at: str | None = None
+    summary: str | None = None
+    topics: list[str] = []
+    summary_source: str
+    summary_generated_at: str | None = None
+    summary_model: str | None = None
+
+
+@app.get("/corpus-summary", response_model=CorpusDescription, dependencies=[Depends(verify_api_key)])
+def corpus_summary():
+    """Item #83: description of VERA's own corpus, regenerated only when it changes. Behind VERA_API_KEY like /ask
+    (the UI calls it server-side); no titles, URLs or abstracts in the response."""
+    if CORPUS_DESCRIBER is None:
+        return CorpusDescription(summary_source="disabled")
+    try:
+        return CorpusDescription(**CORPUS_DESCRIBER.current(generate_with_chain(ASK_CHAIN)))
+    except Exception as exc:  # noqa: BLE001  (DB unreachable etc.: a generic state, never the error text)
+        logger.warning("corpus description unavailable (%s)", type(exc).__name__)
+        return CorpusDescription(summary_source="unavailable")
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
 
 @app.post("/ask", response_model=AskResponse, dependencies=[Depends(verify_api_key), Depends(enforce_caps)])  # W2 caps (public mode)
-def ask(req: AskRequest, request: Request):
+def ask(req: AskRequest, request: Request, background_tasks: BackgroundTasks):
     if req.mode is DemoMode.force_bad:
         # Guardrail demo: inject one identified synthetic fault, rejected by real
         # schema validation. No OpenAI call is made — the demo is free and deterministic.
@@ -149,7 +194,16 @@ def ask(req: AskRequest, request: Request):
 
     try:
         # scope router first (item #72 W1); free providers first, OpenAI last (item #77)
-        result, answered_by = answer_via_chain(req.question, ASK_CHAIN)
+        grounding, cache = None, {}
+        if GROUNDING is not None:
+
+            def sources_fn():  # one search per request, reused if the provider chain falls through
+                if "s" not in cache:
+                    cache["s"], cache["unused"] = retrieve_all(req.question, GROUNDING)
+                return cache["s"]
+
+            grounding = (sources_fn, GROUNDING)
+        result, answered_by = answer_via_chain(req.question, ASK_CHAIN, grounding)
     except AuthenticationError as exc:
         raise HTTPException(
             status_code=401,
@@ -178,9 +232,17 @@ def ask(req: AskRequest, request: Request):
         raise HTTPException(status_code=502, detail="OpenAI request failed. Please try again.") from exc
 
     record_request_cost(request, result.cost_usd)
+    store = store_from_env(CORPUS) if result.sources else None
+    if store is not None and ASK_CHAIN:  # item #79 phase C: after the response, never delaying it
+        background_tasks.add_task(admit_to_corpus, req.question, list(result.sources), llm_call_for(ASK_CHAIN[0]),
+                                  CORPUS, store)
     return AskResponse(
         answer=result.answer,
         model=answered_by,
         tokens_used=result.tokens_used,
         cost_usd=result.cost_usd,
+        sources=public_sources(list(result.sources)),
+        claim_check=result.claim_check,
+        traced_sources=[{"n": i, **{k: t.get(k) for k in ("title", "url", "published")}, "source_type": "traced"}
+                        for i, t in enumerate(cache.get("unused") or [], 1)],
     )

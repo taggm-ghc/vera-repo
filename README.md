@@ -101,16 +101,32 @@ The application interface includes:
 ``` text
 GET  /health
 POST /ask
+GET  /corpus-summary
 ```
 
-`GET /health` provides a basic service health check.
+`GET /health` provides a basic service health check (no key).
 
-`POST /ask` is the primary research-question interface and serves as the
-entry point to VERA.
+`POST /ask` is the primary research-question interface (key: `VERA_API_KEY`). Since 2026-10-07 (items #77 and
+#79): the scope router runs first; an accepted question is searched live (arXiv, OpenAlex, DuckDuckGo links
+followed to original papers); the answer is written only from the retrieved abstracts with [n] citations, each
+cited claim is checked against the cited abstract, and unsupported sentences are removed. Request:
+`{"question": "...", "mode": "normal"}`. Response:
 
-`POST /ask` is protected by an API key (`VERA_API_KEY`, described below). The
-M2-M7 pipeline modules under `vera/` and the Streamlit demo page are separate
-from this HTTP interface and are not yet wired into `/ask` (see Current Status).
+``` text
+answer          text with [n] citations (or a decline, no-sources or insufficient-evidence reply)
+model           provider:model that answered (Groq first, OpenAI fallback)
+tokens_used     integer
+cost_usd        number (0 on the Groq free tier)
+sources         [{n, title, url, published, source_type, provider, identifier, retrieved_at, licence_decision}]
+traced_sources  originals found from links but without a free abstract (listed, not used)
+claim_check     {checked, supported, partial, removed, checker, outcome}
+```
+
+`GET /corpus-summary` (key: `VERA_API_KEY`; item #83) describes VERA's own admitted sources: count, newest
+source time, a model-written description and topics; no titles, URLs or abstracts.
+
+The M2-M6 research pipeline under `vera/` (with Gate C, M5 verification and the M6 judge) remains a separate,
+offline path; `/ask` reuses its search providers, Gate A and licence gate, not the whole pipeline.
 
 ## Model Choice
 
@@ -131,6 +147,24 @@ or an empty answer moves the request to the next entry; the response's `model` f
 answered. Evaluation paths (TRACE capture, M6 baseline and judge, Gate A, pipeline) do not use the chain.
 Because free answers cost $0, the daily cost cap only binds on OpenAI fallbacks; the request caps still
 apply. The unused per-task file `.vera-provider-chain.json` was removed (its Groq model was retired).
+
+Grounded `/ask` (2026-10-07, item #79). For each question the scope router accepts, `/ask` searches arXiv,
+OpenAlex and DuckDuckGo once (`config/ask-provider-chain.json` `grounding`). Results with an abstract are
+used directly. Link-only results (DuckDuckGo, news, portals, OpenAlex records without an abstract) are
+followed to the original paper (`vera/source_resolver.py`): the page's citation DOI, arXiv, SSRN and linked
+DOIs, one more hop through known scholarly hosts, then an OpenAlex title match (Jaccard >= 0.8) for portals
+that refuse the fetch; abstracts come from OpenAlex, then Semantic Scholar. All counts, hops and time limits
+are in the `resolve` block. The answer uses the grounded-v1 prompt (numbered abstracts, cite only), invalid
+citation numbers are removed with a note, and the response lists `sources` (no abstracts) and
+`traced_sources` (originals found without a free abstract, not used). With no usable source, `/ask` says so
+and does not answer from memory.
+
+Corpus growth (item #79 phase C). After the response, each source with an abstract goes through Gate A
+(`vera/gate_a.py`, scored by the first `/ask` provider) and the licence gate (`vera/licence_gate.py`). Every
+candidate is recorded with its decision; `fetch` decisions the licence gate allows are stored as corpus
+sources (metadata and abstract only) under one fixed corpus question per process. The visitor's question is
+never stored. Writes use the production write-only account `vera_pipeline_wo` via `VERA_DB_URL_WO` (unset =
+disabled); every step is one INSERT ... RETURNING, so a source already in the corpus is counted as known.
 
 The M6 judge must come from a different model family than the generator. Since goal #2 (2026-10-02,
 offline, not yet run live) the judge is chosen at run time from the live list of Groq-served models
@@ -190,7 +224,7 @@ network needed; two integration tests skip without credentials):
 venv/bin/python -m pytest tests
 ```
 
-Last result, as of 2026-10-01, not re-run since: 178 passed, 2 skipped. Run `tests/` only: the script
+Last result, 2026-10-07: 801 passed, 2 skipped (`python scripts/release_gate.py` runs the same suite plus static checks). Run `tests/` only: the script
 `vera/m6/test_m6_schema_sync.py` is not a pytest module and exits at import.
 Integration paths that touch the database write to the shared production
 instance, so use identifiable, removable test rows only.
@@ -221,25 +255,33 @@ secret in `.env.example`.
 -   `VERA_API_KEY`: key required by `POST /ask`.
 -   `EXTERNAL_DB_URL` / `INTERNAL_DB_URL`: Render Postgres URLs. They point at the
     **same** instance, and dev and production share one schema (`vera_vjay`), so
-    "local" database work touches production data.
+    "local" database work touches production data. Since 2026-10-07 both use VERA's own
+    `vera_claude_code_rw` account (they previously used an AI-Internship account, which is refused on
+    `vera_vjay`).
+-   `VERA_DB_URL_RW`: `vera_claude_code_rw` URL for the MVP runner and preflight (`vera.db.get_role_engine`).
+-   `VERA_DB_URL_WO`: `vera_pipeline_wo` URL for `/ask` corpus admission (item #79); unset = disabled.
+-   `GROQ_API_KEY`: also makes `/ask` free-tier-first (item #77). `.env.example` lists every variable the
+    code reads (names only); the gitignored `.env` holds the values.
 -   `VERA_DB_PASSWORD_<role>`: one password variable for each of three accounts
     applied 2026-10-01 by the DB admin identity (`db/accounts/create_vera_accounts.sql`):
     `vera_claude_code_rw` (dev read/write), `vera_pipeline_wo` (production write-only,
     column-level SELECT on key columns only), `vera_eval_ro` (production read-only).
-    No further accounts are to be created. The runners are not yet repointed to them (they still use
-    the admin identity), and the write-only column grants are untested against a live run.
+    No further accounts are to be created. 2026-10-07: all three logins verified; the write-only grants were
+    exercised for corpus admission in a rolled-back transaction (plain INSERT ... RETURNING works; ON CONFLICT
+    is refused because it needs SELECT on the conflict columns). `tests/test_m4_m5_integration.py` still
+    imports another project's admin engine (skipped; open item).
 
 ## Deploying on Render (2026-10-05)
 
 One image (`Dockerfile`) runs both services; `start.sh api|ui` picks which. Port: Render's `PORT`, else 8000. Secrets live only in Render's environment settings, never in the repo or the image (`.dockerignore` keeps `.env` and `*-prv` files out). Service URLs are not recorded in this repository.
 
 1. Generate a client key locally: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`.
-2. **API service:** New → Web Service → this repo, branch `main`; Runtime Docker; Root Directory blank; plan Free; Health Check Path `/health`; Auto-Deploy Off. Environment: `OPENAI_API_KEY`, `VERA_API_KEY` (the new key), optional `GROQ_API_KEY` (free-tier `/ask`, OpenAI as fallback). Leave `VERA_PUBLIC_MODE` unset (public mode is the default). Template: `.env.render.api.example` (copy to the gitignored `.env.render.api`, fill in, paste with "Add from .env").
+2. **API service:** New → Web Service → this repo, branch `main`; Runtime Docker; Root Directory blank; plan Free; Health Check Path `/health`; Auto-Deploy Off. Environment: `OPENAI_API_KEY`, `VERA_API_KEY` (the new key), optional `GROQ_API_KEY` (free-tier `/ask`, OpenAI as fallback), optional `VERA_DB_URL_WO` (corpus admission: Render's INTERNAL database URL with the `vera_pipeline_wo` account). Optional `VERA_DB_URL_RO` (sidebar corpus description: Render's INTERNAL database URL with `vera_eval_ro`). Leave `VERA_PUBLIC_MODE` unset (public mode is the default). Template: `.env.render.api.example` (copy to the gitignored `.env.render.api`, fill in, paste with "Add from .env").
 3. **UI service:** New → Web Service → same repo; Runtime Docker; plan Free; Docker Command `./start.sh ui`; Health Check Path `/_stcore/health`; Auto-Deploy Off. Environment: `VERA_API_BASE_URL` (the API service's `https://` address, no trailing slash; without it the UI calls `127.0.0.1:8001` and fails), `VERA_API_KEY` (same key), `VERA_DEMO_SOURCE=fixture` (demo pages show the labelled fixture; no database on Render yet). Template: `.env.render.ui.example` (copy to `.env.render.ui`, same steps). The UI holds no provider key (no `OPENAI_API_KEY` or `GROQ_API_KEY`): it only calls the API, which chooses the provider.
-4. Check: API `/health` returns 200 and `/ask` without the key returns 401; the UI answers one question. With `GROQ_API_KEY` set, the answer's `model` field reads `groq:...` and `cost_usd` is 0; `gpt-4.1-nano` there means Groq failed and OpenAI answered.
+4. Check: API `/health` returns 200 and `/ask` without the key returns 401; the UI answers one question. With `GROQ_API_KEY` set, the answer's `model` field reads `groq:...` and `cost_usd` is 0; `gpt-4.1-nano` there means Groq failed and OpenAI answered. An in-scope answer lists its numbered sources; with `VERA_DB_URL_WO` set, the API log shows a `corpus admission:` line per grounded answer.
 5. Redeploy after a push: Manual Deploy → Deploy latest commit.
 
-Limits: free services sleep when idle (first request after sleep waits about a minute); public-mode caps are in memory, so they reset whenever a service restarts or wakes; one uvicorn worker by design. Run `python scripts/release_gate.py` before every deploy.
+Limits: free services sleep when idle (first request after sleep waits about a minute); grounded `/ask` adds live search and link following (measured 2 to 4 s locally; bounded by the `grounding` and `resolve` deadlines; the UI waits up to 60 s); public-mode caps are in memory, so they reset whenever a service restarts or wakes; one uvicorn worker by design. Run `python scripts/release_gate.py` before every deploy.
 
 ## Week 4: TRACE evaluation (2026-10-04)
 
@@ -253,14 +295,19 @@ The bootcamp's Week 4 asks for "an eval suite your capstone runs against, visibl
 - **What TRACE found in VERA's code.** `search_question()` rebuilds its provider chain, and so the arXiv rate gate, on every call; multi-question runs hit HTTP 429 (arXiv also refuses after about 20 quick requests). The harness reuses one chain; the M2 gate defect is fixed (item #71: one cached chain per process). One grounded trace stayed a capture error after bounded retries.
 - **Why retrieval misses (diagnosed 2026-10-04).** Mostly the question-to-query step, not the corpus: the query keeps the question's first words, so meta-words such as "published", "evidence" and "show" dominate and match almost any paper (on average 0.82 of 5 results on topic over 22 questions). Hand-focused queries on the same questions found relevant studies. Narrow questions and non-arXiv literature are smaller factors. Evidence: `docs/trace_eval/retrieval_diagnosis_2026-10-04.md`. Fixed in code by item #71 (query translation, OpenAlex second provider, rank-fusion fan-out); the after-fix measurement has not been run yet.
 - **Search providers.** arXiv and OpenAlex, plus DOAJ when enabled (scholarly, keyless, merged by reciprocal rank fusion; DOAJ article metadata is released under a CC0 waiver, and VERA keeps only title, abstract and bibliographic fields from it, within a 2 requests per second limit and a daily cap), plus DuckDuckGo Lite as a **discovery-only** provider (item #71): it is used to find source URLs (mainstream news and journal portals without open search APIs, through `site:` groups in `config/vera_eval_run.json` `search.duckduckgo_lite`). VERA keeps only the target URL, the target page's own headline and its domain; it never shows DuckDuckGo snippets, pages or ranking, never auto-fetches discovered pages (no licence is declared, so the licence gate holds them for review), caps them at 2 of the final results, and labels news as grey literature. DuckDuckGo's params page says its parameters are intended for individual use; VERA uses it at low volume (5 s gap, daily cap of 8 queries, and a local per-question cache of URLs and headlines only under the gitignored `tmp/search_cache/`) and treats a challenge page as a failure, never evading it. Switch it off with `search.duckduckgo_lite.enabled: false`. **Google Scholar is a link-out only:** the demo page shows a "Search Google Scholar yourself" button built from VERA's query terms; the person clicks it in their own browser, and VERA never queries, fetches or parses Google Scholar, because Scholar's robots.txt disallows `/scholar` and Google's terms forbid automated access against robots.txt.
-- **See it.** `streamlit run streamlit_app.py`, page **trace eval**: headline, per-check and validation tables, and a trace browser.
+- **See it.** `streamlit run streamlit_app.py`, page **trace eval**: headline, per-check and validation tables, decision guidance (2026-10-07: paired exact McNemar tests per split and per check, Wilson intervals for check TPR/TNR, indicators and the formulas, thresholds in `config/trace_eval_guidance.json`), and a trace browser. On this snapshot only citation presence (p = 0.0039) and phantom evidence (p = 0.0002) improve significantly; the overall pass rate is not distinguishable.
 - **Limits.** Agent-authored questions (self-preference risk); a single agent coder and labeller from the same model family as the builder; 30 questions; abstracts only; the checks were frozen before the after-fix run but are heuristics. Next fix by this evidence: retrieval query translation, then scope routing.
 
-## Status and limitations (2026-10-04)
+## Status and limitations (2026-10-04, updated 2026-10-07)
 
 Written as dated observations, not guarantees. Every measured figure carries its caveat; nothing here is a statistical claim.
 
 **What VERA does now**
+
+- **Grounded `/ask` (2026-10-07, item #79; built and tested, not yet deployed).** Live search per accepted question, link-only results followed to original papers, answers only from retrieved abstracts with [n] citations, invalid citation numbers removed, sources listed under the answer, an explicit no-sources reply instead of memory answers; corpus admission (Gate A + licence gate) after the response. See "Grounded `/ask`" above. It does not yet meet every criterion R1 set for the public default (next list).
+- **Free-tier-first models for `/ask`** (item #77): Groq `openai/gpt-oss-20b`, then `openai/gpt-oss-120b`, then OpenAI `gpt-4.1-nano`; evaluation paths stay on `gpt-4.1-nano`.
+- **"What VERA draws on" sidebar** (item #78) on every page: scope, how answers are produced, and the Trace Eval evidence snapshot, read from shipped files.
+- **Corpus description and connection triage** (item #83, ported from AI-Internship). `GET /corpus-summary` (behind `VERA_API_KEY`; the UI calls it server-side) describes VERA's own admitted sources in model-written prose with topics, from titles and metadata only, through the read-only account (`VERA_DB_URL_RO`); it is regenerated only when the source count, newest source time or prompt version change (memory cache; deterministic fallback with a retry cooldown) and shown in the sidebar. When the Ask page cannot reach the API, it shows an ordered, host-free triage (address, reachable, awake, `/health`, endpoint) stopping at the earliest failing step.
 
 - **Search providers.** arXiv and OpenAlex (keyless, merged by reciprocal rank fusion). A DOAJ provider exists but is switched off in config: in two blind measurements (2026-10-04) it added no directly relevant result the others missed, and in the second it displaced two relevant ones. Zero-hit query relaxation is also built but off: it lowered strict relevance (directional, one labeller, 22 questions). DuckDuckGo Lite is **discovery-only**: VERA keeps only the target URL, that page's own headline and its domain, at low volume (5 s gap, daily cap of 8 queries, at most 2 of the top 5 results; a challenge page counts as a failure and is never evaded). DuckDuckGo's params page says its parameters are intended for individual use; that terms note is why volume stays low and the provider can be switched off (`search.duckduckgo_lite.enabled: false`). Discovered pages are not auto-fetched. **Google Scholar is a link-out only**: a person clicks a button in their own browser; VERA never queries it. Measured on 22 questions, one AI labeller (item #71, before the OpenAlex and DOAJ additions are separated out): strictly relevant results in the top 5 rose from 0.27 to 0.77 per question; directional, small n, not re-measured since.
 - **Scope router** (`vera/scope_router.py`, `config/scope_router.json`). A deterministic first layer plus an optional small-model classifier; declined questions never reach search or the answering model. On the frozen 50-item scope set (`config/scope_set_v1.json`, sha256-frozen, AI-authored): false refusals 1/24 (Wilson 95% 0.007 to 0.202) and false accepts 0/26 (0.000 to 0.129), identical for layer 1 alone and with the classifier. **Directional, small n.** The one false refusal cites a 2025 study that the classifier called a future date.
@@ -272,13 +319,14 @@ Written as dated observations, not guarantees. Every measured figure carries its
 
 - The full pipeline (M2 to M6) has **not been run live end to end**; the tests use fakes and fixtures.
 - The central claim (VERA's engineered answer beats a direct model answer) is **unmeasured**.
-- Grounded `/ask` is **not** the public default; `/ask` today answers from the model alone after the scope check. R1 approved making it the default only when, for every answer: each cited source is a record retrieved in that request (identifiers checked to resolve; DuckDuckGo-discovered URLs shown only as "discovered, not verified"); each citation carries provider, identifier, retrieval time and licence decision; citations that map to no retrieved record are removed (and an answer with none is replaced by an insufficient-evidence reply); each cited claim is checked against the cited record's text (not the word-overlap heuristic, measured TPR 0.0); and, on the 30-question trace set, unresolvable citations are 0 and the unsupported-claim rate is reported with Wilson 95% intervals, directional, small n.
-- Week 5 memory is not built. The service is **not deployed**; no public URL exists yet.
+- Grounded `/ask` (2026-10-07) now meets R1's criteria for the public default, measured once (directional, small n): each cited source is a record retrieved in that request with provider, identifier, retrieval time and licence decision; citations that map to no record are removed; an answer with no valid citation becomes an insufficient-evidence reply; each cited claim is checked against the cited abstract (`vera/claim_check.py`; unsupported sentences removed, partial ones marked; a different-family checker first; fails closed). On the 30-question trace set (`scripts/grounded_trace_run.py`, `eval_results/grounded_ask_v1.json`): unresolvable citations 0 of 57; unsupported-claim rate 9 of 105 (8.6%, Wilson 95% 4.6% to 15.5%), removed before display; partial or unsupported 37 of 105 (35%, 26.8% to 44.7%). Caveats: the checker's own error rate is unmeasured; abstracts only; false-premise questions often end as insufficient-evidence replies (corrections without citations).
+- Week 5 memory is not built. The API and UI are deployed on Render (2026-10-07, item #73; addresses are not recorded here); the deployed version predates grounded `/ask`.
 
 **Accepted residuals (risks named, not removed)**
 
 - A poisoned or misleading abstract from an allowed source is not detected (OWASP LLM04 and LLM08).
-- Misinformation (LLM09): the support-check heuristic is unusable, so unsupported claims can pass until the grounded-default criteria above are met.
+- Misinformation (LLM09): grounded `/ask` checks each cited sentence against the cited abstract with a model (`vera/claim_check.py`); the checker's own error rate is unmeasured, it sees abstracts only, and sentences without a citation are not checked. The trace-eval support heuristic (A6) remains unusable (TPR 0%).
+- Corpus admission writes to the shared production database from visitor-driven searches (sources only, never visitor text), bounded by the request caps and by Gate A and the licence gate.
 - Clients behind one IP share a limit (identity is the remote address; proxy headers are off by default).
 - The title-family dedupe key can merge two different papers with the same main title in the same year; every merge is logged with its reason, so a wrong merge is visible.
 - Some `/ask` 401/402/429 error details still name the provider.
@@ -293,18 +341,18 @@ planning folder; a plain path, not a link); this section is a summary and can la
 VERA is under active development as a capstone project. The 2026-09-30 directive lifted the earlier
 "paused until 2026-10-15" rule; the Oct 15 - Nov 1 sprint plan is now the **fallback**, not the build window.
 
-| Area | State (2026-10-01, corrected 2026-10-02) |
+| Area | State (2026-10-01, corrected 2026-10-02; rows marked 2026-10-07 updated) |
 |---|---|
 | Architecture and design | Complete: `docs/vera-design.md` and Addendum A (milestone status table with the 2026-10-01 addendum at A.11). |
-| Service foundation | FastAPI `GET /health` and `POST /ask` work. |
+| Service foundation | 2026-10-07: FastAPI `GET /health`, `POST /ask` (grounded, items #77/#79) and `GET /corpus-summary` (item #83); deployed on Render (item #73; the deployed build predates items #79 and #83 until the next deploy). |
 | Persistence | Built: Postgres schema `vera_vjay`, migrations 001-005 in `db/migrations/` (see `db/README.md`; 003 and 004 are not re-runnable). Migration 005 columns verified to exist live, read-only. (The earlier "persistence not yet implemented" line was stale.) |
 | M1-M7 code | Built under `vera/` (m2_runner, m3, m4, m5, m6, m7, plus `pipeline_llm`, `pipeline_store`, `cost_ledger`) with tests. **The pipeline cannot yet run end to end**; nothing has run end to end against the live database. Missing: (a) no production code creates `runs` rows (only tests do), and the M6 adapter reads `runs.question` / `runs.final_response`, which nothing writes (`finalize_run` writes `engineered_response`), so the M6 CLI fails on a new run; (b) `sub_question_ids` is read by Gate C and the context builder but set by nothing (no M3-to-M4 adapter), so Gate C returns `insufficient`; (c) the runners are not repointed to the new accounts, and `run_m2` probably cannot run under the write-only account (static reading, not run live). The plan is `AI-Internship/p3m3/vera-plan-end-to-end-runner.md`. |
 | What is persisted | Gate C decisions per attempt (`gate_c_decisions`), claims with fine-grained status and issue codes, answers by stage with tokens, cost and latency, relations (type and confidence only), appraisals with rubric/policy version, and immutable source versions. **M2 search cost is not persisted on `search_iterations`**: it is returned in memory and appended to a file only if `VERA_COST_LOG` is set. The inputs behind an M5 `weak` label are not stored. Live rows were not queried 2026-10-02. |
-| Tests | `pytest tests`: **178 passed, 2 skipped** (as of 2026-10-01, not re-run since). Includes the SQL contract test `tests/test_sql_contract.py` (87 table/column pairs). Older documents may say 166: that was the 2026-09-30 count before tests were added; the 12-test difference is not itemised. |
-| DB accounts | 3 accounts applied 2026-10-01 (descriptions above). Column grants of the write-only account are untested against a live run; the runners are not yet repointed to the new accounts. |
-| Version control | Only the B1 (`28aae11`) and B2 (`9fef487`) commits exist. M1-M7 code, migrations 001-004, the edit to 005, and the `.gitignore` edit are **uncommitted** (`venv/` was already ignored; `syllabus/` was removed from the working tree 2026-10-02 as irrelevant to VERA); commit only after the owner validates (checklist in `VERA-STATE-REPORT-2026-10-01.md`; M4 owns the migration 005 `evidence_relations.run_id` backfill that was removed, to be confirmed). |
+| Tests | 2026-10-07: `pytest tests`: **801 passed, 2 skipped**; release gate PASS. Includes the SQL contract test `tests/test_sql_contract.py`, which now runs live read-only with VERA's own `vera_eval_ro` (3 passed). |
+| DB accounts | 3 accounts applied 2026-10-01 (descriptions above). 2026-10-07: all three logins verified; `.env` uses VERA's own accounts only (`EXTERNAL_DB_URL`/`INTERNAL_DB_URL`/`VERA_DB_URL_RW` → `vera_claude_code_rw`, `VERA_DB_URL_WO` → `vera_pipeline_wo`, `VERA_DB_URL_RO` → `vera_eval_ro`); write-only grants exercised for corpus admission. The pipeline runners are not yet repointed. |
+| Version control | 2026-10-07: `main` is pushed to GitHub through the `/ask` provider chain (item #77); later work (grounded `/ask`, corpus admission and description, triage, Trace Eval guidance, sidebar) is committed only on R1's request. |
 | Evaluation design | Longitudinal and quarterly: 8 runs, one per quarter (default stamps Jan 2025, Apr 2025, Jul 2025, Oct 2025, Jan 2026, Apr 2026, Jul 2026, Oct 2026; **unconfirmed**), 2 tests per agent/model per run, as-of stamping by code (never in the baseline prompt), a config fingerprint, and six named contamination channels (search, fetched content, parametric knowledge, judge hindsight, rubric hindsight, cross-run carry-over). Design only: no code or schema for it exists yet. See `AI-Internship/p3m3/VERA-EVAL-BEST-PRACTICES.md` (plain path; gitignored folder). |
-| Target | MVP target Oct 3, 2026 is aggressive (critical path about 9 h, about 12 h with contingency); fallback sprint Oct 15 - Nov 1; course end 2026-10-12. |
+| Target | Course end 2026-10-25 (corrected 2026-10-05; earlier documents say 10-12). Demo Day uses the Render deployment. |
 
 **Open items (visibly open unless marked decided):** demo question (D0); baseline prompt lock (G2);
 A2 (Anthropic key) DECIDED 2026-10-02 by R1: dropped, no Anthropic key will be used; MVP must-have #8

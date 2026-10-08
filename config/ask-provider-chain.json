@@ -10,7 +10,9 @@
       "api_key_env": "GROQ_API_KEY",
       "input_per_1m": 0.0,
       "output_per_1m": 0.0,
-      "extra_body": {"reasoning_effort": "low"},
+      "extra_body": {
+        "reasoning_effort": "low"
+      },
       "note": "Free tier: $0 recorded (Groq's paid rate is listed at $0.075 in / $0.30 out per 1M). reasoning_effort low is required: without it the router's 60-token JSON call fails with 400 json_validate_failed (measured 2026-10-07)."
     },
     {
@@ -20,7 +22,9 @@
       "api_key_env": "GROQ_API_KEY",
       "input_per_1m": 0.0,
       "output_per_1m": 0.0,
-      "extra_body": {"reasoning_effort": "low"},
+      "extra_body": {
+        "reasoning_effort": "low"
+      },
       "note": "Second Groq model: separate per-model free limits. Same reasoning_effort rule (measured 2026-10-07)."
     }
   ],
@@ -32,5 +36,108 @@
     "api_key_env": "OPENROUTER_API_KEY",
     "input_per_1m": 0.0,
     "output_per_1m": 0.0
+  },
+  "grounding": {
+    "note": "Item #79 (2026-10-07): /ask searches these providers once per accepted question. Results with an abstract are used directly; link-only results (DuckDuckGo, news, portals, OpenAlex records without an abstract) are followed to their original scholarly sources under `resolve` (vera/source_resolver.py). Only sources with an abstract reach the grounded-v1 prompt (vera/trace_eval/capture.py).",
+    "enabled": true,
+    "providers": [
+      "arxiv",
+      "openalex",
+      "duckduckgo_lite"
+    ],
+    "num_results": 5,
+    "deadline_s": 10,
+    "snippet_max_chars": 1500,
+    "no_sources_text": "VERA could not find published sources for this question right now, so it has not answered from memory. Please try again shortly or rephrase the question.",
+    "removed_citation_note": "Note: citation markers that did not match a listed source were removed.",
+    "resolve": {
+      "enabled": true,
+      "max_results_to_resolve": 4,
+      "max_pages_per_result": 3,
+      "max_depth": 2,
+      "max_ids_per_page": 2,
+      "max_links_per_page": 3,
+      "timeout_s": 6,
+      "deadline_s": 12,
+      "scholarly_hosts": [
+        "doi.org",
+        "arxiv.org",
+        "dl.acm.org",
+        "ieeexplore.ieee.org",
+        "link.springer.com",
+        "sciencedirect.com",
+        "onlinelibrary.wiley.com",
+        "nature.com",
+        "journals.plos.org",
+        "mdpi.com",
+        "aclanthology.org",
+        "openreview.net",
+        "pubmed.ncbi.nlm.nih.gov",
+        "ncbi.nlm.nih.gov",
+        "semanticscholar.org",
+        "openalex.org",
+        "papers.ssrn.com"
+      ],
+      "title_match_min": 0.8
+    },
+    "provider_timeout_s": 5,
+    "provider_max_retries": 1,
+    "insufficient_text": "VERA found sources for this question, but its answer did not contain a claim it could tie to them, so it has not answered. The sources it found are listed below; please read them directly or rephrase.",
+    "claim_check": {
+      "note": "Item #79 (R1 criterion: each cited claim is checked against the cited record's text). One call per answer judges every cited sentence against the abstracts it cites. Checkers are tried in order; a different model family from the answering model is preferred. If every checker fails, the answer fails closed to unavailable_text.",
+      "enabled": true,
+      "checkers": [
+        {
+          "provider": "groq",
+          "base_url": "https://api.groq.com/openai/v1",
+          "model": "qwen/qwen3.8-27b",
+          "api_key_env": "GROQ_API_KEY",
+          "extra_body": {},
+          "family": "qwen"
+        },
+        {
+          "provider": "groq",
+          "base_url": "https://api.groq.com/openai/v1",
+          "model": "openai/gpt-oss-120b",
+          "api_key_env": "GROQ_API_KEY",
+          "extra_body": {
+            "reasoning_effort": "low"
+          },
+          "family": "openai"
+        },
+        {
+          "provider": "openai",
+          "base_url": null,
+          "model": "gpt-4.1-nano",
+          "api_key_env": "OPENAI_API_KEY",
+          "extra_body": {},
+          "family": "openai"
+        }
+      ],
+      "timeout_s": 20,
+      "max_claims": 30,
+      "partial_marker": " (partly supported by the cited abstract)",
+      "removed_note": "Note: sentences the cited abstracts did not support were removed.",
+      "unavailable_text": "VERA could not verify its draft answer against the sources right now, so it has not answered. The sources it found are listed below."
+    }
+  },
+  "corpus": {
+    "note": "Item #79 phase C (R1 2026-10-07: full Gate A scoring). After each grounded /ask, sources with abstracts go through Gate A then the licence gate; every candidate is recorded with its decision, and fetch+allowed ones are stored as corpus sources (metadata and abstract only). Runs after the response. Uses the production write-only account; its URL is read from the env var named in db_url_env (unset = disabled). The visitor's question is never stored.",
+    "enabled": true,
+    "db_url_env": "VERA_DB_URL_WO",
+    "question_text": "VERA /ask corpus accumulation (sources admitted by Gate A and the licence gate; visitor questions are not stored)",
+    "gate_a": {
+      "fetch_threshold": 0.6,
+      "reject_threshold": 0.25,
+      "max_fetch": 8
+    }
+  },
+  "corpus_description": {
+    "note": "Item #83 (ported from AI-Internship #80): a model-written description of VERA's own corpus (vera_vjay.sources), from titles and provenance metadata only, regenerated only when the source count, newest created_at or prompt_version change. Read with the read-only account (URL in the env var named read_db_url_env; unset = not connected). Cached in memory; on model failure a deterministic description is served and generation retries after retry_s.",
+    "enabled": true,
+    "read_db_url_env": "VERA_DB_URL_RO",
+    "prompt_version": "vera-corpus-description-v1",
+    "max_titles": 150,
+    "retry_s": 300
   }
 }

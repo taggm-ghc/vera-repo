@@ -1,4 +1,4 @@
-"""Streamlit renderer for the Week 4 TRACE results. Reads only the committed JSON files; no API, DB or env."""
+"""Streamlit renderer for the TRACE results (item #70; decision guidance added 2026-10-07). Reads only the committed JSON files; no API, DB or env."""
 import json
 from pathlib import Path
 
@@ -69,6 +69,57 @@ def _validation(val: dict) -> None:
                     f"TPR={_pct(s.get('heuristic_tpr'))}, TNR={_pct(s.get('heuristic_tnr'))}. {s.get('note', '')}")
 
 
+def _guidance(res: dict, val: dict | None) -> None:
+    from vera.trace_eval import guidance as g
+
+    try:
+        cfg = g.load_config()
+    except (OSError, ValueError):
+        st.info("Decision guidance unavailable: config/trace_eval_guidance.json missing or unreadable.")
+        return
+    st.subheader("Decision guidance: what this snapshot supports")
+    st.caption("Computed from the results and validation files above with the thresholds in "
+               "config/trace_eval_guidance.json; re-running the evaluation recomputes everything here.")
+    overall, checks = g.compare_overall(res, cfg), g.compare_checks(res, cfg)
+    trust = g.check_trust(val, cfg) if val else []
+    for line in g.supported_statements(overall, checks, trust, cfg):
+        st.markdown(f"- {line}")
+    st.markdown("**Is a variant better overall?** (paired, every question)")
+    st.dataframe(pd.DataFrame(overall), hide_index=True)
+    st.markdown("**Which checks changed?** (paired, questions where the check applies to both variants)")
+    st.dataframe(pd.DataFrame(checks), hide_index=True)
+    if trust:
+        st.markdown("**How far can each check be trusted?** (against the blind labels; positive class = FAIL)")
+        st.dataframe(pd.DataFrame(trust), hide_index=True)
+    alpha, m = cfg["alpha"], g.min_discordant_for_significance(cfg["alpha"])
+    t = cfg["trust"]
+    with st.expander("The math behind the indicators"):
+        st.markdown("**Pass rate and its 95% range (Wilson score interval)**, for k passes in n questions, "
+                    f"with z = Φ⁻¹(1 − α/2) = {g.z_for(alpha):.2f} at α = {alpha}:")
+        st.latex(r"\hat p=\frac{k}{n},\qquad \frac{\hat p+\frac{z^2}{2n}\pm z\sqrt{\frac{\hat p(1-\hat p)}{n}+\frac{z^2}{4n^2}}}{1+\frac{z^2}{n}}")
+        st.markdown("**Paired comparison (exact McNemar test).** Both variants answer the same questions, so only "
+                    "questions where they disagree carry information: b = only the candidate passed, "
+                    "c = only the baseline passed.")
+        st.latex(r"p=\min\Bigl(1,\;2\sum_{i=0}^{\min(b,c)}\binom{b+c}{i}\Bigl(\tfrac12\Bigr)^{b+c}\Bigr)")
+        st.markdown(f"▲/▼ when p < α = {alpha}; ≈ otherwise; · when fewer than {cfg['small_n']} paired questions. "
+                    f"Even if every disagreement goes one way, at least {m} disagreeing questions are needed "
+                    f"for p < {alpha} (2·½^m < α).")
+        st.markdown("**Check trust** (positive class = FAIL): TPR = TP / (TP + FN), the share of real failures the "
+                    "check catches; TNR = TN / (TN + FP), the share of good answers it leaves alone; each with a "
+                    f"Wilson range. Reliable: TPR ≥ {t['reliable_min_tpr']:.0%} and TNR ≥ {t['reliable_min_tnr']:.0%}. "
+                    f"Over-flags: TPR ≥ {t['reliable_min_tpr']:.0%}, TNR lower. Misses failures: TPR ≤ "
+                    f"{t['unusable_max_tpr']:.0%}. \"few labels\" when fewer than {cfg['small_n']} real failures or "
+                    "good answers were labelled.")
+    with st.expander("How to use this for decisions"):
+        st.markdown(
+            "- **Claim** only ▲ rows, and say the overall result is ≈ unless the overall table shows ▲.\n"
+            "- **Fix first**: ▼ rows, then checks marked *misses failures* (their passes say nothing about quality).\n"
+            "- **Treat · rows as warning signs**: add questions in those categories before deciding.\n"
+            "- **Discount** pass rates on checks that *over-flag*: they understate quality.\n"
+            "- **Tune on dev only**; read held-out once at the end, or it stops being a fair test.\n"
+            "- **Re-run after each change** and compare the paired tables, not just the headline.")
+
+
 def _browser(res: dict) -> None:
     st.subheader("Trace browser")
     traces = res.get("traces", [])
@@ -98,19 +149,21 @@ def _browser(res: dict) -> None:
 
 
 def render_trace_eval(results_path=RESULTS_PATH, validation_path=VALIDATION_PATH) -> None:
-    st.title("VERA Trace Eval (Week 4 TRACE)")
+    st.title("VERA Trace Eval")
     res = _load(results_path)
     if res is None:
         st.warning("Results file not found or unreadable. Generate it with: "
                    "`venv/bin/python scripts/trace_measure.py --traces <trace files> --out eval_results/trace_eval_v1.json`")
         return
     sha = str(res.get("questions_sha256") or "n/a")[:12]
-    st.markdown("30 frozen agent-authored questions (20 dev, 10 held-out). Baseline is the current /ask "
-                "(a bare gpt-4.1-nano call). The fix, grounded_v1, uses VERA keyless arXiv search, numbered "
+    captured = str(res.get("generated_at") or "")[:10] or "unknown"
+    st.markdown("30 frozen agent-authored questions (20 dev, 10 held-out). Baseline is /ask as it was at "
+                "capture time (a bare gpt-4.1-nano call; /ask may have changed since). The fix, grounded_v1, uses VERA keyless arXiv search, numbered "
                 "abstracts and a cite-only rule. Each answer is scored by rule-based checks.")
-    st.caption(f"checks_version: {res.get('checks_version')} | questions_sha256: {sha}")
+    st.caption(f"Snapshot captured {captured} (UTC); re-running the evaluation replaces these results and this date. "
+               f"checks_version: {res.get('checks_version')} | questions_sha256: {sha}")
 
-    st.subheader("Headline: all checks passed")
+    st.subheader("Headline: share of answers that passed every check")
     st.caption("Directional, small n; capture errors count as failures.")
     st.dataframe(_headline(res), hide_index=True)
 
@@ -125,6 +178,8 @@ def render_trace_eval(results_path=RESULTS_PATH, validation_path=VALIDATION_PATH
         st.info("Check validation not yet available")
     else:
         _validation(val)
+
+    _guidance(res, val)
 
     _browser(res)
 

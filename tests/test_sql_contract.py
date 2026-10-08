@@ -31,7 +31,7 @@ def test_sql_columns_exist_in_live_catalog():
     except Exception as e:  # noqa: BLE001 - any connect failure means "cannot verify", not "contract broken"
         pytest.skip(f"live catalog unreachable ({type(e).__name__})")
     if conn is None:
-        pytest.skip("read-only DB credentials absent (VERA_DB_PASSWORD_vera_eval_ro / .env.db-accounts)")
+        pytest.skip("read-only DB credentials absent (VERA_DB_PASSWORD_vera_eval_ro / EXTERNAL_DB_URL in VERA's .env)")
     try:
         cat = sc.live_catalog(conn)
     finally:

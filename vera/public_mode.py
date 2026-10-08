@@ -160,7 +160,7 @@ def upstream_base_url(env=None, local_url_file: Path | None = None) -> str:
     return DEFAULT_LOCAL_URL
 
 
-def post_ask(base_url: str, question: str, mode: str, api_key: str, timeout: int = 30):
+def post_ask(base_url: str, question: str, mode: str, api_key: str, timeout: int = 60):  # #79: search + link following
     """Single place the key is attached to an outgoing request. `api_key` is server-side (public)
     or typed by the user (dev); the caller decides, this never reads a widget."""
     return requests.post(
@@ -169,3 +169,14 @@ def post_ask(base_url: str, question: str, mode: str, api_key: str, timeout: int
         headers={"Content-Type": "application/json", "X-API-Key": api_key},
         timeout=timeout,
     )
+
+
+def get_corpus_summary(base_url: str, api_key: str, timeout: int = 30) -> dict | None:
+    """Item #83: server-side GET of the API's corpus description (key attached here, never in a widget)."""
+    if not (base_url and api_key):
+        return None
+    try:
+        r = requests.get(f"{base_url.rstrip('/')}/corpus-summary", headers={"X-API-Key": api_key}, timeout=timeout)
+        return r.json() if r.status_code == 200 else None
+    except (requests.RequestException, ValueError):
+        return None

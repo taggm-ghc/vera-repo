@@ -71,14 +71,16 @@ def load_chain(openai_model: str, openai_pricing: PricingRecord | None, path: Pa
     return entries
 
 
-def answer_via_chain(question: str, entries: list[ChainEntry]) -> tuple[AskResult, str]:
+def answer_via_chain(question: str, entries: list[ChainEntry], grounding=None) -> tuple[AskResult, str]:
     """Return (result, label of the entry that answered). Raises the last entry's error if all fail."""
     if not entries:
         raise RuntimeError("no provider available for /ask")
     for i, e in enumerate(entries):
         last = i == len(entries) - 1
         try:
-            result = answer_in_scope(question, e.model, e.pricing, client=e.client(), extra_body=e.extra_body or None)
+            kw = {"grounding": grounding} if grounding is not None else {}
+            result = answer_in_scope(question, e.model, e.pricing, client=e.client(), extra_body=e.extra_body or None,
+                                     **kw)
             if not (result.answer or "").strip():
                 raise EmptyAnswerError(f"empty answer from {e.label}")
             return result, e.label

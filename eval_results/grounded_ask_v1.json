@@ -1,0 +1,1513 @@
+{
+  "summary": {
+    "generated_at": "2026-10-08T03:42:00+00:00",
+    "questions": 30,
+    "questions_file": "trace_questions_v1.json",
+    "outcomes": {
+      "checked": 19,
+      "no_valid_citations": 4,
+      "no_sources": 7
+    },
+    "cited_sources": 57,
+    "unresolvable_citations": 0,
+    "claims_checked": 105,
+    "claims_removed_unsupported": 9,
+    "claims_partial": 28,
+    "unsupported_claim_rate": 0.0857,
+    "unsupported_claim_rate_wilson95": [
+      0.045749478754151834,
+      0.15492275641568204
+    ],
+    "partial_or_unsupported_rate": 0.3524,
+    "partial_or_unsupported_wilson95": [
+      0.2676935477387038,
+      0.4474885130689383
+    ],
+    "checkers_used": [
+      "groq:openai/gpt-oss-120b",
+      "groq:qwen/qwen3.8-27b"
+    ],
+    "caveats": "Directional, small n. The claim check is a model judgement against abstracts only (its own error rate is unmeasured here); questions are agent-authored; one run.",
+    "elapsed_s": 303.5
+  },
+  "records": [
+    {
+      "id": "q01",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "### Published evidence (2023‑2026) on how AI coding assistants affect developer productivity\n\n| Study | Design & Setting | Key Findings on Productivity | Caveats / Limitations | Citation |\n|-------|-----------------|------------------------------|-----------------------|----------|\n| **[1] IBM’s watsonx Code Assistant (WCA)** | Two survey cohorts (N = 669) + 15‑person usability test inside an enterprise | • Overall users reported *net* productivity gains, but the benefit was uneven – not all participants experienced an increase. <br>• The study identified that motivation to use the tool and expectations about speed/quality influence whether productivity rises. | • Only surveys and a small usability test; no objective time‑to‑completion metrics.<br>• Focus on internal IBM developers; generalizability unclear. | [1] | (partly supported by the cited abstract)\n| **[3] GovTech Singapore – GitHub Copilot** | Programmatic evaluation with 8 000 public‑sector developers (including vendors) | • Coding speed increased by 21–28 %. <br>• 95 % of respondents felt the tool increased job satisfaction. <br>• Junior developers saw the largest efficiency gains. | • Self‑reported speed; no controlled baseline comparison.<br>• The study is sector‑specific (public) and may not generalize to private or highly regulated domains. | [3] | (partly supported by the cited abstract)\n| **[2] Security‑centric user study** | Lab‑based tasks (security‑related code) with participants using an AI assistant vs. a control group | • Users with an AI assistant wrote **less** secure code than those without. <br>• Those using the assistant were *more* over‑confident that their code was secure. | • Focused on security tasks, not general development tasks.<br>• Does not directly measure productivity (time‑to‑completion). | [2] |\n\n---\n\n## Why the findings appear to disagree\n\n| Perspective | What the study says | Why it can conflict with the others |\n|-------------|---------------------|-------------------------------------|\n| **Positive productivity claim (studies [1], [3])** | AI assistants *increase* speed or perceived satisfaction. | • Both rely on self‑reported or survey data; they do not directly observe coding time or errors. <br>• The gains are context‑dependent (enterprise vs. public sector; junior vs. senior developers). | (partly supported by the cited abstract)\n| **Negative or mixed productivity claim (study [1] again)** | Not *all* users benefit; some see no change or even a slowdown. | • Highlights that the *net* effect is not universal; motivation and expectation modulate outcomes. | (partly supported by the cited abstract)\n| **Potential harm to productivity (study [2])** | AI‑assisted developers produce **less secure** code and are over‑confident. | • While productivity might rise in speed, the resulting code may need more debugging or re‑work, offsetting the initial time savings. <br>• The study examines a specific domain (security), where incorrect code has a high cost; productivity gains measured in speed do not capture the downstream effort to fix flaws. | (partly supported by the cited abstract)\n\n### Summary\n- **Evidence points to productivity gains** in speed and satisfaction in enterprise and public‑sector settings ([1], [3]), but these gains are **context‑dependent** and not guaranteed for every developer. \n- **Other evidence indicates a trade‑off**: faster code generation can come with increased risk of insecure code and over‑confidence ([2]), which may ultimately reduce overall efficiency if bugs must be fixed later. (partly supported by the cited abstract) \n\nThus, the apparent disagreement arises because different studies focus on **different dimensions of productivity** (speed vs. correctness), use **different measurement methods** (self‑report vs. controlled experiments), and study **different populations** (enterprise vs. public‑sector vs. lab participants).",
+      "n_sources": 3,
+      "cited": [
+        1,
+        2,
+        3
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 8,
+        "supported": 2,
+        "partial": 6,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Examining the Use and Impact of an AI Code Assistant on Developer Productivity and Experience in the Enterprise",
+          "url": "https://doi.org/10.48550/arxiv.2412.06603",
+          "identifier": "doi:10.48550/arxiv.2412.06603",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Do Users Write More Insecure Code with AI Assistants?",
+          "url": "https://doi.org/10.1145/3576915.3623157",
+          "identifier": "doi:10.1145/3576915.3623157",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Harnessing the Potential of Gen-AI Coding Assistants in Public Sector Software Development",
+          "url": "https://doi.org/10.48550/arxiv.2409.17434",
+          "identifier": "doi:10.48550/arxiv.2409.17434",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 10.06
+    },
+    {
+      "id": "q02",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "Published evidence suggests that **experienced developers working in familiar, mature codebases are generally sped up by AI coding assistants, but the effect can be nuanced.** \n\n* In a longitudinal mixed‑methods study of 158 professional software engineers, participants reported **less time spent on most development tasks**—particularly on writing code—after adopting AI assistants. \n* However, the same study also identified a “productivity‑experience paradox.” While 84 % of participants reported improved productivity at both time points, the proportion of matched participants who reported a **worsened developer experience** (e.g., higher cognitive load, reduced flow state) nearly doubled from 14 % to 27% over six months [4]. This suggests that some experienced developers may feel slowed or strained by the need to supervise, verify, or correct AI‑generated output, especially when the assistant’s suggestions do not fully align with the mature codebase’s conventions or architecture. \n\nBecause the study’s abstract does not detail exact quantitative speed‑up metrics or the specific tasks where slowdown occurs, the conclusions are drawn from the reported self‑assessments. Nonetheless, the evidence points to a **mixed impact**: overall faster code writing for experienced developers, tempered by potential increases in verification effort and cognitive load.\n\nNote: sentences the cited abstracts did not support were removed.",
+      "n_sources": 5,
+      "cited": [
+        4
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 2,
+        "supported": 1,
+        "partial": 0,
+        "removed": 1,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "GitHub Copilot Developer Experience: A Study Comparing Novice and Experienced Developers' Perspectives",
+          "url": "https://trepo.tuni.fi/handle/10024/231602",
+          "identifier": "https://trepo.tuni.fi/handle/10024/231602",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Configurable AI Coding Assistants: Designing For Developers Who Like to Be in Control",
+          "url": "https://doi.org/10.1145/3803437.3806709",
+          "identifier": "doi:10.1145/3803437.3806709",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Developer Experiences with a Contextualized AI Coding Assistant: Usability, Expectations, and Outcomes",
+          "url": "https://doi.org/10.1145/3644815.3644949",
+          "identifier": "doi:10.1145/3644815.3644949",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "The Impact of AI Coding Assistants on Software Engineering: A Longitudinal Study",
+          "url": "https://doi.org/10.48550/arxiv.2605.23135",
+          "identifier": "doi:10.48550/arxiv.2605.23135",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "Developer Experiences with a Contextualized AI Coding Assistant: Usability, Expectations, and Outcomes",
+          "url": "https://doi.org/10.48550/arxiv.2311.18452",
+          "identifier": "doi:10.48550/arxiv.2311.18452",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 7.02
+    },
+    {
+      "id": "q03",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "VERA found sources for this question, but its answer did not contain a claim it could tie to them, so it has not answered. The sources it found are listed below; please read them directly or rephrase.",
+      "n_sources": 5,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 0,
+        "outcome": "no_valid_citations"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "The Fine Balance Between Helping With Your Job and Taking It: AI Code Assistants Come to the Fore",
+          "url": "https://doi.org/10.1109/ms.2024.3357787",
+          "identifier": "doi:10.1109/ms.2024.3357787",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "RuberDuckBench: A Benchmark for AI Coding Assistants",
+          "url": "https://doi.org/10.1145/3786181.3788710",
+          "identifier": "doi:10.1145/3786181.3788710",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Exploring Continuance Intention in the Use of AI Coding Assistants",
+          "url": "https://doi.org/10.1109/iipem65914.2025.11548454",
+          "identifier": "doi:10.1109/iipem65914.2025.11548454",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Pedagogical Transformation and Teaching Practice in Programming Education Through AI Coding Assistants: Faculty Perspectives and the AI Coding Assistant Adoption Framework",
+          "url": "https://doi.org/10.3390/app16104833",
+          "identifier": "doi:10.3390/app16104833",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "Empowering the Manufacturing Workforce to Integrate AI Coding Assistants",
+          "url": "https://doi.org/10.1007/978-3-032-38618-2_5",
+          "identifier": "doi:10.1007/978-3-032-38618-2_5",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 6.46
+    },
+    {
+      "id": "q04",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "Studies that have examined the discrepancy between developers’ self‑reported gains and objective performance metrics report a consistent pattern: developers frequently claim that AI assistants dramatically boost their productivity, yet controlled experiments and physiological measurements tend to show only modest improvements in measurable task performance and sometimes reveal increased cognitive load.\n\nIn the exploratory study “Towards Decoding Developer Cognition in the Age of AI Assistants” (2025) the authors note that while developers consistently report significant productivity gains from AI tools, empirical measurements often indicate more modest improvements in completion time and error rates. The authors highlight that prior work has documented self‑reported experiences but little empirical work has quantified actual cognitive load or measured performance differences between tasks completed with and without AI assistance. Their proposed methodology combines EEG, eye tracking, and interaction logs to capture real‑world usage patterns and to compare perceived productivity against objective outcomes [4].",
+      "n_sources": 5,
+      "cited": [
+        4
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 1,
+        "supported": 1,
+        "partial": 0,
+        "removed": 0,
+        "checker": "groq:openai/gpt-oss-120b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Study on reducing gaps between UX designers and developers",
+          "url": "https://doi.org/10.31274/td-20240617-200",
+          "identifier": "doi:10.31274/td-20240617-200",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Cypress Copilot: Development of an AI Assistant for Boosting Productivity and Transforming Web Application Testing",
+          "url": "https://doi.org/10.1109/access.2024.3521407",
+          "identifier": "doi:10.1109/access.2024.3521407",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "F.R.I.D.A.Y: A Unified Multimodal Intelligent AI Assistant for Enhanced Productivity",
+          "url": "https://doi.org/10.36948/ijfmr.2025.v07i03.47400",
+          "identifier": "doi:10.36948/ijfmr.2025.v07i03.47400",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Towards Decoding Developer Cognition in the Age of AI Assistants",
+          "url": "https://doi.org/10.48550/arxiv.2501.02684",
+          "identifier": "doi:10.48550/arxiv.2501.02684",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "CelestAI: Virtual Reality AI Assistant for Everyday Tasks",
+          "url": "https://doi.org/10.1109/icsit65336.2025.11295027",
+          "identifier": "doi:10.1109/icsit65336.2025.11295027",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 2.79
+    },
+    {
+      "id": "q05",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "The published literature that is currently available largely focuses on AI coding tools and models that were prominent in the mid‑2020s (e.g., GitHub Copilot, OpenAI Codex, Claude Code, Cursor, Gemini). These works document how developers configured and adopted those tools and, in some cases, how they affected entrepreneurial outcomes. However, the studies themselves do not assess whether the findings transfer automatically to the newer generation of large‑language‑model (LLM)–based coding assistants (e.g., GPT‑4o, Gemini Pro, Claude 3‑Sonnet, etc.) that were released after the datasets and experiments described in the papers were collected.\n\n* **Configuration‑related findings** – Source [1] and Source [4] document the prevalence of repository‑level configuration artifacts (Context Files, Skills, Rules, Hooks) for the tools listed above. Source [4] shows that Context Files are the dominant mechanism and that more advanced mechanisms (Skills, Subagents) are rarely used. These patterns were observed in a sample of repositories collected up to mid‑2026. Because the underlying architectures of the tools (e.g., the way they ingest context or execute sub‑agents) have not fundamentally changed since then, it is reasonable to conjecture that similar configuration practices may persist for newer LLM‑based assistants. Still, the studies do not test newer tools directly, so the conclusion is tentative rather than definitive.\n\n It does not provide quantitative evidence from later releases, and the practices it recommends (e.g., using “ghost comments” or “inline prompts”) may be specific to the Copilot architecture. \n\nIn short, the literature offers empirical observations for the earlier generation of AI coding assistants, and while some of the high‑level patterns (e.g., the prominence of context‑files, the limited use of executable skills, the association between tool adoption and development speed) could plausibly extend to current tools, the studies do not explicitly test this. Consequently, the literature does **not** provide a direct confirmation that findings about older AI coding tools and models still apply to the very latest assistants. Researchers would need to conduct new, systematic studies on the current generation of tools to confirm whether the older patterns persist.\n\nNote: sentences the cited abstracts did not support were removed.",
+      "n_sources": 4,
+      "cited": [
+        1,
+        4
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 4,
+        "supported": 2,
+        "partial": 0,
+        "removed": 2,
+        "checker": "groq:openai/gpt-oss-120b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "A Dataset of Agentic AI Coding Tool Configurations",
+          "url": "https://doi.org/10.48550/arxiv.2605.08435",
+          "identifier": "doi:10.48550/arxiv.2605.08435",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "GitHub Copilot and AI Coding Tools in Practice",
+          "url": "https://doi.org/10.1007/979-8-8688-1784-7",
+          "identifier": "doi:10.1007/979-8-8688-1784-7",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "AI Coding Tools and Digital Entrepreneurship: The Role of Software Expertise",
+          "url": "https://doi.org/10.48550/arxiv.2511.06545",
+          "identifier": "doi:10.48550/arxiv.2511.06545",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Harness Engineering for Agentic AI Coding Tools: An Exploratory Study",
+          "url": "https://doi.org/10.48550/arxiv.2602.14690",
+          "identifier": "doi:10.48550/arxiv.2602.14690",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 8.75
+    },
+    {
+      "id": "q06",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "**Effect of AI coding assistants on code security and vulnerabilities – what the most recent peer‑reviewed evidence says**\n\n| Source | Main finding on security/vulnerabilities | Key points / caveats |\n|--------|------------------------------------------|----------------------|\n| **[1] Impact of AI Code Assistants on Audit Tool Development (2026‑06‑10)** | AI‑generated code can *introduce* serious security risks (e.g., SQL injection, hard‑coded credentials, and verification debt) in regulated audit environments. | • The paper notes that developers sometimes accept AI suggestions without critical review, creating “material risks.” <br>• Mitigation requires *mandatory peer review*, *automated security scanning* (Bandit, SonarQube, CodeQL), and *governance of prompts* via version‑controlled templates. <br>• The evidence comes from case studies in audit analytics; exact quantitative metrics are not provided because the source is an abstract. |\n| **[2] From Vulnerabilities to Remediation: A Systematic Literature Review of LLMs in Code Security (2024‑12‑19)** | LLMs can **introduce new vulnerabilities** during generation, **miss existing ones**, and sometimes report false positives. | • The review covers a broad set of studies but notes that the quality of evidence varies (many studies lack detailed methodology). <br>• The authors highlight the importance of prompting strategies but do not quantify the reduction in vulnerability rates. |\n| **[3] An Empirical Evaluation of LLM‑Generated Code Security Across Prompting Methods (2026‑05‑22)** | Prompt engineering—including the new **WA‑0CoT** strategy—does **not significantly lower overall vulnerability frequency or density** across five LLMs and four languages. | • The study uses chi‑square tests to compare vulnerability counts. <br>• While the distribution of CWE categories shifts with prompt style, the *total* number of weaknesses remains unchanged. <br>• The abstract indicates the results are “empirical” but specific sample sizes or confidence intervals are not listed in the abstract. |\n| **[4] AI and the Future of Software Engineering (2026‑08‑24)** | AI‑written code that is merged **without scrutiny** carries **more security flaws and technical debt**. | • The report cites randomized trials, industry surveys, and code‑security audits. <br>• It notes a trend of *entry‑level* employment decline but overall demand rising, implying that more complex tasks are shifting to humans (architecture, verification). <br>• Specific quantitative findings are not provided in the abstract. |\n\n### Synthesis of the evidence\n\n1. **Security risks are real and non‑trivial** – AI‑assisted code often contains vulnerabilities that would not appear in manually written code, especially if developers accept suggestions without verification (source [1]).\n\n2. **Prompt engineering alone is not a silver bullet** – Even advanced prompting strategies that embed security context (e.g., WA‑0CoT) do not reduce the *overall* number of defects; they only change the mix of vulnerability types (source [3]).\n\n3. **Detection capabilities of LLMs are mixed** – LLMs can sometimes spot and fix existing vulnerabilities, but they also generate false positives and can miss real issues; the effectiveness depends on prompt design and the specific LLM (source [2]).\n\n4. **Human oversight remains essential** – Randomized trials and audits show that code merged without human review carries higher rates of security flaws and technical debt (source [4]).\n\n### Practical implications\n\n- Adopt **mandatory peer review** and **automated security scanners** whenever AI assistants contribute code (as suggested in source [1]).\n- Use **prompt‑engineering best practices** but **do not rely solely** on them to ensure security (source [3]).\n- Integrate **security‑focused prompts** and **continuous monitoring** for vulnerability detection, but be aware of potential false positives/negatives (source [2]).\n- Treat AI‑generated code as *additional code* that must be subjected to the same rigorous verification and accountability processes applied to hand‑written code (source [4]).\n\nIn short, the latest research indicates that AI coding assistants **can improve productivity** but **do not automatically guarantee safer code**; they may introduce new vulnerabilities, and mitigating those risks requires deliberate human‑in‑the‑loop processes and tooling.",
+      "n_sources": 4,
+      "cited": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 12,
+        "supported": 12,
+        "partial": 0,
+        "removed": 0,
+        "checker": "groq:openai/gpt-oss-120b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Impact of AI Code Assistants on Audit Tool Development",
+          "url": "https://doi.org/10.5281/zenodo.20721947",
+          "identifier": "doi:10.5281/zenodo.20721947",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "From Vulnerabilities to Remediation: A Systematic Literature Review of LLMs in Code Security",
+          "url": "https://doi.org/10.48550/arxiv.2412.15004",
+          "identifier": "doi:10.48550/arxiv.2412.15004",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "An Empirical Evaluation of LLM-Generated Code Security Across Prompting Methods",
+          "url": "https://doi.org/10.48550/arxiv.2605.24298",
+          "identifier": "doi:10.48550/arxiv.2605.24298",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "AI and the Future of Software Engineering: Expertise, Employment, and Policy",
+          "url": "https://doi.org/10.21275/sr26818210502",
+          "identifier": "doi:10.21275/sr26818210502",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 12.49
+    },
+    {
+      "id": "q07",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "Controlled experiments on AI coding assistants (e.g., those that measure correctness, code quality or the impact of a single‑task prompt in a laboratory setting) tend to show **highly focused, short‑term gains**—such as faster generation of boilerplate code, easier debugging of isolated functions, or improved code‑comprehension in a curated test suite. In contrast, **field studies performed in actual organisations capture longer‑term, ecosystem‑wide effects** that are not visible in the lab. \n\n| Aspect | Controlled‑experiment findings* | Field‑study findings* |\n|--------|--------------------------------|-----------------------|\n| **Task‑level productivity** | Often report modest speed‑ups (a few seconds to a few minutes) for narrowly defined coding tasks. | Show larger, cumulative gains: e.g., 21–28 % faster coding and task completion across whole projects (GovTech Singapore study) [3]. |\n| **Developer experience** | Usually report positive or neutral perceptions because participants are highly motivated and the tasks are brief. | Reveal a “productivity‑experience paradox”: while 84 % of engineers report productivity gains at both survey points, nearly half of the matched cohort experience worsened developer experience (flow, cognitive load) after six months of use [2]. | (partly supported by the cited abstract)\n| **Verification & compliance costs** | Rarely examined; the experimental setting often ignores audit or review overhead. | Highlight a productivity‑compliance asymmetry: AI tools can outpace the organization’s ability to audit or verify changes, especially in regulated domains where provenance and evidence are mandatory [4]. |\n| **Skill development** | Not directly assessed; controlled tasks usually do not probe learning or skill acquisition. | Show that junior developers can achieve greater efficiency and code quality, yet also raise concerns about over‑reliance and reduced independence in problem‑solving [3, 5]. |\n| **Generalizability** | Findings are limited to the specific language, IDE, and dataset used in the experiment, making extrapolation difficult. | Provide evidence across diverse teams, project sizes, and industry sectors (public sector, finance, healthcare), illustrating that the benefits and challenges scale differently in practice [3, 4, 5]. | (partly supported by the cited abstract)\n\n\\*Sources: \n\n- Controlled‑experiment insights are derived from the narrative description in [1] (benefits and challenges reported in a 14‑interview qualitative study, which reflects a controlled setting of daily usage). (partly supported by the cited abstract) \n\n- Field‑study results come from longitudinal mixed‑methods work with 158 professionals over six months [2], the public‑sector case study with up to 8 000 developers [3], and the governance framework for regulated codebases [4]. The student study [5] also represents a real‑world academic environment.\n\n**Bottom line:** While controlled experiments highlight the *potential* for immediate, task‑specific efficiency, field studies demonstrate that real organisations experience *larger, sustained productivity gains* but must also manage new verification, compliance, and experience‑related trade‑offs that are invisible in laboratory settings.",
+      "n_sources": 5,
+      "cited": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 8,
+        "supported": 5,
+        "partial": 3,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "\"You're on a bicycle with a little motor\": Benefits and Challenges of Using AI Code Assistants",
+          "url": "https://doi.org/10.1145/3641822.3641882",
+          "identifier": "doi:10.1145/3641822.3641882",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "The Impact of AI Coding Assistants on Software Engineering: A Longitudinal Study",
+          "url": "https://doi.org/10.48550/arxiv.2605.23135",
+          "identifier": "doi:10.48550/arxiv.2605.23135",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Harnessing the Potential of Gen-AI Coding Assistants in Public Sector Software Development",
+          "url": "https://doi.org/10.48550/arxiv.2409.17434",
+          "identifier": "doi:10.48550/arxiv.2409.17434",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Productivity vs. Compliance: The New Engineering Challenge of AI Coding Assistants in Regulated Codebases",
+          "url": "https://doi.org/10.70917/ijcisim-2026-4825",
+          "identifier": "doi:10.70917/ijcisim-2026-4825",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "Measuring the Impact of AI Coding Assistants (e.g., GitHub Copilot, ChatGPT) on Programming Productivity among BSCS Students",
+          "url": "https://doi.org/10.71146/kjmr877",
+          "identifier": "doi:10.71146/kjmr877",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 11.95
+    },
+    {
+      "id": "q08",
+      "split": "dev",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "VERA found sources for this question, but its answer did not contain a claim it could tie to them, so it has not answered. The sources it found are listed below; please read them directly or rephrase.",
+      "n_sources": 5,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 0,
+        "outcome": "no_valid_citations"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Developer Experiences with a Contextualized AI Coding Assistant: Usability, Expectations, and Outcomes",
+          "url": "https://doi.org/10.1145/3644815.3644949",
+          "identifier": "doi:10.1145/3644815.3644949",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Developer Experiences with a Contextualized AI Coding Assistant: Usability, Expectations, and Outcomes",
+          "url": "https://doi.org/10.48550/arxiv.2311.18452",
+          "identifier": "doi:10.48550/arxiv.2311.18452",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "\"You're on a bicycle with a little motor\": Benefits and Challenges of Using AI Code Assistants",
+          "url": "https://doi.org/10.1145/3641822.3641882",
+          "identifier": "doi:10.1145/3641822.3641882",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Examining the Use and Impact of an AI Code Assistant on Developer Productivity and Experience in the Enterprise",
+          "url": "https://doi.org/10.48550/arxiv.2412.06603",
+          "identifier": "doi:10.48550/arxiv.2412.06603",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "Examining the Use and Impact of an AI Code Assistant on Developer Productivity and Experience in the Enterprise",
+          "url": "https://doi.org/10.1145/3706599.3706670",
+          "identifier": "doi:10.1145/3706599.3706670",
+          "provider": "openalex+semanticscholar",
+          "licence_decision": "defer"
+        }
+      ],
+      "error": null,
+      "latency_s": 6.58
+    },
+    {
+      "id": "q09",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "**Outcome measures used in the recent literature to evaluate AI coding assistants**\n\n| Study | Outcome measure(s) | Key findings on how the measure shapes the conclusion |\n|-------|--------------------|-------------------------------------------------------|\n| **RuberDuckBench** (2026‑04‑12) [1] | • Quantitative rubrics scoring correctness, completeness, and hallucination.<br>• “Partial‑credit” scoring and “fully correct” counts.<br>• Cost (API pricing / parameter count) as a covariate. | The benchmark’s fine‑grained rubric reveals that even the best models answer only a handful of questions *completely* correctly, with many responses containing hallucinations. Because the metric rewards partial credit, overall scores remain relatively high (≈ 68 %) even though correctness is low. Consequently the authors conclude that *performance gaps are small* and that *cost is unrelated to accuracy* – an inference that hinges on the rubric’s weighting scheme rather than on absolute correctness. |\n| **StackSpot AI (user study)** (2024‑04‑14) [2] | • Self‑reported time‑savings.<br>• Perceived ease of documentation access.<br>• Accuracy of generated code for internal APIs.<br>• Open‑ended qualitative feedback on limitations. | Because the study relies on **user‑reported** time savings and subjective impressions, the authors report “significant time savings” and improved access to documentation. However, the lack of an objective metric for *pull‑request throughput* or *bug‑fix rate* means the study cannot quantify the actual productivity boost. The qualitative focus on perceived benefits also limits the generalizability of the conclusions. |\n| **StackSpot AI (preprint)** (2023‑11‑30) [5] | Same set of measures as the 2024 study (time savings, documentation access, code accuracy). | The earlier preprint echoes the 2024 findings but stresses that “variable responses” and difficulty with complex code were noted. The conclusions are therefore more tentative, reflecting that the outcome measure is a *self‑assessment survey* rather than an objective performance trace. |\n| **Undergraduate student survey** (2026‑01‑04) [3] | • Multi‑dimensional productivity: task completion time, code quality, debugging efficiency, and perceived problem‑solving independence.<br>• Structured questionnaire responses (Likert scales). | The survey’s **mixed‑metrics** design allows the authors to claim improved *task efficiency* and *learning support* while acknowledging reliability concerns. Because the measures are all self‑reported (except for time logged), the conclusions about “improved task efficiency” are contingent on students’ perceptions, not on an objective code‑review metric such as pull‑request throughput. |\n\n---\n\n### How the chosen outcome measures influence the conclusions\n\n1. **Rubric‑based benchmarks (RuberDuckBench)** \n - Emphasizing partial credit and hallucination rates highlights *quality* of the assistant’s answers, leading to the conclusion that “no model is consistently correct.” \n - Absence of throughput or time‑based metrics means the benchmark cannot comment on *productivity gains*.\n\n2. **Self‑report surveys (StackSpot studies, student survey)** \n - Relying on perceived time savings or documentation ease produces findings that AI assistants *feel* helpful, but do not prove *objective productivity*. \n - Surveys allow the authors to discuss *learning impacts* and *independence*, but the lack of observable code‑quality metrics limits claims about actual code correctness or efficiency.\n\n3. **Combined quantitative–qualitative measures (student survey)** \n - Including time, code quality, and debugging efficiency attempts to triangulate productivity. \n - Yet all metrics are still derived from questionnaires rather than automated trace data, so conclusions about “improved task efficiency” remain dependent on participant self‑assessment.\n\nIn summary, **benchmarks that score correctness and hallucination** lead to conclusions about *trustworthiness* and *accuracy* but not productivity. \n**User‑survey studies** highlight perceived *time savings* and *ease of use* but cannot establish objective *throughput* or *bug‑fix rates*. \nA study that mixes self‑reported time and quality still cannot fully capture real‑world productivity metrics such as pull‑request merge rates or sustained code quality over time.",
+      "n_sources": 5,
+      "cited": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 4,
+        "supported": 4,
+        "partial": 0,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "RuberDuckBench: A Benchmark for AI Coding Assistants",
+          "url": "https://doi.org/10.1145/3786181.3788710",
+          "identifier": "doi:10.1145/3786181.3788710",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Developer Experiences with a Contextualized AI Coding Assistant: Usability, Expectations, and Outcomes",
+          "url": "https://doi.org/10.1145/3644815.3644949",
+          "identifier": "doi:10.1145/3644815.3644949",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Measuring the Impact of AI Coding Assistants (e.g., GitHub Copilot, ChatGPT) on Programming Productivity among BSCS Students",
+          "url": "https://doi.org/10.71146/kjmr877",
+          "identifier": "doi:10.71146/kjmr877",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "The Power of AI Coding Assistants",
+          "url": "https://doi.org/10.1201/9781003637738-3",
+          "identifier": "doi:10.1201/9781003637738-3",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "Developer Experiences with a Contextualized AI Coding Assistant: Usability, Expectations, and Outcomes",
+          "url": "https://doi.org/10.48550/arxiv.2311.18452",
+          "identifier": "doi:10.48550/arxiv.2311.18452",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 10.71
+    },
+    {
+      "id": "q10",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "Published evidence on AI coding assistants and their impact on **long‑term code maintainability and defect rates** is mixed and still evolving. Below is a synthesis of the findings that are available in the 2023‑2026 literature you provided.\n\n| Source | What it examined | Key findings on maintainability/defects |\n|--------|------------------|----------------------------------------|\n| **[1] CodeDiet** | A lightweight architectural‑governance framework that embeds architectural guidance into the AI interaction layer to counter AI‑induced code bloat. | The authors argue that without such guidance, large language models (LLMs) tend to prioritize short‑term functionality at the expense of long‑term architecture, leading to duplicated logic, uncontrolled helper abstractions, and “architectural drift” that can degrade maintainability. They claim that CodeDiet’s persistent contextual guidance reduces these problems, but the paper is an abstract and does not provide quantitative evidence of defect‑rate changes. |\n| **[2] Just‑In‑Time Clone Refactoring** | An LLM‑powered clone‑refactoring assistant that detects duplicates during development. | The study reports that the assistant can flag and refactor duplicated code early, thereby reducing technical debt that would otherwise accumulate over time. (partly supported by the cited abstract) The authors plan to evaluate its impact on code quality and developer productivity, but no empirical defect‑rate or maintainability metrics are reported yet. |\n| **[3] Generative AI Assistants in Software Development** | A narrative review of 20 studies, including experiments, field trials, and repository analyses. | Findings are heterogeneous. *Task‑level* productivity gains (e.g., 55.8 % faster completion on a bounded JS task) are reported, but *long‑term* effects on maintenance are less clear. One observational Phase‑1 maintainability result showed a 30.7 % shorter median initial‑task time, while experienced maintainers in mature repositories took 19 % longer when AI was used. The authors note that AI can increase verification burden and that selection and measurement problems limit firm conclusions about defect rates or maintainability. They propose a Quality‑Adjusted Development Productivity (QADP) framework but state it is not a validated metric. |\n| **[4] Quality Profile of AI‑Generated C++ in Production** | Empirical study of 3.52 million AI‑generated C++ changes in a large enterprise from April 2025‑April 2026. | The analysis shows a “distinct quality profile” for AI‑generated code, including higher rates of interface and coupling burdens, copy and allocation overheads, and a reliance on explicit … (abstract cuts off). While the study focuses on performance and maintenance characteristics, it does **not** provide explicit defect‑rate statistics, but it suggests that AI‑generated code can increase certain maintenance‑related burdens compared to human‑written code. |\n\n### Take‑away points\n\n1. **Evidence of negative effects** – Several sources note that AI‑generated code can introduce architectural problems (code bloat, clones, coupling) that may increase future maintenance effort or defect propensity [1, 2, 4]. (partly supported by the cited abstract)\n2. **Lack of definitive defect‑rate data** – None of the abstracts report precise, statistically‑significant defect‑rate changes attributable to AI coding assistants. Most discuss potential or observed *qualitative* maintenance burdens rather than hard metrics.\n3. **Heterogeneous outcomes** – The review in [3] shows that productivity gains can coexist with increased verification effort; the impact on defects and maintainability is context‑dependent and not consistently measurable across studies.\n\nIn short, the current literature indicates that AI coding assistants **can** pose challenges to long‑term maintainability, but concrete, quantitative evidence on defect rates remains sparse. Further controlled studies that track maintenance outcomes over extended periods are needed to draw firm conclusions.",
+      "n_sources": 5,
+      "cited": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 6,
+        "supported": 4,
+        "partial": 2,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "CodeDiet: An AI‑Guided Architectural Governance Framework for Preventing Code Bloat",
+          "url": "https://doi.org/10.5281/zenodo.19429693",
+          "identifier": "doi:10.5281/zenodo.19429693",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Towards Just-In-Time, Inclusive Clone Refactoring",
+          "url": "https://doi.org/10.1109/icsme64153.2025.00099",
+          "identifier": "doi:10.1109/icsme64153.2025.00099",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Generative AI Assistants in Software Development: Productivity Gains, Code Quality, and Security Trade-offs",
+          "url": "https://doi.org/10.66104/z67gjz21",
+          "identifier": "doi:10.66104/z67gjz21",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Characterizing the Quality Profile of AI-Generated C++ in Production",
+          "url": "https://doi.org/10.48550/arxiv.2608.06640",
+          "identifier": "doi:10.48550/arxiv.2608.06640",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "Pedagogical Transformation and Teaching Practice in Programming Education Through AI Coding Assistants: Faculty Perspectives and the AI Coding Assistant Adoption Framework",
+          "url": "https://doi.org/10.3390/app16104833",
+          "identifier": "doi:10.3390/app16104833",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 5.05
+    },
+    {
+      "id": "q11",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "I’m not aware of any published research that specifically examines how the type of task (e.g., green‑field development versus maintenance or refactoring) moderates the productivity effects of AI coding assistants. The two arXiv studies provided ([1] and [2]) report overall productivity and experience outcomes but do not disaggregate results by task type. (partly supported by the cited abstract) Consequently, there is no evidence in these sources to describe a moderating effect of green‑field versus maintenance work on AI assistant productivity.",
+      "n_sources": 2,
+      "cited": [
+        1,
+        2
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 1,
+        "supported": 0,
+        "partial": 1,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Beyond the Commit: Developer Perspectives on Productivity with AI Coding Assistants",
+          "url": "http://arxiv.org/abs/2602.03593",
+          "identifier": "arXiv:2602.03593",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "The Impact of AI Coding Assistants on Software Engineering: A Longitudinal Study",
+          "url": "https://doi.org/10.48550/arxiv.2605.23135",
+          "identifier": "doi:10.48550/arxiv.2605.23135",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 7.32
+    },
+    {
+      "id": "q12",
+      "split": "heldout",
+      "category": "in_scope_synthesis",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "Researchers in the recent literature have explicitly noted several methodological limits that shape the interpretation of AI‑coding‑assistant productivity findings:\n\n| Study | Sample size / participant groups | Study duration / design constraints | Stated limitations |\n|-------|----------------------------------|-------------------------------------|---------------------|\n| **Beyond the Commit: Developer Perspectives on Productivity with AI Coding Assistants** (2026) | 2989 survey respondents + 11 in‑depth interviews | Cross‑sectional survey; interviews conducted at a single time point; no longitudinal follow‑up | The authors point out that survey responses reveal conflicting perspectives and that the interview‑derived factors may not generalize beyond the BNY Mellon context; the mixed‑methods design cannot establish causal effects over time [2]. | (partly supported by the cited abstract)\n| **Examining the Use and Impact of an AI Code Assistant on Developer Productivity and Experience in the Enterprise** (2025) | 669 survey participants + 15 users in unmoderated usability testing | One‑off usability sessions; no pre‑/post productivity measurement or extended observation period | The authors note that productivity gains were reported qualitatively and that benefits varied across users; the short, uncontrolled testing period limits claims about sustained or long‑term productivity impacts [3]. | (partly supported by the cited abstract)\n| **CAPABILITIES AND LIMITATIONS OF MODERN AI CODE ASSISTANTS** (2025) | Qualitative review of existing studies; no primary empirical sample | Not an empirical study; relies on secondary reports | The paper highlights that many referenced studies have small or convenience samples and that findings often lack longitudinal validation or standardized metrics for productivity [1]. | (partly supported by the cited abstract)\n\n**Key points**\n\n1. **Large sample sizes in surveys (e.g., 2989 responses) do not guarantee representativeness** – the respondents were all from a single financial institution, limiting generalizability. \n2. **Small usability‑testing cohorts (15 participants) provide rich qualitative data but cannot capture variability across the broader developer population**. \n3. **Cross‑sectional designs preclude observation of how productivity effects evolve**—e.g., learning curves, diminishing returns, or changes in ownership concerns over months. \n4. **Lack of controlled, pre‑post or longitudinal experiments** means that reported productivity gains are often subjective or based on self‑report rather than objective time‑on‑task metrics.\n\nThus, researchers commonly acknowledge that sample size, single‑site recruitment, and short‑duration, cross‑sectional designs limit the robustness and generalizability of conclusions about AI coding assistant productivity.",
+      "n_sources": 3,
+      "cited": [
+        1,
+        2,
+        3
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 3,
+        "supported": 0,
+        "partial": 3,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "CAPABILITIES AND LIMITATIONS OF MODERN AI CODE ASSISTANTS",
+          "url": "https://doi.org/10.5281/zenodo.18387821",
+          "identifier": "doi:10.5281/zenodo.18387821",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Beyond the Commit: Developer Perspectives on Productivity with AI Coding Assistants",
+          "url": "http://arxiv.org/abs/2602.03593",
+          "identifier": "arXiv:2602.03593",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Examining the Use and Impact of an AI Code Assistant on Developer Productivity and Experience in the Enterprise",
+          "url": "https://doi.org/10.1145/3706599.3706670",
+          "identifier": "doi:10.1145/3706599.3706670",
+          "provider": "openalex+semanticscholar",
+          "licence_decision": "defer"
+        }
+      ],
+      "error": null,
+      "latency_s": 4.07
+    },
+    {
+      "id": "q13",
+      "split": "dev",
+      "category": "multi_part",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "Controlled‑experiment evidence of speed gains \n\n* A single‑task experiment on a bounded JavaScript problem found that developers using Copilot completed the task **55.8 % faster** than when coding without an assistant [2]. \n* In a series of workplace‑level trials that were also controlled (e.g., randomized assignment to “AI‑enabled” or “no AI” teams), the studies reported that teams were able to finish **26.08 % more tasks** overall [2]. (partly supported by the cited abstract) \n\nControlled‑experiment evidence on code quality \n\n* The systematic review that compiled controlled experiments (as well as field and survey studies) found that **58 % of the 34 controlled studies** observed a decline in code quality. The reported effects included a median defect‑density increase of **23 %** and a prevalence of code duplication in **74 %** of AI‑heavy repositories [4]. \n* In those same controlled contexts, technical‑debt metrics rose on average by about **1.8 person‑days per 1,000 lines of AI‑generated code** (p < 0.001) [4]. (partly supported by the cited abstract)\n\nThus, controlled experiments tend to show substantial speed improvements (≈ 50 % faster on specific tasks, ≈ 26 % more tasks completed), but they also consistently report measurable detriments in code quality, such as higher defect density, increased duplication, and higher technical debt.",
+      "n_sources": 4,
+      "cited": [
+        2,
+        4
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 4,
+        "supported": 2,
+        "partial": 2,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Harnessing the Potential of Gen-AI Coding Assistants in Public Sector Software Development",
+          "url": "https://doi.org/10.48550/arxiv.2409.17434",
+          "identifier": "doi:10.48550/arxiv.2409.17434",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Generative AI Assistants in Software Development: Productivity Gains, Code Quality, and Security Trade-offs",
+          "url": "https://doi.org/10.66104/z67gjz21",
+          "identifier": "doi:10.66104/z67gjz21",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Measuring the Impact of AI Coding Assistants (e.g., GitHub Copilot, ChatGPT) on Programming Productivity among BSCS Students",
+          "url": "https://doi.org/10.71146/kjmr877",
+          "identifier": "doi:10.71146/kjmr877",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "The AI Productivity Paradox in Software Engineering: A Systematic Review of Code Quality, Technical Debt, and Organizational Throughput (2024–2026)",
+          "url": "https://doi.org/10.17605/osf.io/jtqgn",
+          "identifier": "doi:10.17605/osf.io/jtqgn",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 3.33
+    },
+    {
+      "id": "q14",
+      "split": "dev",
+      "category": "multi_part",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "**Published evidence on AI assistants and developer productivity (2023‑2026)** \n\n| Source | Study focus | Key findings on productivity | Other important notes |\n|--------|-------------|------------------------------|-----------------------|\n| **[2]** | Deployment of IBM’s watsonx Code Assistant (WCA) in an enterprise setting (N = 669 survey; N = 15 usability test) | 1. Many developers reported net productivity gains when using WCA, but 2. Not all users experienced these gains – productivity benefits varied across users. | The study mixed quantitative survey data with qualitative usability testing, offering both breadth and depth. |\n| **[3]** | Randomized experimental study of a *proactive* chat‑based assistant that suggests code without explicit prompts | 1. Significant productivity improvements were found when the assistant provided proactive suggestions. 2. Design elements (e.g., how the assistant is integrated into the workspace) moderated the effect. | The study used an experimental design (randomized assignment) to isolate the effect of specific design choices. |\n| **[5]** | Two‑phase controlled experiment on the downstream effect of AI‑co‑developed code (Phase 1: 151 participants add a feature; Phase 2: new participants evolve the code) | 1. Phase 1: AI‑assisted development cut feature‑addition time by a median of 30.7 % (≈ 56 % speedup for habitual users). 2. Phase 2: No statistically significant difference in evolution time or code quality between AI‑co‑developed and hand‑written code. | Bayesian analysis indicated that any productivity advantage in Phase 2 was small and highly uncertain. |\n| **[1]** | Lab‑based user study on security‑related coding tasks (N ≈ ? – not specified) | 1. Participants using an AI assistant wrote *less secure* code than those without access. 2. They were also more likely to over‑estimate the security of their own code. | While not a pure productivity measure, it highlights potential quality trade‑offs that could affect overall productivity in production. |\n| **[4]** | Review of enterprise deployments; proposes a framework of three integration conditions (context fidelity, workflow embeddedness, trust calibration) | 1. Consistent productivity outcomes observed in controlled studies are rarely reproduced in production if the assistant is poorly integrated. 2. The article provides design patterns to improve alignment between controlled‑study gains and real‑world productivity. | This is a conceptual paper; it does not present primary data but synthesizes evidence on why productivity gains may fail to materialize in practice. |\n\n### Summary of productivity evidence\n\n1. **Controlled, experimental studies** (e.g., [3] and the Phase 1 of [5]) consistently find *short‑term* productivity gains (30‑55 % faster task completion) when developers use an AI assistant. (partly supported by the cited abstract) \n2. **Enterprise surveys** (e.g., [2]) show that while a *subset* of developers experience productivity benefits, these benefits are *not universal*. User‑experience and context matter. \n3. **Long‑term or downstream effects** (Phase 2 of [5]) reveal **no systematic improvement** in how other developers evolve code that was originally co‑developed with an AI. \n4. **Quality trade‑offs** (e.g., [1]) can offset productivity gains by producing insecure or over‑confident code, potentially leading to costly fixes later. (partly supported by the cited abstract) \n5. **Design and integration** (outlined in [4]) are crucial: productivity gains observed in isolated experiments are unlikely to transfer to production without adequate context fidelity, workflow embedding, and trust calibration mechanisms.\n\n---\n\n## Which study designs are most reliable for assessing productivity impacts?\n\n| Design | Why it’s reliable | Strengths (with references) | Limitations (when they arise) |\n|--------|-------------------|-----------------------------|--------------------------------|\n| **Randomized controlled experiments** | Randomization removes selection bias and isolates the effect of the AI assistant from confounding variables. | **[3]** demonstrated causal gains in productivity; **[5] Phase 1** showed a sizable speedup (30‑55 %). | Requires controlled tasks and may not generalize to complex, open‑ended real‑world projects. | (partly supported by the cited abstract)\n| **Pre‑registered controlled trials** | Pre‑registration commits researchers to analysis plans before data collection, reducing bias. | **[5]** used a preregistered design, strengthening the credibility of its null results in Phase 2. | Still limited to the specific tasks and metrics chosen; may miss long‑term or organizational effects. |\n| **Mixed‑methods enterprise surveys with usability testing** | Combines breadth (large N) with depth (qualitative insights) to capture variability across real users. | **[2]** surveyed 669 developers and conducted usability tests, revealing heterogeneous productivity gains. | Surveys are self‑reported and can suffer from social‑desirability or recall bias; usability tests often involve few participants. |\n| **Longitudinal studies of code evolution** | Observes the real‑world downstream effects of AI‑co‑developed code over time. | **[5] Phase 2** assessed evolution by new developers, finding no sustained benefit. | Requires tracking code across multiple developers and releases, which is logistically complex and may be confounded by other process changes. | (partly supported by the cited abstract)\n| **Conceptual frameworks grounded in empirical findings** | While not primary data, they synthesize evidence and provide actionable design guidelines. | **[4]** offers design patterns that align enterprise deployments with controlled‑study outcomes. | Does not provide new quantitative data; its validity depends on the quality of the underlying studies it cites. |\n\n**Conclusion**\n\nThe most credible evidence comes from **randomized, preregistered controlled experiments** because they best establish causal relationships between AI assistant usage and productivity. However, to understand real‑world applicability, these experiments should be complemented with **mixed‑methods enterprise studies** and **longitudinal evolution analyses**. Finally, **conceptual frameworks** (e.g., [4]) help translate experimental gains into practice by addressing integration and trust issues that often erode productivity benefits in production environments.",
+      "n_sources": 5,
+      "cited": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 16,
+        "supported": 12,
+        "partial": 4,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Do Users Write More Insecure Code with AI Assistants?",
+          "url": "https://doi.org/10.1145/3576915.3623157",
+          "identifier": "doi:10.1145/3576915.3623157",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Examining the Use and Impact of an AI Code Assistant on Developer Productivity and Experience in the Enterprise",
+          "url": "https://doi.org/10.48550/arxiv.2412.06603",
+          "identifier": "doi:10.48550/arxiv.2412.06603",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Need Help? Designing Proactive AI Assistants for Programming",
+          "url": "https://doi.org/10.48550/arxiv.2410.04596",
+          "identifier": "doi:10.48550/arxiv.2410.04596",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Human-AI Collaboration in Software Engineering: Enhancing Developer Productivity through Intelligent Assistants",
+          "url": "https://doi.org/10.37284/eajit.9.2.5705",
+          "identifier": "doi:10.37284/eajit.9.2.5705",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "Echoes of AI: Investigating the downstream effects of AI assistants on software maintainability",
+          "url": "https://doi.org/10.1007/s10664-026-10889-1",
+          "identifier": "doi:10.1007/s10664-026-10889-1",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 13.61
+    },
+    {
+      "id": "q15",
+      "split": "dev",
+      "category": "multi_part",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "**Differences in benefit**\n\n* **Senior developers** tend to gain more from AI coding assistants than juniors. In the large‑enterprise study that tracked daily use of GitHub Copilot over 15 months, senior developers showed noticeably larger increases in commit volume when they actively used the assistant, whereas the effect was smaller for junior developers [2].\n\n* **Junior developers** can still benefit, but the gains are generally modest unless they work closely with senior teammates who use the tool. The same study found that juniors whose teams included active senior users showed higher contribution increases, indicating a spillover effect [2].\n\n**Explanations offered by researchers**\n\n1. **Technology‑skill complementarity** – The senior–junior gap is partly due to the fact that senior developers have more domain knowledge, coding experience, and an established workflow that they can combine with the AI’s rapid code generation. \n\n2. **Experience‑based learning and trust calibration** – In the mixed‑methods study that examined adoption across four experience tiers, mid‑career developers reported higher motivation and a more sophisticated “trust‑calibration” strategy: they were more likely to actively verify and strategically integrate AI output. Senior developers, by contrast, had more refined friction‑minimizing strategies and could therefore use the assistant more efficiently. This suggests that as developers gain experience, they learn to balance the time saved by the assistant against the effort needed to validate its output [1]. (partly supported by the cited abstract)\n\n3. **Exposure effect and friction sensitivity** – The same study noted that exposure to technical friction (e.g., debugging AI‑generated code) led mid‑career developers to develop better verification habits, which in turn boosted productivity. \n\nIn short, researchers point to a combination of **skill complementarity**, **experience‑driven trust calibration**, and **friction‑handling strategies** as the key factors that make senior developers reap greater benefits from AI coding assistants than their junior counterparts.\n\nNote: sentences the cited abstracts did not support were removed.",
+      "n_sources": 3,
+      "cited": [
+        1,
+        2
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 5,
+        "supported": 2,
+        "partial": 1,
+        "removed": 2,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Contextual AI Coding Assistants in Professional Practice: A Mixed Methods Investigation of Perceptions, Benefits, and Experience-Based Challenges",
+          "url": "https://doi.org/10.6084/m9.figshare.33322491.v1",
+          "identifier": "doi:10.6084/m9.figshare.33322491.v1",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Seniority, Spillovers, and AI-Enhanced Code Contributions: Evidence from a Large Enterprise",
+          "url": "https://aisel.aisnet.org/icis2025/impl_adopt/impl_adopt/2",
+          "identifier": "https://aisel.aisnet.org/icis2025/impl_adopt/impl_adopt/2",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "From Preventive to Reactive: How AI Coding Assistants Transform Developers' Security Awareness",
+          "url": "https://arxiv.org/abs/2605.23130",
+          "identifier": "arXiv:2605.23130",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 8.16
+    },
+    {
+      "id": "q16",
+      "split": "heldout",
+      "category": "multi_part",
+      "model": "gpt-4.1-nano",
+      "answer": "The available evidence on AI assistants in companies primarily comes from field experiments and studies focusing on specific domains, such as healthcare, online commerce, and spiritual or moral guidance. For example, a randomized field experiment on a livestream selling platform found that AI assistants increased sales by 3.00% and reduced product return rates by 12.55%, suggesting they can positively influence consumer behavior and confidence [2]. Another study investigated physician adoption of AI assistants in healthcare, highlighting how factors like AI smartness and transparency influence adoption rates and timing, which indicates operational and strategic impacts in real-world settings [3].\n\nIn contrast, the laboratory evidence concerning AI assistants' impact on developer productivity emphasizes potential benefits and risks, particularly in the context of security. One lab study directly examined how users interact with AI code assistants while solving security-related tasks and found that users with access to AI assistants wrote significantly less secure code than those without assistance. Additionally, users with AI assistances were more likely to overestimate their security competence, suggesting increased overconfidence [1]. This points to security concerns and behavioral effects that might not fully translate into the typical corporate environment but highlight risks associated with AI in code development.\n\nCompared with lab experiments, the field evidence tends to focus on broader performance indicators like sales, user confidence, and adoption behaviors rather than direct measures of speed or security in coding tasks. The lab study specifically addresses security and coding efficiency challenges, while field evidence demonstrates AI's potential to enhance or disrupt operational and commercial outcomes. However, there is a gap in direct, comparative data on how AI assistants affect developer speed and security in actual company settings, highlighting an area for further research.",
+      "n_sources": 4,
+      "cited": [
+        1,
+        2,
+        3
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 3,
+        "supported": 3,
+        "partial": 0,
+        "removed": 0,
+        "checker": "groq:openai/gpt-oss-120b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Do Users Write More Insecure Code with AI Assistants?",
+          "url": "https://doi.org/10.1145/3576915.3623157",
+          "identifier": "doi:10.1145/3576915.3623157",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Artificial Intelligence (AI) Assistant in Online Shopping: A Randomized Field Experiment on a Livestream Selling Platform",
+          "url": "https://doi.org/10.1287/isre.2023.0103",
+          "identifier": "doi:10.1287/isre.2023.0103",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Physician Adoption of AI Assistant",
+          "url": "https://doi.org/10.1287/msom.2023.0093",
+          "identifier": "doi:10.1287/msom.2023.0093",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "JaleesBench: Are AI Assistants Good Spiritual Company?",
+          "url": "https://doi.org/10.48550/arxiv.2608.07508",
+          "identifier": "doi:10.48550/arxiv.2608.07508",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 14.73
+    },
+    {
+      "id": "q17",
+      "split": "heldout",
+      "category": "multi_part",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "**Moderating Factors**\n\n1. **Developer Expertise & Awareness** – The study in [1] shows that while AI coding assistants can help produce more accessible UI code, the benefit is largely contingent on the developer already having some awareness of accessibility principles. Without that baseline knowledge, the assistant’s suggestions often fall short, indicating that *domain expertise* moderates the effect.\n\n2. This suggests *developer skill* and the *complexity of the task* (routine vs. highly specialized code) moderate the magnitude of the gains.\n\n3. **Tool Design Choices (Retrieval & Context)** – Findings in [4] highlight that adding contextualized information (e.g., fine‑tuning on a team’s codebase or incorporating project‑specific context) reduces generic or incorrect outputs and eases prompt engineering. Thus, *tool design*—particularly the inclusion of contextual memory or domain‑specific fine‑tuning—acts as a moderator: better‑contexted assistants yield higher quality output and more consistent gains.\n\n4. **Prompt Engineering Effort** – [4] notes that extensive prompt engineering can erode productivity benefits. When developers spend less time crafting prompts (thanks to more intelligent, context‑aware assistants), the observed productivity gains are stronger. Therefore, the *time spent on prompt engineering* moderates the effect.\n\n---\n\n**Persistence of Gains Over Time**\n\n- **Short‑Term Gains** – In the 2024 studies ([1] and [4]), developers initially experienced noticeable productivity boosts—easier code completion, fewer errors, and faster prototype creation. (partly supported by the cited abstract) However, these studies focused on single‑session or short‑term use and did not track longitudinal performance.\n\n While participants reported initial productivity spikes, the magnitude of those gains diminished after the first few months. The authors attribute this “decline” to a combination of (a) the learning curve flattening out, (b) developers becoming accustomed to the tool’s limitations, and (c) the emergence of more generic or incorrect suggestions over time. Thus, the evidence suggests that **productivity gains tend to attenuate after the initial adoption phase** unless the assistant is continuously updated, refined, or the developer’s expertise is maintained.\n\n- **No Definitive Evidence of Long‑Term Erosion** – It’s worth noting that because the studies are limited to short‑to‑medium‑term observations and rely on self‑reported surveys, there is still uncertainty about the exact trajectory of gains over multi‑year periods. The abstracts do not provide granular longitudinal metrics, so a definitive claim about sustained or diminishing benefits over several years cannot be made.\n\n**Bottom Line**\n\n- *Moderators* include developer expertise, task complexity, tool design (contextualization, retrieval, fine‑tuning), and prompt‑engineering effort. \n- *Persistence* of productivity gains appears to be strongest immediately after adoption but tends to diminish over time, according to the 2026 enterprise survey, although the evidence is not exhaustive and further long‑term studies are needed.\n\nNote: sentences the cited abstracts did not support were removed.",
+      "n_sources": 4,
+      "cited": [
+        1,
+        4
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 6,
+        "supported": 3,
+        "partial": 1,
+        "removed": 2,
+        "checker": "groq:openai/gpt-oss-120b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Tab to Autocomplete: The Effects of AI Coding Assistants on Web Accessibility",
+          "url": "https://doi.org/10.1145/3663548.3688513",
+          "identifier": "doi:10.1145/3663548.3688513",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Usage, Effects and Requirements for AI Coding Assistants in the Enterprise: An Empirical Study",
+          "url": "https://doi.org/10.1145/3786181.3788727",
+          "identifier": "doi:10.1145/3786181.3788727",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "AI CODING ASSISTANT FOR SPECIFIC TECH STACK",
+          "url": "https://doi.org/10.5281/zenodo.21955082",
+          "identifier": "doi:10.5281/zenodo.21955082",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Lessons from Building StackSpot AI: A Contextualized AI Coding Assistant",
+          "url": "https://doi.org/10.1145/3639477.3639751",
+          "identifier": "doi:10.1145/3639477.3639751",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 9.21
+    },
+    {
+      "id": "q18",
+      "split": "dev",
+      "category": "false_premise",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "The claim that “AI coding assistants *double* developer productivity” is a blanket statement that does not hold up against the evidence that has been published so far. The studies you cited report productivity gains, but the magnitude—and even the direction—of those gains vary substantially depending on the context, the particular tool, and how it is integrated into a workflow.\n\n| Source | Context | Reported productivity effect | Caveats |\n|--------|---------|------------------------------|---------|\n| [1] | IBM’s internal watsonx Code Assistant (WCA) | Net productivity increases for many users, but **not for all** users | The study relied on surveys (N = 669) and unmoderated usability tests (N = 15); it does not quantify a “doubling” effect, and benefits varied by user cohort. |\n| [2] | GovTech Singapore’s public‑sector developers using GitHub Copilot | 21–28 % faster coding/taking tasks | Gains were measured in a specific public‑sector setting with a limited sample (up to 8,000 developers); the figure is a percentage increase, not a two‑fold improvement. |\n| [3] | Enterprise component‑library developers using an intelligent documentation retrieval system coupled with an AI assistant | Not quantified in the abstract, but described as “substantial organizational value” through reduced knowledge silos and improved consistency | No explicit productivity multiplier is reported; the benefits are more about knowledge sharing than raw speed. |\n| [4] | Enterprise software teams deploying AI assistants without full integration | Identifies that productivity gains seen in controlled experiments are **under‑realized** in production unless three integration conditions are met | The paper emphasizes variability in outcomes due to architectural factors rather than a uniform boost. |\n| [5] | Users of a domain‑specific contextualized assistant (StackSpot AI) | Participants reported significant time savings and easier documentation access | The study involved only 62 participants in a controlled setting, and it notes variability in responses and limits in handling complex code. |\n\n### Why the results are not uniform\n1. **Tool & Domain Variability** – General‑purpose assistants (e.g., GitHub Copilot) and highly contextualized assistants (e.g., StackSpot AI) differ in how much domain knowledge they incorporate, which directly affects the quality and relevance of suggestions. \n2. **Integration Factors** – As noted in [4], insufficient context fidelity, limited workflow embedment, and poor trust calibration can blunt the productivity benefits that controlled studies predict. \n3. **User Experience & Skill Levels** – [2] shows junior developers benefiting more than senior ones, suggesting that the impact depends on the developer’s familiarity with the codebase and with AI tools. (partly supported by the cited abstract) \n4. **Measurement Approaches** – The studies use different metrics (percentage speedup, self‑reported time savings, organizational efficiency) and different sample sizes, making direct comparison difficult. \n\n### Bottom line\nThere is no single, universally observed “two‑fold” productivity increase. Instead, the empirical evidence indicates that AI coding assistants can improve productivity—but the magnitude of that improvement is context‑dependent and often modest (tens of percent) rather than a strict doubling. The consensus is that **proper integration, context management, and user training are critical to unlocking the full potential** of these tools.",
+      "n_sources": 5,
+      "cited": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 7,
+        "supported": 6,
+        "partial": 1,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Examining the Use and Impact of an AI Code Assistant on Developer Productivity and Experience in the Enterprise",
+          "url": "https://doi.org/10.48550/arxiv.2412.06603",
+          "identifier": "doi:10.48550/arxiv.2412.06603",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Harnessing the Potential of Gen-AI Coding Assistants in Public Sector Software Development",
+          "url": "https://doi.org/10.48550/arxiv.2409.17434",
+          "identifier": "doi:10.48550/arxiv.2409.17434",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Enhancing Developer Productivity Through Intelligent Documentation Retrieval",
+          "url": "https://doi.org/10.52783/jisem.v10i62s.13643",
+          "identifier": "doi:10.52783/jisem.v10i62s.13643",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Human-AI Collaboration in Software Engineering: Enhancing Developer Productivity through Intelligent Assistants",
+          "url": "https://doi.org/10.37284/eajit.9.2.5705",
+          "identifier": "doi:10.37284/eajit.9.2.5705",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "Developer Experiences with a Contextualized AI Coding Assistant: Usability, Expectations, and Outcomes",
+          "url": "https://doi.org/10.1145/3644815.3644949",
+          "identifier": "doi:10.1145/3644815.3644949",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 10.36
+    },
+    {
+      "id": "q19",
+      "split": "dev",
+      "category": "false_premise",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "VERA found sources for this question, but its answer did not contain a claim it could tie to them, so it has not answered. The sources it found are listed below; please read them directly or rephrase.",
+      "n_sources": 3,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 0,
+        "outcome": "no_valid_citations"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "The Power of AI Coding Assistants",
+          "url": "https://doi.org/10.1201/9781003637738-3",
+          "identifier": "doi:10.1201/9781003637738-3",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "CAPABILITIES AND LIMITATIONS OF MODERN AI CODE ASSISTANTS",
+          "url": "https://doi.org/10.5281/zenodo.18387821",
+          "identifier": "doi:10.5281/zenodo.18387821",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "AI CODING ASSISTANT FOR SPECIFIC TECH STACK",
+          "url": "https://doi.org/10.5281/zenodo.21955082",
+          "identifier": "doi:10.5281/zenodo.21955082",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 1.08
+    },
+    {
+      "id": "q20",
+      "split": "dev",
+      "category": "false_premise",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "VERA found sources for this question, but its answer did not contain a claim it could tie to them, so it has not answered. The sources it found are listed below; please read them directly or rephrase.",
+      "n_sources": 5,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 0,
+        "outcome": "no_valid_citations"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "On the Assessment of Interactive Detection of Code Smells in Practice: A Controlled Experiment",
+          "url": "https://doi.org/10.1109/access.2023.3302260",
+          "identifier": "doi:10.1109/access.2023.3302260",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Recommending Collaborators Based on Co–Changed Files: A Controlled Experiment",
+          "url": "https://doi.org/10.5753/sbsc.2023.229104",
+          "identifier": "doi:10.5753/sbsc.2023.229104",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "Controlled experiment finds no detectable citation bump from Twitter promotion",
+          "url": "https://doi.org/10.1371/journal.pone.0292201",
+          "identifier": "doi:10.1371/journal.pone.0292201",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Controlled experiments involving Anomalous Information Reception with Mediums:",
+          "url": "https://doi.org/10.31275/20222575",
+          "identifier": "doi:10.31275/20222575",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "Towards Empirical Evidence for the Impact of Microservice API Patterns on Software Quality: A Controlled Experiment",
+          "url": "https://doi.org/10.5281/zenodo.7758135",
+          "identifier": "doi:10.5281/zenodo.7758135",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 2.02
+    },
+    {
+      "id": "q21",
+      "split": "heldout",
+      "category": "false_premise",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "The claim that “AI assistants have no effect on experienced developers” is only partially supported by the evidence. According to the 2025 study on Copilot’s impact on code security, the tool did **not** alter the overall security outcomes for novice versus experienced developers, but it did influence **how** each group used the assistant [2]. Other work shows that experienced developers tend to obtain more value when they move beyond ad‑hoc chat interactions and instead embed the tool into **structured, repeatable workflows** with clear instruction files and reusable templates [3].\n\nBecause the evidence suggests that experience level mainly changes *usage patterns* rather than *outcomes*, teams that want to maximize productivity for seasoned engineers should focus on the following practical steps:\n\n| Action | Rationale (source) | Practical tip |\n|--------|--------------------|---------------|\n| **Encourage structured interaction** | Experienced developers gain more when the AI is treated as a programmable collaborator, not just a chat window [3] | Provide a shared repository of “instruction files” that define the context, style, and constraints for the assistant. |\n| **Standardize workflows** | Structured forms of interaction enable higher quality and consistency, reducing the need for manual rework [3] | Map common tasks (e.g., code reviews, unit‑test generation) to scripted agent prompts and integrate them into CI/CD pipelines. | (partly supported by the cited abstract)\n| **Invest in instruction‑file tooling** | Teams that adopt reusable instruction templates can exceed basic usage levels [3] | Offer a lightweight editor or template system that lets developers edit and version instruction files alongside code. | (partly supported by the cited abstract)\n| **Monitor usage patterns** | Novice and experienced developers differ in how they leverage the AI; tracking these patterns can reveal inefficiencies or gaps [2] | Log AI‑prompt frequency, response acceptance rates, and time‑to‑completion for each developer role to identify training needs. | (partly supported by the cited abstract)\n| **Combine AI with existing skill‑building practices** | Foundational knowledge is crucial for interpreting and refining AI output; experienced developers benefit when they can filter and contextualize suggestions [5] | Pair AI use with regular code‑review sessions where senior engineers validate and adapt AI suggestions. | (partly supported by the cited abstract)\n\nIn short, teams should not assume that the presence of an AI assistant alone will change the productivity of experienced developers. Instead, they should **design and enforce disciplined workflows that leverage the AI’s strengths** and align with the developers’ expertise. By doing so, the team can realize the potential productivity gains that experienced engineers can extract from AI coding assistants.",
+      "n_sources": 5,
+      "cited": [
+        2,
+        3,
+        5
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 7,
+        "supported": 3,
+        "partial": 4,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "GitHub Copilot Developer Experience: A Study Comparing Novice and Experienced Developers' Perspectives",
+          "url": "https://trepo.tuni.fi/handle/10024/231602",
+          "identifier": "https://trepo.tuni.fi/handle/10024/231602",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "The impact of GitHub Copilot on the Security of Code by Novice and Experienced Developers",
+          "url": "https://doi.org/10.22215/etd/2025-17028",
+          "identifier": "doi:10.22215/etd/2025-17028",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "How Experienced Developers Can Get More Value from Agents",
+          "url": "https://doi.org/10.67228/30715628/ijmiet-v9i2p101",
+          "identifier": "doi:10.67228/30715628/ijmiet-v9i2p101",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "Towards Decoding Developer Cognition in the Age of AI Assistants",
+          "url": "https://doi.org/10.48550/arxiv.2501.02684",
+          "identifier": "doi:10.48550/arxiv.2501.02684",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "The Evolution of Information Seeking in Software Development: Understanding the Role and Impact of AI Assistants",
+          "url": "https://doi.org/10.1145/3696630.3731665",
+          "identifier": "doi:10.1145/3696630.3731665",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 10.34
+    },
+    {
+      "id": "q22",
+      "split": "heldout",
+      "category": "false_premise",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "There is no evidence that **every** independent study has concluded that AI‑coding assistants make code less secure. \n- Source [4] highlights security concerns—such as potential vulnerabilities introduced by auto‑generated code, the need for human oversight, and adherence to DevSecOps/OWASP guidelines—but it does not claim that all studies observe a net decrease in security. \n- The other cited works ([1], [2], and [3]) focus on privacy‑focused deployments, educational benefits, or benchmark performance and do not provide systematic evidence that AI assistants uniformly degrade security.\n\nThus, the premise that all independent studies find a negative security impact is incorrect. While security risks have been identified and debated in the literature, the conclusion that every study shows a net security decline is not supported by the available evidence.",
+      "n_sources": 4,
+      "cited": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 2,
+        "supported": 2,
+        "partial": 0,
+        "removed": 0,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Self-Hosted AI Coding Assistant for Secure Real-Time Code Generation",
+          "url": "https://doi.org/10.55041/ijsrem60290",
+          "identifier": "doi:10.55041/ijsrem60290",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "The Power of AI Coding Assistants",
+          "url": "https://doi.org/10.1201/9781003637738-3",
+          "identifier": "doi:10.1201/9781003637738-3",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "RuberDuckBench: A Benchmark for AI Coding Assistants",
+          "url": "https://doi.org/10.1145/3786181.3788710",
+          "identifier": "doi:10.1145/3786181.3788710",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "AI Code Assistants in Secure Software Development: Opportunities, Risks, and Best Practices",
+          "url": "https://doi.org/10.20944/preprints202507.1144.v1",
+          "identifier": "doi:10.20944/preprints202507.1144.v1",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 5.62
+    },
+    {
+      "id": "q23",
+      "split": "dev",
+      "category": "out_of_scope",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "I can only help with questions about published evidence on AI coding assistants, AI-assisted software development and developer productivity. Your request looks outside that scope, so I have not answered it. For medical, legal, financial or safety matters, please consult a qualified professional or an appropriate official source.",
+      "n_sources": 0,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": null,
+      "sources": [],
+      "error": null,
+      "latency_s": 0.02
+    },
+    {
+      "id": "q24",
+      "split": "dev",
+      "category": "out_of_scope",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "I can only help with questions about published evidence on AI coding assistants, AI-assisted software development and developer productivity. Your request looks outside that scope, so I have not answered it. For medical, legal, financial or safety matters, please consult a qualified professional or an appropriate official source.",
+      "n_sources": 0,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": null,
+      "sources": [],
+      "error": null,
+      "latency_s": 0.02
+    },
+    {
+      "id": "q25",
+      "split": "dev",
+      "category": "out_of_scope",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "I can only help with questions about published evidence on AI coding assistants, AI-assisted software development and developer productivity. Your request looks outside that scope, so I have not answered it. For medical, legal, financial or safety matters, please consult a qualified professional or an appropriate official source.",
+      "n_sources": 0,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": null,
+      "sources": [],
+      "error": null,
+      "latency_s": 0.36
+    },
+    {
+      "id": "q26",
+      "split": "heldout",
+      "category": "out_of_scope",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "I can only help with questions about published evidence on AI coding assistants, AI-assisted software development and developer productivity. Your request looks outside that scope, so I have not answered it. For medical, legal, financial or safety matters, please consult a qualified professional or an appropriate official source.",
+      "n_sources": 0,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": null,
+      "sources": [],
+      "error": null,
+      "latency_s": 0.01
+    },
+    {
+      "id": "q27",
+      "split": "dev",
+      "category": "ambiguous_or_underspecified",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "I can only help with questions about published evidence on AI coding assistants, AI-assisted software development and developer productivity. Your request looks outside that scope, so I have not answered it. For medical, legal, financial or safety matters, please consult a qualified professional or an appropriate official source.",
+      "n_sources": 0,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": null,
+      "sources": [],
+      "error": null,
+      "latency_s": 0.36
+    },
+    {
+      "id": "q28",
+      "split": "dev",
+      "category": "ambiguous_or_underspecified",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "**Research on AI and productivity**\n\n| Source | Key Findings on Productivity | Notes |\n|--------|------------------------------|-------|\n| [4] (2024‑03‑01) | Empirical evidence on productivity effects is *inconclusive*. The review notes that while theoretical work predicts productivity gains from AI adoption, observational studies have not consistently confirmed these gains across all sectors or occupations. | The paper is a literature review; it does not present new data but summarizes the state of research up to early 2024. |\n\n| [3] (2025‑06‑09) | In the context of taxi driving, AI‑based route suggestions reduce cruising time. The productivity gain is observed mainly among low‑skilled drivers, narrowing the productivity gap by 13.4 %. | This is a domain‑specific case study; it demonstrates a measurable productivity improvement in a real‑world setting, though it focuses on a single occupation. |\n\n**Summary**\n\n \n- Empirical reviews (e.g., [4]) find that the evidence for productivity gains is still mixed; many studies have not yet captured robust, generalizable increases across industries. \n- Specific field studies (e.g., [3]) provide concrete examples where AI tools yield measurable productivity benefits, especially for workers who are less skilled in the task domain.\n\nOverall, the published literature up to early 2026 indicates that AI has the *potential* to boost productivity, but the magnitude and consistency of this effect across the broader economy remain an open research question.\n\nNote: sentences the cited abstracts did not support were removed.",
+      "n_sources": 5,
+      "cited": [
+        3,
+        4
+      ],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": {
+        "checked": 6,
+        "supported": 4,
+        "partial": 0,
+        "removed": 2,
+        "checker": "groq:qwen/qwen3.8-27b",
+        "outcome": "checked"
+      },
+      "sources": [
+        {
+          "n": 1,
+          "title": "Implications of AI innovation on economic growth: a panel data study",
+          "url": "https://doi.org/10.1186/s40008-023-00307-w",
+          "identifier": "doi:10.1186/s40008-023-00307-w",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 2,
+          "title": "Modeling the effects of artificial intelligence (AI)-based innovation on sustainable development goals (SDGs): Applying a system dynamics perspective in a cross-country setting",
+          "url": "https://doi.org/10.1016/j.techfore.2023.123203",
+          "identifier": "doi:10.1016/j.techfore.2023.123203",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 3,
+          "title": "AI, Skill, and Productivity: The Case of Taxi Drivers",
+          "url": "https://doi.org/10.1287/mnsc.2023.01631",
+          "identifier": "doi:10.1287/mnsc.2023.01631",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 4,
+          "title": "The Economic Impacts and the Regulation of AI: A Review of the Academic Literature and Policy Actions",
+          "url": "https://doi.org/10.5089/9798400268588.001",
+          "identifier": "doi:10.5089/9798400268588.001",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        },
+        {
+          "n": 5,
+          "title": "AI raises the productivity bar",
+          "url": "https://doi.org/10.1126/science.aef5239",
+          "identifier": "doi:10.1126/science.aef5239",
+          "provider": "openalex",
+          "licence_decision": "allow"
+        }
+      ],
+      "error": null,
+      "latency_s": 8.42
+    },
+    {
+      "id": "q29",
+      "split": "dev",
+      "category": "ambiguous_or_underspecified",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "VERA could not find published sources for this question right now, so it has not answered from memory. Please try again shortly or rephrase the question.",
+      "n_sources": 0,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": null,
+      "sources": [],
+      "error": null,
+      "latency_s": 2.26
+    },
+    {
+      "id": "q30",
+      "split": "heldout",
+      "category": "ambiguous_or_underspecified",
+      "model": "groq:openai/gpt-oss-20b",
+      "answer": "I can only help with questions about published evidence on AI coding assistants, AI-assisted software development and developer productivity. Your request looks outside that scope, so I have not answered it. For medical, legal, financial or safety matters, please consult a qualified professional or an appropriate official source.",
+      "n_sources": 0,
+      "cited": [],
+      "bad_citation_numbers": [],
+      "unresolved_cited_urls": [],
+      "claim_check": null,
+      "sources": [],
+      "error": null,
+      "latency_s": 0.34
+    }
+  ]
+}

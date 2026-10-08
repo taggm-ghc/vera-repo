@@ -120,7 +120,7 @@ def test_ask_response_names_the_provider_that_answered(monkeypatch):
     from vera import public_mode as pm
     pm.reset_limiter(None)
     monkeypatch.setattr(main, "ASK_CHAIN", _entries())
-    monkeypatch.setattr(main, "answer_via_chain", lambda q, entries: (AskResult("free answer", 42, 0.0), "groq:a"))
+    monkeypatch.setattr(main, "answer_via_chain", lambda q, entries, grounding=None: (AskResult("free answer", 42, 0.0), "groq:a"))
     r = TestClient(main.app).post("/ask", json={"question": "Do AI coding assistants help developers?"},
                                   headers={"X-API-Key": "k" * 20})
     assert r.status_code == 200, r.text
