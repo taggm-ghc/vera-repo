@@ -117,7 +117,9 @@ def test_answer_in_scope_llm_decline_uses_template_not_model_text(monkeypatch):
 
 def test_main_ask_routes_through_scope_router():
     src = (ROOT / "main.py").read_text()
-    assert "answer_in_scope(req.question" in src and "answer_question(" not in src
+    chain = (ROOT / "vera" / "inference_chain.py").read_text()  # item #77: main -> chain -> answer_in_scope
+    assert "answer_via_chain(req.question" in src and "answer_question(" not in src
+    assert "answer_in_scope(question" in chain and "answer_question(" not in chain
 
 
 SECRET_PATTERNS = [r"sk-[A-Za-z0-9]{10,}", r"https?://", r"onrender\.com", r"\.env\b", r"OPENAI_API_KEY",

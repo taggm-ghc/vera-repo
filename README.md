@@ -122,9 +122,15 @@ load-bearing evaluation dimension.
 
 Where the model name comes from today (read from code 2026-10-02): `vera/pipeline_llm.py` takes
 the default from `config/model-selection.json` and falls back to a hardcoded `gpt-4.1-nano`;
-`vera/gate_a.py` and `vera/m6/baseline_collection.py` hardcode `gpt-4.1-nano` themselves. A per-task
-provider chain file (`.vera-provider-chain.json`) exists but no code reads it, and its model
-availability and prices are unverified; wiring it is an open item (optional, C9).
+`vera/gate_a.py` and `vera/m6/baseline_collection.py` hardcode `gpt-4.1-nano` themselves.
+
+`/ask` only (2026-10-07, item #77): free providers first. `config/ask-provider-chain.json` lists Groq
+`openai/gpt-oss-20b`, then `openai/gpt-oss-120b` (free tier, recorded at $0, `reasoning_effort` low); an entry
+whose key is unset is skipped, and the selected OpenAI model is always the last resort. Any provider error
+or an empty answer moves the request to the next entry; the response's `model` field names the one that
+answered. Evaluation paths (TRACE capture, M6 baseline and judge, Gate A, pipeline) do not use the chain.
+Because free answers cost $0, the daily cost cap only binds on OpenAI fallbacks; the request caps still
+apply. The unused per-task file `.vera-provider-chain.json` was removed (its Groq model was retired).
 
 The M6 judge must come from a different model family than the generator. Since goal #2 (2026-10-02,
 offline, not yet run live) the judge is chosen at run time from the live list of Groq-served models
@@ -208,6 +214,7 @@ secret in `.env.example`.
 -   `OPENAI_API_KEY`: model provider key (generator and baseline). No Anthropic key will be used (A2 dropped 2026-10-02).
 -   No search key: M2 search is keyless (arXiv abstract pages, `vera/search_providers.py`; config `search` in `config/vera_eval_run.json`). An optional agent-prepared seed list can be frozen by sha256 as a disclosed fallback (`search.fallback_seed`). A licence gate (`vera/licence_gate.py`) defers undeclared and rejects NC/ND licences before content is stored.
 -   `GROQ_API_KEY` / `MISTRAL_API_KEY`: judge provider keys (`vera/m6/judge.py`); the judge default is Groq.
+    `GROQ_API_KEY` also makes `/ask` free-tier-first (item #77, `config/ask-provider-chain.json`); API service only.
 -   Optional, read by code: `VERA_COST_LOG` (file the M2 runner appends cost lines to),
     `VERA_JUDGE_*` overrides (model, price, `VERA_JUDGE_ALLOW_SAME_FAMILY=1` to allow a disclosed same-family judge),
     `VERA_DEMO_SOURCE`.
@@ -227,9 +234,9 @@ secret in `.env.example`.
 One image (`Dockerfile`) runs both services; `start.sh api|ui` picks which. Port: Render's `PORT`, else 8000. Secrets live only in Render's environment settings, never in the repo or the image (`.dockerignore` keeps `.env` and `*-prv` files out). Service URLs are not recorded in this repository.
 
 1. Generate a client key locally: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`.
-2. **API service:** New → Web Service → this repo, branch `main`; Runtime Docker; Root Directory blank; plan Free; Health Check Path `/health`; Auto-Deploy Off. Environment: `OPENAI_API_KEY`, `VERA_API_KEY` (the new key). Leave `VERA_PUBLIC_MODE` unset (public mode is the default). Template: `.env.render.api.example` (copy to the gitignored `.env.render.api`, fill in, paste with "Add from .env").
-3. **UI service:** New → Web Service → same repo; Runtime Docker; plan Free; Docker Command `./start.sh ui`; Health Check Path `/_stcore/health`; Auto-Deploy Off. Environment: `VERA_API_BASE_URL` (the API service's `https://` address, no trailing slash; without it the UI calls `127.0.0.1:8001` and fails), `VERA_API_KEY` (same key), `VERA_DEMO_SOURCE=fixture` (demo pages show the labelled fixture; no database on Render yet). Template: `.env.render.ui.example` (copy to `.env.render.ui`, same steps).
-4. Check: API `/health` returns 200 and `/ask` without the key returns 401; the UI answers one question.
+2. **API service:** New → Web Service → this repo, branch `main`; Runtime Docker; Root Directory blank; plan Free; Health Check Path `/health`; Auto-Deploy Off. Environment: `OPENAI_API_KEY`, `VERA_API_KEY` (the new key), optional `GROQ_API_KEY` (free-tier `/ask`, OpenAI as fallback). Leave `VERA_PUBLIC_MODE` unset (public mode is the default). Template: `.env.render.api.example` (copy to the gitignored `.env.render.api`, fill in, paste with "Add from .env").
+3. **UI service:** New → Web Service → same repo; Runtime Docker; plan Free; Docker Command `./start.sh ui`; Health Check Path `/_stcore/health`; Auto-Deploy Off. Environment: `VERA_API_BASE_URL` (the API service's `https://` address, no trailing slash; without it the UI calls `127.0.0.1:8001` and fails), `VERA_API_KEY` (same key), `VERA_DEMO_SOURCE=fixture` (demo pages show the labelled fixture; no database on Render yet). Template: `.env.render.ui.example` (copy to `.env.render.ui`, same steps). The UI holds no provider key (no `OPENAI_API_KEY` or `GROQ_API_KEY`): it only calls the API, which chooses the provider.
+4. Check: API `/health` returns 200 and `/ask` without the key returns 401; the UI answers one question. With `GROQ_API_KEY` set, the answer's `model` field reads `groq:...` and `cost_usd` is 0; `gpt-4.1-nano` there means Groq failed and OpenAI answered.
 5. Redeploy after a push: Manual Deploy → Deploy latest commit.
 
 Limits: free services sleep when idle (first request after sleep waits about a minute); public-mode caps are in memory, so they reset whenever a service restarts or wakes; one uvicorn worker by design. Run `python scripts/release_gate.py` before every deploy.
@@ -303,8 +310,8 @@ VERA is under active development as a capstone project. The 2026-09-30 directive
 A2 (Anthropic key) DECIDED 2026-10-02 by R1: dropped, no Anthropic key will be used; MVP must-have #8
 ("draft critiqued"): direction given 2026-10-02 (a critique pass informed by the divergences found by claim
 verification, feeding the existing bounded revision), plan being drafted, nothing built; deleting test row `questions.question_id=7` (needs an approved action); confirming
-the 8 quarterly stamps; the staged live run; requirements freeze; provider-chain wiring
-(`.vera-provider-chain.json` exists but no code reads it; optional); pg_dump and the non-Render host choice
+the 8 quarterly stamps; the staged live run; requirements freeze; provider-chain wiring for the
+pipeline stages (`/ask` is wired since item #77, 2026-10-07); pg_dump and the non-Render host choice
 (deferred to 2026-10-13..16; the Render database expires 2026-10-17; PostgreSQL stays regardless of host).
 
 **Accepted divergences (recorded):** dev and production share one Postgres instance and schema
@@ -320,7 +327,7 @@ plain paths and are not links):
 
 -   `AI-Internship/p3m3/vera-plan-end-to-end-runner.md`: what is missing for a first end-to-end run and how to build it.
 -   `AI-Internship/p3m3/vera-plan-config-single-source.md`: fix the three VERA config issues (model and judge choice
-    scattered across code, an unread provider-chain file, hardcoded judge family) with one config source,
+    scattered across code, an unread provider-chain file (removed 2026-10-07; `/ask` now uses `config/ask-provider-chain.json`), hardcoded judge family) with one config source,
     **planned before the MVP**; implementation not started, waiting on two R1 decisions (amend in place or a
     companion file; judge provider and key).
 -   `AI-Internship/p3m3/vera-plan-m2-hardening.md`, `vera-plan-m3-gate-b-extras.md`,

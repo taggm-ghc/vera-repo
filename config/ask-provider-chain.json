@@ -1,0 +1,36 @@
+{
+  "description": "Item #77 (2026-10-07): free-tier-first providers for /ask only (scope router + answer). Tried in order; an entry whose api_key_env is unset is skipped; OpenAI (config/model-selection.json, priced from config/model-pricing.json) is always the last resort. Evaluation paths (TRACE capture, M6 baseline and judge, Gate A, pipeline) never read this file and stay on the selected OpenAI model.",
+  "checked_at": "2026-10-07",
+  "timeout_s": 20,
+  "providers": [
+    {
+      "provider": "groq",
+      "base_url": "https://api.groq.com/openai/v1",
+      "model": "openai/gpt-oss-20b",
+      "api_key_env": "GROQ_API_KEY",
+      "input_per_1m": 0.0,
+      "output_per_1m": 0.0,
+      "extra_body": {"reasoning_effort": "low"},
+      "note": "Free tier: $0 recorded (Groq's paid rate is listed at $0.075 in / $0.30 out per 1M). reasoning_effort low is required: without it the router's 60-token JSON call fails with 400 json_validate_failed (measured 2026-10-07)."
+    },
+    {
+      "provider": "groq",
+      "base_url": "https://api.groq.com/openai/v1",
+      "model": "openai/gpt-oss-120b",
+      "api_key_env": "GROQ_API_KEY",
+      "input_per_1m": 0.0,
+      "output_per_1m": 0.0,
+      "extra_body": {"reasoning_effort": "low"},
+      "note": "Second Groq model: separate per-model free limits. Same reasoning_effort rule (measured 2026-10-07)."
+    }
+  ],
+  "openrouter_example": {
+    "note": "Not active. To add OpenRouter, copy this object into providers (OpenAI stays the implied last resort), set model to a current ':free' id from https://openrouter.ai/api/v1/models, and set OPENROUTER_API_KEY. Free models allow 50 requests/day without purchased credits (1,000/day with $10+). Check the account's privacy settings first: some providers may log or train on prompts.",
+    "provider": "openrouter",
+    "base_url": "https://openrouter.ai/api/v1",
+    "model": "<current :free model id>",
+    "api_key_env": "OPENROUTER_API_KEY",
+    "input_per_1m": 0.0,
+    "output_per_1m": 0.0
+  }
+}

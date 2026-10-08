@@ -132,12 +132,14 @@ def classifier_messages(question: str, cfg: RouterConfig) -> list[dict]:
             {"role": "user", "content": l2["user_template"].format(question=q)}]
 
 
-def default_chat(messages: list[dict], model: str, l2: dict) -> tuple[str, int, int]:
+def default_chat(messages: list[dict], model: str, l2: dict, client=None,
+                 extra_body: dict | None = None) -> tuple[str, int, int]:
     from vera.ask_service import _get_client
 
-    c = _get_client().chat.completions.create(
+    c = (client or _get_client()).chat.completions.create(
         model=model, messages=messages, temperature=l2["temperature"], max_tokens=l2["max_tokens"],
         response_format={"type": "json_object"}, timeout=l2["timeout_s"],
+        **({"extra_body": extra_body} if extra_body else {}),
     )
     return c.choices[0].message.content or "", c.usage.prompt_tokens, c.usage.completion_tokens
 

@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from openai import AuthenticationError, OpenAIError, RateLimitError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from vera.ask_service import answer_in_scope
+from vera.inference_chain import answer_via_chain, load_chain
 from vera.auth import (
     OPENAI_KEY_ERROR_DETAIL,
     classify_openai_api_key,
@@ -40,6 +40,7 @@ _model_pricing = load_model_pricing()
 
 MODEL = _model_selection.selected_model if _model_selection else "gpt-4o-mini"
 CURRENT_PRICING = latest_pricing_for(MODEL, _model_pricing)
+ASK_CHAIN = load_chain(MODEL, CURRENT_PRICING)  # item #77: free-tier providers first, OpenAI last
 
 if CURRENT_PRICING is None:
     logger.warning(
@@ -147,7 +148,8 @@ def ask(req: AskRequest, request: Request):
         )
 
     try:
-        result = answer_in_scope(req.question, MODEL, CURRENT_PRICING)  # scope router first (item #72 W1)
+        # scope router first (item #72 W1); free providers first, OpenAI last (item #77)
+        result, answered_by = answer_via_chain(req.question, ASK_CHAIN)
     except AuthenticationError as exc:
         raise HTTPException(
             status_code=401,
@@ -178,7 +180,7 @@ def ask(req: AskRequest, request: Request):
     record_request_cost(request, result.cost_usd)
     return AskResponse(
         answer=result.answer,
-        model=MODEL,
+        model=answered_by,
         tokens_used=result.tokens_used,
         cost_usd=result.cost_usd,
     )
