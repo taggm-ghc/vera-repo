@@ -56,7 +56,7 @@ def _per_check(res: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def _validation(val: dict) -> None:
-    st.subheader("Check validation (dev labels)")
+    st.markdown("#### Check validation (dev labels)")
     st.caption(f"Positive class: {val.get('positive_class')}; labeller: {val.get('labeller')}")
     rows = [{"check": n, "n": c["n"], "TP": c["tp"], "TN": c["tn"], "FP": c["fp"], "FN": c["fn"],
              "TPR": _pct(c.get("tpr")), "TNR": _pct(c.get("tnr")), "note": c.get("note", "")}
@@ -69,28 +69,72 @@ def _validation(val: dict) -> None:
                     f"TPR={_pct(s.get('heuristic_tpr'))}, TNR={_pct(s.get('heuristic_tnr'))}. {s.get('note', '')}")
 
 
-def _guidance(res: dict, val: dict | None) -> None:
+def _cfg():
     from vera.trace_eval import guidance as g
-
     try:
-        cfg = g.load_config()
+        return g.load_config()
     except (OSError, ValueError):
-        st.info("Decision guidance unavailable: config/trace_eval_guidance.json missing or unreadable.")
-        return
-    st.subheader("Decision guidance: what this snapshot supports")
-    st.caption("Computed from the results and validation files above with the thresholds in "
-               "config/trace_eval_guidance.json; re-running the evaluation recomputes everything here.")
-    overall, checks = g.compare_overall(res, cfg), g.compare_checks(res, cfg)
-    trust = g.check_trust(val, cfg) if val else []
-    for line in g.supported_statements(overall, checks, trust, cfg):
-        st.markdown(f"- {line}")
-    st.markdown("**Is a variant better overall?** (paired, every question)")
+        return None
+
+
+def _context(res: dict) -> None:
+    """1. Context: a short setup only (what was evaluated, which system, when); detail lives in Elaboration."""
+    sha = str(res.get("questions_sha256") or "n/a")[:12]
+    captured = str(res.get("generated_at") or "")[:10] or "unknown"
+    n_q = len({t.get("id") for t in res.get("traces", []) if t.get("id")})
+    variants = ", ".join(res.get("variants", {}))
+    st.markdown(f"**Context.** {n_q} frozen agent-authored questions, each answered by: {variants}. Baseline is /ask "
+                "as it was at capture time (a bare gpt-4.1-nano call; /ask may have changed since); grounded_v1 adds "
+                "VERA's keyless arXiv search, numbered abstracts and a cite-only rule. Rule-based checks score every "
+                "answer.")
+    st.caption(f"Snapshot captured {captured} (UTC); re-running the evaluation replaces these results and this date. "
+               f"checks_version: {res.get('checks_version')} | questions_sha256: {sha}")
+
+
+def _tldr(res: dict, val: dict | None, cfg: dict) -> None:
+    """2. TL;DR: computed findings with their uncertainty and the main caveat beside them (not later)."""
+    from vera.trace_eval import guidance as g
+    text = g.tldr(g.compare_overall(res, cfg), g.compare_checks(res, cfg), g.check_trust(val, cfg) if val else [], cfg)
+    n_q = len({t.get("id") for t in res.get("traces", []) if t.get("id")})
+    st.info(f"**TL;DR (computed from the results below)**\n\n{text}\n\n**Main caveat:** {n_q} agent-authored "
+            "questions (small n, self-preference risk); checks are heuristics; grounding used abstracts only.")
+    st.caption("Assembled from the paired tests and check validation on this page; not a new model judgement.")
+
+
+def _determinations(overall, checks, trust) -> None:
+    """3. Computed determinations: the paired tests and check trust, each row with its indicator."""
+    st.subheader("Computed determinations")
+    st.markdown("**Is a variant better overall?** (paired exact McNemar test, every question)")
     st.dataframe(pd.DataFrame(overall), hide_index=True)
     st.markdown("**Which checks changed?** (paired, questions where the check applies to both variants)")
     st.dataframe(pd.DataFrame(checks), hide_index=True)
     if trust:
-        st.markdown("**How far can each check be trusted?** (against the blind labels; positive class = FAIL)")
+        st.markdown("**How far can each check be trusted?** (against blind labels; positive class = FAIL)")
         st.dataframe(pd.DataFrame(trust), hide_index=True)
+
+
+def _decisioning(overall, checks, trust, cfg) -> None:
+    """4. Decisioning: recommendations, each tied to a determination above (findings and recommendations kept apart)."""
+    from vera.trace_eval import guidance as g
+    st.subheader("Decisioning")
+    st.caption("Recommendations derived from the determinations above with the thresholds in "
+               "config/trace_eval_guidance.json; each names the row it rests on. Judgement, not a further finding.")
+    for line in g.supported_statements(overall, checks, trust, cfg):
+        st.markdown(f"- {line}")
+    st.markdown(
+        "**How to act on it**\n"
+        "- **Claim** only ▲ rows, and say the overall result is ≈ unless the overall table shows ▲.\n"
+        "- **Fix first**: ▼ rows, then checks marked *misses failures* (their passes say nothing about quality).\n"
+        "- **Treat · rows as warning signs**: add questions in those categories before deciding.\n"
+        "- **Discount** pass rates on checks that *over-flag*: they understate quality.\n"
+        "- **Tune on dev only**; read held-out once at the end, or it stops being a fair test.\n"
+        "- **Re-run after each change** and compare the paired tables, not just the headline.")
+
+
+def _elaboration(cfg, val: dict | None) -> None:
+    """5. Elaboration: the math, check validation detail and the full caveats."""
+    from vera.trace_eval import guidance as g
+    st.subheader("Elaboration")
     alpha, m = cfg["alpha"], g.min_discordant_for_significance(cfg["alpha"])
     t = cfg["trust"]
     with st.expander("The math behind the indicators"):
@@ -110,18 +154,32 @@ def _guidance(res: dict, val: dict | None) -> None:
                     f"Over-flags: TPR ≥ {t['reliable_min_tpr']:.0%}, TNR lower. Misses failures: TPR ≤ "
                     f"{t['unusable_max_tpr']:.0%}. \"few labels\" when fewer than {cfg['small_n']} real failures or "
                     "good answers were labelled.")
-    with st.expander("How to use this for decisions"):
-        st.markdown(
-            "- **Claim** only ▲ rows, and say the overall result is ≈ unless the overall table shows ▲.\n"
-            "- **Fix first**: ▼ rows, then checks marked *misses failures* (their passes say nothing about quality).\n"
-            "- **Treat · rows as warning signs**: add questions in those categories before deciding.\n"
-            "- **Discount** pass rates on checks that *over-flag*: they understate quality.\n"
-            "- **Tune on dev only**; read held-out once at the end, or it stops being a fair test.\n"
-            "- **Re-run after each change** and compare the paired tables, not just the headline.")
+    if val is None:
+        st.info("Check validation not yet available")
+    else:
+        _validation(val)
+    st.warning("Caveats: questions are agent-authored (self-preference risk); a single agent coded the checks "
+               "and labelled the validation set, both from the same model family; n is small; checks are "
+               "heuristics validated on dev only; grounding uses abstracts only; arXiv rate limits caused "
+               "capture errors, which count as failures.")
+
+
+def _data(res: dict) -> None:
+    """6. Data: raw summary tables, chart and the trace browser."""
+    st.subheader("Data")
+    st.markdown("**Headline: share of answers that passed every check**")
+    st.caption("Directional, small n; capture errors count as failures.")
+    st.dataframe(_headline(res), hide_index=True)
+    st.markdown("**Per check**")
+    table, chart = _per_check(res)
+    st.dataframe(table, hide_index=True)
+    if not chart.empty:
+        st.bar_chart(chart)
+    _browser(res)
 
 
 def _browser(res: dict) -> None:
-    st.subheader("Trace browser")
+    st.markdown("#### Trace browser")
     traces = res.get("traces", [])
     variants = sorted({t["variant"] for t in traces})
     if not variants:
@@ -149,41 +207,26 @@ def _browser(res: dict) -> None:
 
 
 def render_trace_eval(results_path=RESULTS_PATH, validation_path=VALIDATION_PATH) -> None:
+    """Order (literature-checked): context, TL;DR with caveat, computed determinations, decisioning,
+    elaboration, data."""
+    from vera.trace_eval import guidance as g
     st.title("VERA Trace Eval")
     res = _load(results_path)
     if res is None:
         st.warning("Results file not found or unreadable. Generate it with: "
                    "`venv/bin/python scripts/trace_measure.py --traces <trace files> --out eval_results/trace_eval_v1.json`")
         return
-    sha = str(res.get("questions_sha256") or "n/a")[:12]
-    captured = str(res.get("generated_at") or "")[:10] or "unknown"
-    st.markdown("30 frozen agent-authored questions (20 dev, 10 held-out). Baseline is /ask as it was at "
-                "capture time (a bare gpt-4.1-nano call; /ask may have changed since). The fix, grounded_v1, uses VERA keyless arXiv search, numbered "
-                "abstracts and a cite-only rule. Each answer is scored by rule-based checks.")
-    st.caption(f"Snapshot captured {captured} (UTC); re-running the evaluation replaces these results and this date. "
-               f"checks_version: {res.get('checks_version')} | questions_sha256: {sha}")
-
-    st.subheader("Headline: share of answers that passed every check")
-    st.caption("Directional, small n; capture errors count as failures.")
-    st.dataframe(_headline(res), hide_index=True)
-
-    st.subheader("Per check")
-    table, chart = _per_check(res)
-    st.dataframe(table, hide_index=True)
-    if not chart.empty:
-        st.bar_chart(chart)
-
     val = _load(validation_path)
-    if val is None:
-        st.info("Check validation not yet available")
-    else:
-        _validation(val)
-
-    _guidance(res, val)
-
-    _browser(res)
-
-    st.warning("Caveats: questions are agent-authored (self-preference risk); a single agent coded the checks "
-               "and labelled the validation set, both from the same model family; n is small; checks are "
-               "heuristics validated on dev only; grounding uses abstracts only; arXiv rate limits caused "
-               "capture errors, which count as failures.")
+    _context(res)
+    cfg = _cfg()
+    if cfg is None:
+        st.info("Decision guidance unavailable: config/trace_eval_guidance.json missing or unreadable.")
+        _data(res)
+        return
+    overall, checks = g.compare_overall(res, cfg), g.compare_checks(res, cfg)
+    trust = g.check_trust(val, cfg) if val else []
+    _tldr(res, val, cfg)
+    _determinations(overall, checks, trust)
+    _decisioning(overall, checks, trust, cfg)
+    _elaboration(cfg, val)
+    _data(res)

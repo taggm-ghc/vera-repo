@@ -95,9 +95,33 @@ def test_page_shows_guidance_and_math_without_date_literals():
     at.run(timeout=30)
     assert not at.exception
     subs = [s.value for s in at.subheader]
-    assert "Decision guidance: what this snapshot supports" in subs
+    # literature-checked order (2026-10-07): context, TL;DR, determinations, decisioning, elaboration, data
+    assert subs[:4] == ["Computed determinations", "Decisioning", "Elaboration", "Data"], subs
+    assert "Context." in at.markdown[0].value and "TL;DR" in at.info[0].value and "Main caveat" in at.info[0].value
     assert len(at.latex) == 2
     src = (ROOT / "vera" / "trace_eval" / "ui.py").read_text() + (ROOT / "vera" / "trace_eval" / "guidance.py").read_text()
     import re
     assert not re.search(r"20\d\d-\d\d-\d\d", src.split('"""', 2)[-1])  # no date literal outside the docstring
     assert "Week 4" not in "".join(m.value for m in at.markdown) + "".join(t.value for t in at.title)
+
+
+def test_tldr_from_real_snapshot_and_on_page():
+    cfg = g.load_config()
+    res = json.loads((ROOT / "eval_results" / "trace_eval_v1.json").read_text())
+    val = json.loads((ROOT / "eval_results" / "trace_eval_v1_validation.json").read_text())
+    text = g.tldr(g.compare_overall(res, cfg), g.compare_checks(res, cfg), g.check_trust(val, cfg), cfg)
+    assert text.startswith("Overall, grounded_v1 is not distinguishable")
+    assert "A1_citation_present (p=0.0039)" in text and "A4_phantom_evidence (p=0.0002)" in text
+    at = AppTest.from_function(_app, args=(str(ROOT / "eval_results" / "trace_eval_v1.json"),
+                                           str(ROOT / "eval_results" / "trace_eval_v1_validation.json")))
+    at.run(timeout=30)
+    assert not at.exception and at.info and "TL;DR" in at.info[0].value
+
+
+def test_tldr_reports_regressions():
+    cfg = dict(CFG)
+    res = _res(0, 0)
+    for i in range(7):
+        res["traces"] += [_trace(f"w{i}", "baseline", True, {"A1": True}), _trace(f"w{i}", "cand", False, {"A1": False})]
+    text = g.tldr(g.compare_overall(res, cfg), g.compare_checks(res, cfg), [], cfg)
+    assert "worse" in text and "Real regressions: A1" in text

@@ -172,3 +172,31 @@ def supported_statements(overall: list[dict], checks: list[dict], trust: list[di
     if over:
         out.append("Checks that over-flag good answers (pass rates may be understated): " + ", ".join(over) + ".")
     return out
+
+
+def tldr(overall: list[dict], checks: list[dict], trust: list[dict], cfg: dict) -> str:
+    """A short top-of-page summary assembled from the computed tables (not a model judgement)."""
+    base = cfg["baseline_variant"]
+    parts = []
+    if overall:
+        verdicts = {r["indicator"] for r in overall}
+        variant = overall[0]["variant"]
+        if verdicts == {SAME} or verdicts <= {SAME, SMALL}:
+            parts.append(f"Overall, {variant} is not distinguishable from {base} on this question set "
+                         f"(paired McNemar, p >= {cfg['alpha']}).")
+        else:
+            parts.append("Overall: " + "; ".join(f"{r['split']} {r['indicator'].split(' ', 1)[1]} (p={r['McNemar p']})"
+                                                  for r in overall) + ".")
+    better = [r for r in checks if r["indicator"] == BETTER]
+    worse = [r for r in checks if r["indicator"] == WORSE]
+    if better:
+        parts.append("Real improvements: " + ", ".join(f"{r['check']} (p={r['McNemar p']})" for r in better) + ".")
+    if worse:
+        parts.append("Real regressions: " + ", ".join(f"{r['check']} (p={r['McNemar p']})" for r in worse) + ".")
+    small = [r["check"] for r in checks if r["indicator"] == SMALL]
+    if small:
+        parts.append(f"Too few questions to judge: {len(small)} checks.")
+    weak = [r["check"] for r in trust if r["indicator"].startswith(MISSES)]
+    if weak:
+        parts.append("Do not trust: " + ", ".join(weak) + " (misses real failures).")
+    return " ".join(parts) or "Not enough data for a summary."
