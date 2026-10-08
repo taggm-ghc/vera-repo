@@ -1,5 +1,6 @@
 """Item #84 storage/recall: fake reader/store, no DB. #74: the question and identity are never written."""
 import json
+from pathlib import Path
 from datetime import datetime, timezone
 
 from vera import memory_store as ms
@@ -150,3 +151,18 @@ def test_recall_requires_min_matched_terms_from_config():
     assert "unnest(CAST(:terms AS text[]))" in sql and "plainto_tsquery" in sql
     assert p["minterms"] == CFG["min_matched_terms"]
     assert p["terms"] == r.query_terms(QUESTION).split(" or ") and len(p["terms"]) >= p["minterms"]
+
+
+Q09 = ("Which outcome measures, such as task completion time, pull request throughput or surveys, "
+       "have been used to assess AI coding assistants, and how do they affect conclusions?")
+
+
+def test_query_terms_keep_q09_content_words():
+    cfg = json.loads((Path(ms.__file__).parent.parent / "config" / "ask-provider-chain.json").read_text())["memory"]["store"]
+    terms = ms.RoMemoryReader(None, cfg).query_terms(Q09).split(" or ")
+    for w in ("outcome", "measures", "task", "completion", "time", "pull", "request", "throughput", "surveys",
+              "assess", "coding", "assistants", "conclusions"):
+        assert w in terms, w
+    for w in ("which", "such", "have", "been", "how", "they"):
+        assert w not in terms
+    assert len(terms) <= int(cfg["max_query_terms"])

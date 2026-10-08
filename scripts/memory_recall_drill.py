@@ -3,6 +3,7 @@
 Usage (env: OPENAI_API_KEY, GROQ_API_KEY, VERA_API_KEY, VERA_DB_URL_RO, VERA_DB_URL_WO already in the process):
   memory_recall_drill.py ask QID      # FastAPI TestClient; background tasks run before the call returns
   memory_recall_drill.py recall QID   # fresh process: ask a (related) question and print `recalled`
+  memory_recall_drill.py recall-related QID "<related question>"  # ro reader recall ONLY: no /ask, no writes
   memory_recall_drill.py count MINUTES [QID...]  # ro: live memory claims created in the last MINUTES; placeholder check
 Questions come from config/trace_questions_v1.json by id.
 """
@@ -59,7 +60,23 @@ def count(minutes: int, qids: tuple = ()) -> dict:
             "memory_answer_rows_with_nonplaceholder_question": ph[2]}
 
 
+def recall_related(qid: str, related: str) -> dict:
+    """ro reader's recall only (SELECT). Needs only the ro URL env var; never touches /ask or a write account."""
+    from sqlalchemy import create_engine
+    from vera.memory_store import RoMemoryReader
+    cfg = json.loads((ROOT / "config" / "ask-provider-chain.json").read_text())["memory"]["store"]
+    rd = RoMemoryReader(create_engine(os.environ[cfg["db_url_ro_env"]], hide_parameters=True), cfg)
+    out = {}
+    for label, q in (("qid", question(qid)), ("related", related)):
+        rows = rd.recall(q)
+        out[label] = {"terms": rd.query_terms(q), "recalled": len(rows), "first": [r["claim_text"][:80] for r in rows]}
+    return out
+
+
 if __name__ == "__main__":
     mode, arg = sys.argv[1], sys.argv[2]
+    if mode == "recall-related":
+        print(json.dumps(recall_related(arg, sys.argv[3]), default=str))
+        sys.exit(0)
     out = count(int(arg), tuple(sys.argv[3:])) if mode == "count" else ask(arg)
     print(json.dumps(out, default=str))

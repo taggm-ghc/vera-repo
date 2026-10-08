@@ -47,7 +47,10 @@ class RoMemoryReader:
             return c.execute(text(_sql(sql)), params).fetchall()
 
     def query_terms(self, question: str) -> str:
-        words = list(dict.fromkeys(w.lower() for w in _WORD.findall(question or "")))
+        stop = {w.lower() for w in self.cfg["query_stopwords"]}
+        short = int(self.cfg["min_query_word_len"])
+        words = list(dict.fromkeys(w for w in (x.lower() for x in _WORD.findall(question or ""))
+                                   if len(w) >= short and w not in stop))
         return " or ".join(words[: int(self.cfg["max_query_terms"])])
 
     def recall(self, question: str) -> list[dict]:

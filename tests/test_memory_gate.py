@@ -100,3 +100,19 @@ def test_min_words_is_config_driven():
     t = "Sparse attention reduces memory cost on very long sequences."
     assert run(text=t, cfg=dataclasses.replace(DEFAULT_CONFIG, min_words=1)).allowed
     assert LENGTH in run(text=t, cfg=dataclasses.replace(DEFAULT_CONFIG, min_words=20)).reasons
+
+
+ROW20 = "In the benchmark shows that even the best models answer only 2 of 20 questions completely correctly, suggesting limited impact on *code correctness* in PR contexts."
+ROW21 = "In, stable productivity self‑reports (84 % improvement at both times) contrasted with a *paradox*: almost half the matched cohort reported worse developer experience."
+ROW22 = "These metrics support the claim that assistants aid learning, yet the study relied on participant perception rather than objective code metrics, potentially inflating the positive effect. | |"
+ROW23 = "| **Surveys / questionnaires** (self‑reported perceptions of productivity, experience, flow, cognitive load, etc.) | Subjective gauge of developer experience and perceived productivity | Both the longitudinal study and the student study used surveys."
+ROW24 = "This “productivity‑experience paradox” is driven entirely by subjective survey responses; objective metrics are absent, so the conclusion is limited to perceived effects. |, |"
+
+
+@pytest.mark.parametrize("row", [ROW20, ROW21, ROW22, ROW23, ROW24])
+def test_live_defect_rows_20_to_24_rejected(row):
+    assert not run(text=row).allowed
+
+
+def test_row21_rejected_as_fragment():
+    assert FRAGMENT in run(text=ROW21).reasons

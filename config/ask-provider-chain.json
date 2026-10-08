@@ -158,7 +158,8 @@
   "ellipsis_patterns": ["\\.{2,}\\s*$", "\u2026\\s*$"],
   "markup_patterns": ["\\|[^|\\n]*\\|", "^\\s*#{1,6}\\s", "^\\s*([-*+\u2022]|\\d+[.)])\\s", "^\\s*>\\s", "\\*\\*|__|`"],
   "fragment_start_words": ["and", "but", "or", "nor", "so", "yet", "which", "that", "whereas", "while", "thus", "therefore", "also", "because", "although", "however", "then", "than", "of", "to"],
-  "fragment_patterns": ["^(in|on|at|for|by|from|with|within|across|under|over)\\s+(the|this|these|those|a|an)\\s+\\w+\\s+(shows?|demonstrates?|indicates?|suggests?|reports?|finds?|found|confirms?)\\b"],
+  "fragment_patterns": ["^(in|on|at|for|by|from|with|within|across|under|over)\\s+(the|this|these|those|a|an)\\s+\\w+\\s+(shows?|demonstrates?|indicates?|suggests?|reports?|finds?|found|confirms?)\\b",
+    "^(in|on|at|for|by|from|with|within|across|under|over|as|per|via|among|between|during|after|before|despite|given|while|when|if|since)\\s*,"],
     "max_chars": 400,
     "max_question_overlap": 0.6,
     "min_overlap_tokens": 3,
@@ -263,7 +264,9 @@
       "connect_timeout_s": 5,
       "statement_timeout_ms": 5000,
       "recall_k": 3,
-      "max_query_terms": 12,
+      "max_query_terms": 16,
+  "min_query_word_len": 4,
+  "query_stopwords": ["which","such","what","when","where","while","with","without","that","this","these","those","have","has","been","being","were","was","are","does","did","and","the","for","from","into","onto","than","then","them","they","their","there","about","between","among","how","why","who","whom","whose","can","could","would","should","will","shall","may","might","must","also","each","some","any","more","most","other","over","under","very","both","only","same","does"],
       "max_writes_per_answer": 3,
       "max_writes_per_day": 50
     }
