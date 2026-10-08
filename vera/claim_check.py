@@ -10,10 +10,12 @@ import json
 import logging
 import os
 import re
+from contextvars import ContextVar
 
 from openai import OpenAI
 
 logger = logging.getLogger("vera")
+RECORDS: ContextVar = ContextVar("claim_records", default=None)  # item #84: caller-set out-channel for records
 
 _CITE = re.compile(r"\[(\d+(?:\s*,\s*\d+)*)\]")
 _SENT = re.compile(r"(?<=[.!?])\s+(?=[A-Z\[(*#-])|\n+")
@@ -115,7 +117,8 @@ def apply(answer: str, claims: list[dict], verdicts: dict[int, dict], cfg: dict)
     return text, counts
 
 
-def check_answer(answer: str, sources: list[dict], cfg: dict, call=None) -> tuple[str | None, dict]:
+def check_answer(answer: str, sources: list[dict], cfg: dict, call=None,
+                 records: list | None = None) -> tuple[str | None, dict]:
     """(checked text, summary). Text None means fail closed (no claim survived, or no checker could judge)."""
     claims = split_claims(answer, len(sources), int(cfg["max_claims"]))
     if not claims:
@@ -123,6 +126,10 @@ def check_answer(answer: str, sources: list[dict], cfg: dict, call=None) -> tupl
     verdicts, label = judge(claims, sources, cfg, call)
     if verdicts is None:
         return None, {"checked": 0, "outcome": "checker_unavailable"}
+    records = RECORDS.get() if records is None else records
+    if records is not None:  # item #84: internal per-claim records (never part of the public summary)
+        records.extend({"id": c["id"], "sentence": c["text"], "citations": c["cites"],
+                        "verdict": verdicts[c["id"]]["verdict"]} for c in claims)
     text, counts = apply(answer, claims, verdicts, cfg)
     counts["checker"] = label
     if counts["supported"] + counts["partial"] == 0:

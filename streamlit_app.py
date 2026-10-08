@@ -6,6 +6,7 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
+from vera.memory_panel import render_memory_panel
 from vera.public_mode import is_public_mode, post_ask, upstream_base_url
 from vera.sources_sidebar import render_sources, render_sources_sidebar
 from vera.ui_safety import safe_markdown
@@ -77,11 +78,16 @@ if st.button("Ask", type="primary"):
 
                 if response.status_code == 200:
                     data = response.json()
+                    # Store in session state to persist across reruns
+                    st.session_state["last_ask_response"] = data
 
                     # Display answer
                     st.markdown("### ✅ Answer")
                     st.success(safe_markdown(data["answer"]))
                     render_sources(st, data.get("sources") or [], data.get("traced_sources") or [], data.get("claim_check"))
+
+                    # Display recalled findings from memory
+                    render_memory_panel(st, data)
 
                     # Display metrics
                     st.markdown("### 💰 Metrics")

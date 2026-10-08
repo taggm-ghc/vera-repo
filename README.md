@@ -315,12 +315,26 @@ Written as dated observations, not guarantees. Every measured figure carries its
 - **Licence rule (approved by R1, 2026-10-04).** The gate rejects only ND, no-educational-use and fee-only terms; plain NC is accepted; an undeclared or unclear licence is held for review. Checked on 7 hand-written cases (`vera/licence_gate.py`).
 - **Release gate** (`python scripts/release_gate.py`). Offline: full suite, sha256 of the two frozen question files, static safety checks (no environment key passed to a widget, no `unsafe_allow_html` on model text, public mode default). `--live` additionally re-runs scope layer 1 only (zero cost) and fails on any false accept (directional, small n).
 
+## How VERA remembers (Week 5)
+
+**What it keeps.** VERA keeps checked research findings, not people. A finding is one sentence from an answer. The claim checker marked it supported by the abstract it cites. It comes with its sources. VERA never keeps your question, who you are, or any session id.
+
+**How it gets in.** Findings are auto-saved shortly after the answer, in the background after the cited source is admitted to the corpus. They pass the claim check and the structural write gate with no human review — a recorded divergence from the Week 5 lesson's "confirm consequential writes". An owner-only confirm step is planned. The gate tests for support, allowed sources (arXiv or OpenAlex, licence accepted), identifier, and refusable content (tool dumps, instructions, personal remarks, echoed questions, time-bound claims).
+
+**Where it lives.** In VERA's Postgres database, in the existing claims, answers and evidence tables, under one fixed memory label. Process memory holds no candidates.
+
+**How it comes back.** On later questions, VERA searches saved findings by text match and recency, using the read-only account. Only findings above a minimum relevance floor are shown after the answer under "From VERA's memory", with their date and source. They are displayed only; they are never fed back to the model.
+
+**How it is forgotten.** Findings older than 30 days are not recalled. Older findings rank lower, with a 14-day half-life. An operator can mark a finding contradicted, and it stops being recalled at once. Permanent deletion needs the owner's approval each time.
+
+**Known limits.** Stored text is the model's own sentence checked against an abstract, so a fluent false claim from a bad abstract could pass. The gate is hygiene, not a poisoning defence. When a claim cites multiple sources, one evidence span is kept per source. The daily cap (50 findings per day) is a soft per-process cap. Memory lasts until the course database expires 2026-10-17. Database operations have a 5-second connect timeout and 5-second statement timeout. The UI shows no "Saved N findings" message because findings are saved asynchronously after the response; they appear on later questions.
+
 **What VERA does NOT do yet**
 
 - The full pipeline (M2 to M6) has **not been run live end to end**; the tests use fakes and fixtures.
 - The central claim (VERA's engineered answer beats a direct model answer) is **unmeasured**.
 - Grounded `/ask` (2026-10-07) now meets R1's criteria for the public default, measured once (directional, small n): each cited source is a record retrieved in that request with provider, identifier, retrieval time and licence decision; citations that map to no record are removed; an answer with no valid citation becomes an insufficient-evidence reply; each cited claim is checked against the cited abstract (`vera/claim_check.py`; unsupported sentences removed, partial ones marked; a different-family checker first; fails closed). On the 30-question trace set (`scripts/grounded_trace_run.py`, `eval_results/grounded_ask_v1.json`): unresolvable citations 0 of 57; unsupported-claim rate 9 of 105 (8.6%, Wilson 95% 4.6% to 15.5%), removed before display; partial or unsupported 37 of 105 (35%, 26.8% to 44.7%). Caveats: the checker's own error rate is unmeasured; abstracts only; false-premise questions often end as insufficient-evidence replies (corrections without citations).
-- Week 5 memory is not built. The API and UI are deployed on Render (2026-10-07, item #73; addresses are not recorded here); the deployed version predates grounded `/ask`.
+- The API and UI are deployed on Render (2026-10-07, item #73; addresses are not recorded here); the deployed version predates grounded `/ask`.
 
 **Accepted residuals (risks named, not removed)**
 

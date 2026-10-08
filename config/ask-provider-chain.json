@@ -139,5 +139,133 @@
     "prompt_version": "vera-corpus-description-v1",
     "max_titles": 150,
     "retry_s": 300
+  },
+  "memory": {
+    "note": "Item #84 write gate (vera/memory_gate.py): structural filter thresholds and lists. Detector lists ported from AI-Internship intake_detectors.json. Not a security guarantee.",
+    "allowed_fact_types": [
+      "cited_finding"
+    ],
+    "allowed_providers": [
+      "arxiv",
+      "openalex"
+    ],
+    "allowed_licence": [
+      "allow"
+    ],
+    "min_chars": 40,
+  "min_words": 8,
+  "terminal_punctuation": ".!?",
+  "ellipsis_patterns": ["\\.{2,}\\s*$", "\u2026\\s*$"],
+  "markup_patterns": ["\\|[^|\\n]*\\|", "^\\s*#{1,6}\\s", "^\\s*([-*+\u2022]|\\d+[.)])\\s", "^\\s*>\\s", "\\*\\*|__|`"],
+  "fragment_start_words": ["and", "but", "or", "nor", "so", "yet", "which", "that", "whereas", "while", "thus", "therefore", "also", "because", "although", "however", "then", "than", "of", "to"],
+  "fragment_patterns": ["^(in|on|at|for|by|from|with|within|across|under|over)\\s+(the|this|these|those|a|an)\\s+\\w+\\s+(shows?|demonstrates?|indicates?|suggests?|reports?|finds?|found|confirms?)\\b"],
+    "max_chars": 400,
+    "max_question_overlap": 0.6,
+    "min_overlap_tokens": 3,
+    "long_digit_run": 12,
+    "invisible_categories": [
+      "Cf",
+      "Co"
+    ],
+    "invisible_ranges": [
+      [
+        65024,
+        65039
+      ],
+      [
+        917760,
+        917999
+      ]
+    ],
+    "injection_phrases": [
+      "ignore previous instructions",
+      "ignore all previous instructions",
+      "ignore the above",
+      "disregard previous instructions",
+      "disregard the above",
+      "forget your instructions",
+      "you are now",
+      "new instructions:",
+      "system prompt:",
+      "reveal your instructions",
+      "print your system prompt",
+      "pretend you are",
+      "override your instructions",
+      "do not tell the user",
+      "act as an unrestricted"
+    ],
+    "delimiter_patterns": [
+      "</?\\s*retrieved_context\\b",
+      "<\\|[a-z_]{2,30}\\|>",
+      "\\[/?inst\\]",
+      "<</?sys>>",
+      "</?\\s*(system|assistant|developer)\\s*>",
+      "(begin|end)[ _-]untrusted"
+    ],
+    "role_line_patterns": [
+      "^\\s*(system|assistant|developer)\\s*:",
+      "^\\s*#{2,}\\s*(instructions?|system prompt)\\b"
+    ],
+    "tool_dump_patterns": [
+      "[{}]",
+      "https?://",
+      "```",
+      "Traceback \\(most recent call last\\)"
+    ],
+    "personal_words": [
+      "i",
+      "me",
+      "my",
+      "mine",
+      "myself",
+      "you",
+      "your",
+      "yours",
+      "we",
+      "our",
+      "ours",
+      "us"
+    ],
+    "personal_patterns": [
+      "[\\w.+-]+@[\\w-]+\\.[\\w.-]+",
+      "(?<!\\w)@\\w{2,}",
+      "(?<!\\d)\\+?\\d[\\d\\s().-]{7,}\\d(?!\\d)"
+    ],
+    "volatile_terms": [
+      "today",
+      "currently",
+      "latest",
+      "this year",
+      "right now",
+      "at the moment",
+      "these days",
+      "as of now",
+      "this week",
+      "this month"
+    ],
+    "citation_marker_pattern": "\\s*\\[\\d+(?:\\s*,\\s*\\d+)*\\]",
+    "provider_separator": "+",
+    "store": {
+      "enabled": true,
+      "note": "Item #84 storage/recall. One fixed question_text for every memory row (visitor questions are never stored). Forgetting: ttl_days + recency decay (half_life_days) at read time; tombstone via claims.detailed_status. Write account URL in db_url_wo_env, read account in db_url_ro_env.",
+      "question_text": "VERA durable memory: claim-checked, gate-passed findings from corpus sources (trust=tool-derived,claim-checked,auto)",
+      "gate_version": "g1",
+      "fact_type": "cited_finding",
+      "span_text": "whole abstract",
+      "status_live": "memory:g1",
+      "status_tombstone": "memory:tombstoned",
+      "db_url_ro_env": "VERA_DB_URL_RO",
+      "db_url_wo_env": "VERA_DB_URL_WO",
+      "ttl_days": 30,
+      "half_life_days": 14,
+      "min_rank": 0.004,
+  "min_matched_terms": 2,
+      "connect_timeout_s": 5,
+      "statement_timeout_ms": 5000,
+      "recall_k": 3,
+      "max_query_terms": 12,
+      "max_writes_per_answer": 3,
+      "max_writes_per_day": 50
+    }
   }
 }

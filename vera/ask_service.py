@@ -18,6 +18,8 @@ class AskResult:
     cost_usd: float
     sources: tuple = ()  # item #79: numbered sources the answer was grounded in (empty when ungrounded)
     claim_check: dict | None = None  # item #79: per-claim check summary (grounded path only)
+    accepted: bool = False  # item #84: the scope router accepted the question (memory recall/write only then)
+    claims: tuple = ()  # item #84: internal per-claim records [{id, sentence, citations, verdict}]
 
 
 @lru_cache(maxsize=1)
@@ -76,7 +78,7 @@ def answer_in_scope(question: str, model: str, pricing: PricingRecord, client: O
         sources = sources_fn()
         if not sources:  # never answer from memory on the grounded path
             return AskResult(answer=cfg["no_sources_text"], tokens_used=decision.tokens_used,
-                             cost_usd=decision.cost_usd)
+                             cost_usd=decision.cost_usd, accepted=True)
         from vera.grounded_ask import count_valid_citations
 
         result = complete(messages_for(question, sources), model, pricing, **chained)
@@ -85,19 +87,26 @@ def answer_in_scope(question: str, model: str, pricing: PricingRecord, client: O
         cost = round(result.cost_usd + decision.cost_usd, 6)
         if count_valid_citations(text, len(sources)) == 0:  # R1 criterion: no valid citation -> no answer
             return AskResult(answer=cfg["insufficient_text"], tokens_used=tokens, cost_usd=cost,
-                             sources=tuple(sources), claim_check={"checked": 0, "outcome": "no_valid_citations"})
+                             sources=tuple(sources), claim_check={"checked": 0, "outcome": "no_valid_citations"}, accepted=True)
         cc = cfg.get("claim_check") or {}
         if cc.get("enabled"):  # R1 criterion: each cited claim checked against the cited text; fail closed
             from vera.claim_check import check_answer
 
-            checked, summary = check_answer(text, sources, cc)
+            from vera.claim_check import RECORDS
+
+            records: list = []
+            token = RECORDS.set(records)
+            try:
+                checked, summary = check_answer(text, sources, cc)
+            finally:
+                RECORDS.reset(token)
             if checked is None:
                 fallback = cc["unavailable_text"] if summary["outcome"] == "checker_unavailable" else cfg["insufficient_text"]
                 return AskResult(answer=fallback, tokens_used=tokens, cost_usd=cost, sources=tuple(sources),
-                                 claim_check=summary)
+                                 claim_check=summary, accepted=True)
             return AskResult(answer=checked, tokens_used=tokens, cost_usd=cost, sources=tuple(sources),
-                             claim_check=summary)
-        return AskResult(answer=text, tokens_used=tokens, cost_usd=cost, sources=tuple(sources))
+                             claim_check=summary, accepted=True, claims=tuple(records))
+        return AskResult(answer=text, tokens_used=tokens, cost_usd=cost, sources=tuple(sources), accepted=True)
     result = answer_question(question, model, pricing, **chained)
     return AskResult(answer=result.answer, tokens_used=result.tokens_used + decision.tokens_used,
-                     cost_usd=round(result.cost_usd + decision.cost_usd, 6))
+                     cost_usd=round(result.cost_usd + decision.cost_usd, 6), accepted=True)

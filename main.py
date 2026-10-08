@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from vera.corpus_admission import admit as admit_to_corpus, llm_call_for, store_from_env
 from vera.corpus_description import CorpusDescriber, generate_with_chain, load_cfg as load_corpus_description_cfg
 from vera.grounded_ask import load_corpus_cfg, load_grounding, public_sources, retrieve_all
+from vera.memory_store import load_memory_block, memory_from_env
 from vera.inference_chain import answer_via_chain, load_chain
 from vera.auth import (
     OPENAI_KEY_ERROR_DETAIL,
@@ -47,6 +48,7 @@ ASK_CHAIN = load_chain(MODEL, CURRENT_PRICING)  # item #77: free-tier providers 
 GROUNDING = load_grounding()  # item #79: live scholarly retrieval for /ask (None = ungrounded)
 CORPUS = load_corpus_cfg()  # item #79 phase C: corpus admission settings (None = disabled)
 _DESC_CFG = load_corpus_description_cfg()  # item #83
+MEMORY_BLOCK = load_memory_block()  # item #84
 CORPUS_DESCRIBER = CorpusDescriber(_DESC_CFG) if _DESC_CFG else None
 
 if CURRENT_PRICING is None:
@@ -103,6 +105,8 @@ class AskResponse(BaseModel):
     cost_usd: float
     sources: list[AskSource] = []  # item #79: what the answer was grounded in (no abstracts)
     traced_sources: list[AskSource] = []  # item #79: originals traced from links but with no free abstract (not used)
+    recalled: list[dict] = []  # item #84: earlier checked findings relevant to this question (never the question)
+    memory_written: int = 0  # item #84: findings saved after the claim check and the write gate
     claim_check: dict | None = None  # item #79: how many cited claims were checked, kept, marked or removed
 
 
@@ -160,6 +164,17 @@ def corpus_summary():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+def _after_response(admit_args, memory, result, question: str) -> None:
+    """Background: corpus admission first, then memory writes (never raises, never affects the response)."""
+    try:
+        if admit_args:
+            admit_to_corpus(*admit_args)
+        if memory is not None and result.claims:
+            memory.write_claims(result.claims, list(result.sources), question)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("post-response task failed (%s)", type(exc).__name__)
 
 
 @app.post("/ask", response_model=AskResponse, dependencies=[Depends(verify_api_key), Depends(enforce_caps)])  # W2 caps (public mode)
@@ -233,10 +248,24 @@ def ask(req: AskRequest, request: Request, background_tasks: BackgroundTasks):
 
     record_request_cost(request, result.cost_usd)
     store = store_from_env(CORPUS) if result.sources else None
-    if store is not None and ASK_CHAIN:  # item #79 phase C: after the response, never delaying it
-        background_tasks.add_task(admit_to_corpus, req.question, list(result.sources), llm_call_for(ASK_CHAIN[0]),
-                                  CORPUS, store)
+    memory = None
+    recalled, memory_written = [], 0  # memory_written stays 0: writes are asynchronous (background, after admission)
+    if result.accepted:  # item #84: recall and write only for in-scope questions; errors never fail /ask
+        try:
+            memory = memory_from_env(MEMORY_BLOCK)
+            if memory is not None:
+                recalled = memory.recall(req.question)  # recall is synchronous
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("memory failed (%s)", type(exc).__name__)
+    admit_args = (req.question, list(result.sources), llm_call_for(ASK_CHAIN[0]), CORPUS, store) \
+        if store is not None and ASK_CHAIN else None
+    if admit_args or (memory is not None and result.claims):
+        # item #79 phase C + item #84: after the response, never delaying it. Memory writes run AFTER corpus
+        # admission so first-time sources are already in the corpus when their claims are saved.
+        background_tasks.add_task(_after_response, admit_args, memory, result, req.question)
     return AskResponse(
+        recalled=recalled,
+        memory_written=memory_written,
         answer=result.answer,
         model=answered_by,
         tokens_used=result.tokens_used,
