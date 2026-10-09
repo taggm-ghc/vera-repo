@@ -19,14 +19,53 @@ import json
 import logging
 import os
 import threading
+import uuid
 from datetime import datetime, timezone
 
 from vera.gate_a import GateAConfig, score_candidates
-from vera.licence_gate import apply_licence_gate
+from urllib.parse import urlsplit
+
+from vera.licence_gate import METADATA_KIND, apply_licence_gate
 
 logger = logging.getLogger("vera")
 
 SCHEMA = "vera_vjay"
+
+
+LICENCE_OBS_INSERT = (
+    "INSERT INTO {S}.licence_observations (obs_id, observed_at, source_system, portal, portal_basis, host, url_sha256, "
+    "url, doc_ref, licence_scope, governing, spdx, family, nc, nd, confidence, detected_via, decision, native_decision, "
+    "reason_code, config_version, run_id, candidate_id) VALUES (:obs_id, :observed_at, 'vera-admission', :portal, "
+    ":portal_basis, :host, :url_sha256, :url, :doc_ref, :licence_scope, :governing, :spdx, :family, :nc, :nd, "
+    ":confidence, :detected_via, :decision, :native_decision, :reason_code, :config_version, :run_id, :candidate_id)")
+_DECISION = {"allow": "allow", "reject": "reject", "defer": "hold"}  # the licence gate's names -> the table's
+
+
+def _host(url: str) -> str:
+    h = (urlsplit(str(url or "")).hostname or "").lower()
+    return h if h and not any(ch in h for ch in "/@ \t\n") else ""
+
+
+def licence_observation_rows(cand: dict, run_id=None, now=None) -> list[dict]:
+    """Two rows (metadata, content) from a candidate after the licence gate. Licence fields are None when not determined."""
+    url = str(cand.get("url") or "")
+    host = _host(url)
+    decision = _DECISION.get(cand.get("licence_decision"), "hold")
+    lic = cand.get("licence") or {}
+    governing = "metadata" if cand.get("stored_text_kind") == METADATA_KIND else "content"
+    observed = now or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    base = {"observed_at": observed, "portal": host, "portal_basis": "host", "host": host,
+            "url_sha256": hashlib.sha256(url.encode("utf-8", "replace")).hexdigest(),
+            "url": url if decision == "allow" else None, "doc_ref": cand.get("doi"), "family": None,
+            "nc": None, "nd": None, "confidence": None, "decision": decision,
+            "native_decision": cand.get("gate_a_decision"), "reason_code": f"licence_{cand.get('licence_decision') or 'unknown'}",
+            "config_version": None, "run_id": None if run_id is None else str(run_id), "candidate_id": None}
+    out = []
+    for scope in ("metadata", "content"):
+        rec = lic.get(scope) or {}
+        out.append({**base, "obs_id": str(uuid.uuid4()), "licence_scope": scope, "governing": scope == governing,
+                    "spdx": rec.get("id"), "detected_via": rec.get("source")})
+    return out
 
 
 class WoCorpusStore:
@@ -92,6 +131,16 @@ class WoCorpusStore:
                       {"id": cid})
         return "admitted"
 
+    def record_licence_observations(self, cand: dict, run_id=None) -> int:
+        """Append one licence observation per licence scope (metadata, content) for a decided candidate (item #97 H-23).
+        Plain INSERT, no RETURNING, no text columns. Raises on DB failure; the caller counts it and never blocks."""
+        rows = licence_observation_rows(cand, run_id)
+        with self.engine.begin() as c:
+            from sqlalchemy import text
+            for r in rows:
+                c.execute(text(LICENCE_OBS_INSERT.replace("{S}", SCHEMA)), r)
+        return len(rows)
+
 
 def canonical_url(src: dict) -> str:
     doi = str(src.get("doi") or "").strip().lower()
@@ -128,6 +177,13 @@ def admit(question: str, sources: list[dict], llm_call, cfg: dict, store) -> dic
                                "retrieved_at": now}
             outcome = store.admit(c)
             counts[outcome] = counts.get(outcome, 0) + 1
+            if cfg.get("licence_observations_enabled") is True:  # item #97 H-23; default off; never blocks admission
+                try:
+                    store.record_licence_observations(c, getattr(store, "_run_id", None))
+                    counts["licence_obs_written"] = counts.get("licence_obs_written", 0) + 1
+                except Exception as exc:  # noqa: BLE001
+                    counts["licence_obs_failed"] = counts.get("licence_obs_failed", 0) + 1
+                    logger.warning("licence observation write failed (%s)", type(exc).__name__)
     except Exception as exc:  # noqa: BLE001  (admission never affects the answer; fail verbosely in the log)
         counts["error"] = type(exc).__name__
         logger.warning("/ask corpus admission failed (%s)", type(exc).__name__)

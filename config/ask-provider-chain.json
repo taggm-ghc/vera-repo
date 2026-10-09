@@ -125,6 +125,7 @@
     "note": "Item #79 phase C (R1 2026-10-07: full Gate A scoring). After each grounded /ask, sources with abstracts go through Gate A then the licence gate; every candidate is recorded with its decision, and fetch+allowed ones are stored as corpus sources (metadata and abstract only). Runs after the response. Uses the production write-only account; its URL is read from the env var named in db_url_env (unset = disabled). The visitor's question is never stored.",
     "enabled": true,
     "db_url_env": "VERA_DB_URL_WO",
+    "licence_observations_enabled": false,
     "question_text": "VERA /ask corpus accumulation (sources admitted by Gate A and the licence gate; visitor questions are not stored)",
     "gate_a": {
       "fetch_threshold": 0.6,
