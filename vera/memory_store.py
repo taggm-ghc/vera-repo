@@ -17,7 +17,7 @@ import time
 from datetime import datetime, timezone
 
 from vera.corpus_admission import SCHEMA, WoCorpusStore, canonical_url
-from vera.memory_gate import SourceRef, check_memory_write, strip_citation_markers
+from vera.memory_gate import SourceRef, check_memory_write, normalise_claim
 
 logger = logging.getLogger("vera")
 
@@ -214,7 +214,7 @@ class MemoryService:
                                  self.gate_cfg)
         if not res.allowed:
             return res.reasons[0]
-        text = strip_citation_markers(rec["sentence"], self.gate_cfg).strip()
+        text = normalise_claim(rec["sentence"], self.gate_cfg)
         spans = []  # one whole-abstract evidence span per distinct cited source
         for canon in dict.fromkeys(canonical_url(s) for s in cited):
             found = self.reader.source(canon)

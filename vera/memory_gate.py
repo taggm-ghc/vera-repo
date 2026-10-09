@@ -71,6 +71,8 @@ class GateConfig:
     personal_words: tuple
     personal_patterns: tuple
     volatile_terms: tuple
+    leading_marker_pattern: str
+    inline_strip_patterns: tuple
     citation_marker_pattern: str
     provider_separator: str
 
@@ -158,6 +160,18 @@ def strip_citation_markers(text: str, cfg: GateConfig) -> str:
     return re.sub(cfg.citation_marker_pattern, "", text or "").strip()
 
 
+def normalise_claim(text: str, cfg: GateConfig) -> str:
+    """Strip citation markers, one leading list marker, markdown emphasis/backticks and stray <br>; collapse
+    whitespace. Table rows (pipe-delimited cells) are left untouched so the markup rule still refuses them."""
+    t = strip_citation_markers(text, cfg)
+    if any(re.search(p, t) for p in cfg.markup_patterns[:1]):
+        return t
+    t = re.sub(cfg.leading_marker_pattern, "", t)
+    for p in cfg.inline_strip_patterns:
+        t = re.sub(p, " " if p.startswith("<") else "", t, flags=re.I)
+    return re.sub(r"\s+", " ", t).strip()
+
+
 def _provider_allowed(provider: str, cfg: GateConfig) -> bool:
     """Composite providers such as `openalex+semanticscholar` need every part allow-listed."""
     parts = [p.strip() for p in (provider or "").split(cfg.provider_separator)]
@@ -198,7 +212,8 @@ def check_memory_write(fact_type: str, text: str, verdict: str, citations: Seque
 
     `[n]` markers are stripped from `text` before checks; callers store strip_citation_markers(text, cfg)."""
     reasons: set[str] = set()
-    text = strip_citation_markers(text, cfg)
+    raw = strip_citation_markers(text, cfg)
+    text = normalise_claim(text, cfg)
     if fact_type not in cfg.allowed_fact_types:
         reasons.add(NOT_ALLOWED_TYPE)
     if verdict != VERDICT_SUPPORTED:
@@ -214,7 +229,7 @@ def check_memory_write(fact_type: str, text: str, verdict: str, citations: Seque
             reasons.add(NO_IDENTIFIER)
     if _has_invisible(text, cfg):
         reasons.add(INVISIBLE_UNICODE)
-    if _injection_hit(text, cfg):
+    if _injection_hit(raw, cfg) or _injection_hit(text, cfg):
         reasons.add(INJECTION_PATTERN)
     if _tool_dump(text, cfg):
         reasons.add(TOOL_DUMP)

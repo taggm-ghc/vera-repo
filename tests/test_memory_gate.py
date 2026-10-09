@@ -82,8 +82,6 @@ def test_config_overrides_and_reason_catalogue():
     ("| Model | Accuracy | Latency |", MARKUP),
     ("Sparse attention | reduces memory cost | on long sequences while retaining accuracy.", MARKUP),
     ("## Sparse attention reduces memory cost on long sequences while retaining accuracy.", MARKUP),
-    ("- Sparse attention reduces memory cost on long sequences while retaining accuracy.", MARKUP),
-    ("1. Sparse attention reduces memory cost on long sequences while retaining accuracy.", MARKUP),
     ("Sparse attention reduces memory cost on long sequences while retaining accuracy", FRAGMENT),
     ("Sparse attention reduces memory cost on long sequences while retaining accuracy...", FRAGMENT),
     ("sparse attention reduces memory cost on long sequences while retaining accuracy.", FRAGMENT),
@@ -116,3 +114,35 @@ def test_live_defect_rows_20_to_24_rejected(row):
 
 def test_row21_rejected_as_fragment():
     assert FRAGMENT in run(text=ROW21).reasons
+
+
+LIVE_NUM = "4. **Qualitative interviews / thematic analysis** Used in [1] to surface nuanced factors that shape how teams adopt AI tooling."
+LIVE_BUL = "• **Short-term speed is not the sole metric.** Long-term factors such as maintainability also matter, as emphasized by [1]."
+LIVE_TAB = "| [2] The Impact of Generative AI | Longitudinal study | • Quantitative: 82 % reported gains |"
+
+
+@pytest.mark.parametrize("claim", [LIVE_NUM, LIVE_BUL])
+def test_live_list_item_claims_allowed_after_normalisation(claim):
+    r = run(text=claim)
+    assert r.allowed, r.reasons
+
+
+def test_normalise_claim_output():
+    from vera.memory_gate import normalise_claim
+    n = normalise_claim(LIVE_BUL, DEFAULT_CONFIG)
+    assert n.startswith("Short-term speed") and "*" not in n and "[1]" not in n
+    assert normalise_claim("- `x`<br>y  z.", DEFAULT_CONFIG) == "x y z."
+
+
+def test_live_table_row_still_rejected():
+    r = run(text=LIVE_TAB)
+    assert not r.allowed and MARKUP in r.reasons
+
+
+def test_heading_still_rejected():
+    assert MARKUP in run(text="## " + GOOD).reasons
+
+
+@pytest.mark.parametrize("marker", ["- ", "1. ", "* ", "• "])
+def test_plain_list_marker_normalised_then_allowed(marker):
+    assert run(text=marker + GOOD).allowed

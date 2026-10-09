@@ -244,6 +244,13 @@
       "this week",
       "this month"
     ],
+    "leading_marker_pattern": "^\\s*(?:[-*+\u2022]|\\d+[.)])\\s+",
+    "inline_strip_patterns": [
+      "\\*+",
+      "__",
+      "`",
+      "<br\\s*/?>"
+    ],
     "citation_marker_pattern": "\\s*\\[\\d+(?:\\s*,\\s*\\d+)*\\]",
     "provider_separator": "+",
     "store": {
