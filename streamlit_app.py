@@ -7,6 +7,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from vera.memory_panel import render_memory_panel
+from vera.memory_review_panel import render_memory_review
 from vera.public_mode import is_public_mode, post_ask, upstream_base_url
 from vera.sources_sidebar import render_sources, render_sources_sidebar
 from vera.ui_safety import safe_markdown
@@ -51,6 +52,7 @@ else:
     api_key = st.sidebar.text_input(
         "API Key (X-API-Key)", value="", type="password",
         help="Blank by default. Type the key for the API above; it is never pre-filled.")
+    render_memory_review(st, api_base_url)  # item #84 D6: operator review, dev mode only (never in public mode)
 
 # Force bad demo toggle
 render_sources_sidebar(st)

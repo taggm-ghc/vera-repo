@@ -31,7 +31,7 @@ def test_memory_panel_renders_with_recalled_findings():
     assert any("From VERA's memory" in str(call) for call in markdown_calls)
     # Should call caption with memory description
     caption_calls = [call[0][0] for call in mock_st.caption.call_args_list]
-    assert any("auto-saved" in str(call).lower() for call in caption_calls)
+    assert any("confirmed by vera's operator" in str(call).lower() for call in caption_calls)  # D6
 
 
 def test_memory_panel_empty_when_no_recalled_and_no_written():

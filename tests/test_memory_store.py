@@ -24,6 +24,7 @@ class FakeReader:
     def span(self, s, e): return 11
     def answer(self): return 5
     def duplicate(self, t, s): return self.dup
+    def pending_count(self): return 0  # D6 pending-queue cap
     def recall(self, q): return [{"claim_text": "x", "source_title": "t", "source_url": "u", "saved_at": "d"}]
 
 

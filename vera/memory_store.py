@@ -7,6 +7,10 @@ recall is the same for everyone. Writes use the write-only account (URL in the e
 memory.store.db_url_wo_env), reads the read-only account (memory.store.db_url_ro_env); never the rw account.
 Forgetting: TTL and recency decay at read time on claims.created_at; tombstone via claims.detailed_status. There is
 no DELETE path here (deletes need R1 approval). Every error is logged host-free and never fails /ask.
+
+D6 (2026-10-10, retires D-029): with confirm_required (default true), /ask writes rows as status_pending; recall reads
+only status_live, which only the operator sets (confirm). Legacy auto-written rows (status_legacy_auto) are not
+recalled and are listed for review. Operator actions: ro reads the row's state, then wo updates by claim_id.
 """
 import json
 import logging
@@ -27,6 +31,32 @@ SKIP_NOT_IN_CORPUS = "source_not_in_corpus"
 SKIP_DUPLICATE = "duplicate"
 SKIP_CAP = "cap_reached"
 SKIP_DISABLED = "memory_disabled"
+SKIP_QUEUE_FULL = "pending_queue_full"
+# Operator action outcomes (D6).
+CONFIRMED, REJECTED, NOT_FOUND, NOT_ALLOWED = "confirmed", "rejected", "not_found", "transition_not_allowed"
+STATE_PENDING, STATE_LEGACY, STATE_LIVE, STATE_REJECTED = "pending", "legacy_auto", "confirmed", "rejected"
+
+
+def confirm_required(cfg: dict) -> bool:
+    """Deny-by-default: only an explicit false turns confirmation off."""
+    return cfg.get("confirm_required", True) is not False
+
+
+def _known_statuses(cfg: dict) -> list:
+    return [s for s in (cfg["status_live"], cfg.get("status_pending"), cfg.get("status_rejected"),
+                        cfg.get("status_tombstone"), *cfg.get("status_legacy_auto", ())) if s]
+
+
+def _state_of(status: str, cfg: dict) -> str | None:
+    if status == cfg.get("status_pending"):
+        return STATE_PENDING
+    if status in cfg.get("status_legacy_auto", ()):
+        return STATE_LEGACY
+    if status == cfg["status_live"]:
+        return STATE_LIVE
+    if status in (cfg.get("status_rejected"), cfg.get("status_tombstone")):
+        return STATE_REJECTED
+    return None
 _WORD = re.compile(r"[A-Za-z0-9]{3,}")
 
 
@@ -101,12 +131,58 @@ class RoMemoryReader:
         return rows[0][0] if rows else None
 
     def duplicate(self, claim_text: str, span_ids: list) -> bool:
+        """Any known memory state counts (pending, confirmed, rejected, tombstoned, legacy): a rejected claim is
+        never re-queued."""
         rows = self._rows("SELECT c.claim_id FROM {S}.claims c JOIN {S}.answers a ON a.answer_id = c.answer_id "
-                          "WHERE a.response_text = :qt AND c.claim_text = :t AND c.detailed_status = :live "
+                          "WHERE a.response_text = :qt AND c.claim_text = :t "
+                          "AND c.detailed_status = ANY(CAST(:sts AS text[])) "
                           "AND c.evidence_span_ids @> CAST(:e AS jsonb) LIMIT 1",
-                          {"qt": self.cfg["question_text"], "t": claim_text, "live": self.cfg["status_live"],
+                          {"qt": self.cfg["question_text"], "t": claim_text, "sts": _known_statuses(self.cfg),
                            "e": json.dumps(list(span_ids))})
         return bool(rows)
+
+    def pending_count(self) -> int:
+        rows = self._rows("SELECT count(*) FROM {S}.claims c JOIN {S}.answers a ON a.answer_id = c.answer_id "
+                          "WHERE a.response_text = :qt AND c.detailed_status = :p",
+                          {"qt": self.cfg["question_text"], "p": self.cfg["status_pending"]})
+        return int(rows[0][0]) if rows else 0
+
+    def claim_status(self, claim_id: int):
+        """(detailed_status, expired) of a memory row (joined to the fixed memory answer), or None if it is not one.
+        expired = older than ttl_days, so recall would never return it even if confirmed."""
+        rows = self._rows("SELECT c.detailed_status, c.created_at <= now() - make_interval(days => :ttl) "
+                          "FROM {S}.claims c JOIN {S}.answers a ON a.answer_id = c.answer_id "
+                          "WHERE a.response_text = :qt AND c.claim_id = :id",
+                          {"qt": self.cfg["question_text"], "id": int(claim_id), "ttl": int(self.cfg["ttl_days"])})
+        return (rows[0][0], bool(rows[0][1])) if rows else None
+
+    def pending(self) -> list[dict]:
+        """Rows awaiting review (pending + legacy auto-written), oldest first, with their cited sources."""
+        sts = [self.cfg["status_pending"], *self.cfg.get("status_legacy_auto", ())]
+        rows = self._rows(
+            "SELECT c.claim_id, c.claim_text, c.created_at, c.detailed_status, "
+            "c.created_at <= now() - make_interval(days => :ttl), "
+            "COALESCE(jsonb_agg(DISTINCT jsonb_build_object('title', s.provenance ->> 'title', "
+            "'url', COALESCE(s.provenance ->> 'url', cs.canonical_url))) FILTER (WHERE s.source_id IS NOT NULL), "
+            "'[]'::jsonb) "
+            "FROM {S}.claims c JOIN {S}.answers a ON a.answer_id = c.answer_id "
+            "LEFT JOIN LATERAL jsonb_array_elements_text(c.evidence_span_ids) AS sp(span_id) ON true "
+            "LEFT JOIN {S}.evidence_spans e ON e.span_id = sp.span_id::bigint "
+            "LEFT JOIN {S}.sources s ON s.source_id = e.source_id "
+            "LEFT JOIN {S}.canonical_sources cs ON cs.canonical_source_id = s.canonical_source_id "
+            "WHERE a.response_text = :qt AND c.detailed_status = ANY(CAST(:sts AS text[])) "
+            "GROUP BY c.claim_id, c.claim_text, c.created_at, c.detailed_status "
+            "ORDER BY c.created_at, c.claim_id LIMIT :k",
+            {"qt": self.cfg["question_text"], "sts": sts, "k": int(self.cfg["pending_list_limit"]),
+             "ttl": int(self.cfg["ttl_days"])})
+        out = []
+        for r in rows:
+            srcs = r[5] if isinstance(r[5], list) else json.loads(r[5] or "[]")
+            out.append({"claim_id": int(r[0]), "claim_text": r[1],
+                        "created_at": r[2].isoformat() if r[2] else "", "state": _state_of(r[3], self.cfg),
+                        "expired": bool(r[4]),
+                        "sources": [{"title": x.get("title") or "", "url": x.get("url") or ""} for x in srcs]})
+        return out
 
 
 class WoMemoryStore(WoCorpusStore):
@@ -133,19 +209,33 @@ class WoMemoryStore(WoCorpusStore):
                                        "VALUES (:s, :t, 0, :e) RETURNING span_id",
                                     {"s": source_id, "t": self.cfg["span_text"], "e": end})
 
-    def add_claim(self, answer_id: int, claim_text: str, span_ids: list) -> int:
+    def add_claim(self, answer_id: int, claim_text: str, span_ids: list, status: str | None = None) -> int:
+        """New rows are pending unless confirmation is explicitly switched off (D6, deny-by-default)."""
+        if status is None:
+            status = self.cfg["status_pending"] if confirm_required(self.cfg) else self.cfg["status_live"]
         with self.engine.begin() as c:
             return self._one(c, "INSERT INTO {S}.claims (answer_id, claim_text, evidence_span_ids, "
                                 "verification_status, detailed_status) "
                                 "VALUES (:a, :t, CAST(:e AS jsonb), :v, :d) RETURNING claim_id",
                              {"a": answer_id, "t": claim_text, "e": json.dumps(list(span_ids)),
-                              "v": VERIFICATION_SUPPORTED, "d": self.cfg["status_live"]})
+                              "v": VERIFICATION_SUPPORTED, "d": status})
+
+    def set_status(self, claim_id: int, status: str):
+        """Operator transition (D6). wo has UPDATE on claims but SELECT only on claim_id, so the caller checks the
+        current state through the ro reader first."""
+        with self.engine.begin() as c:
+            return self._one(c, "UPDATE {S}.claims SET detailed_status = :d WHERE claim_id = :id RETURNING claim_id",
+                             {"d": status, "id": int(claim_id)})
 
     def tombstone(self, claim_id: int):
         """Operator use only (not called by the app)."""
         with self.engine.begin() as c:
             return self._one(c, "UPDATE {S}.claims SET detailed_status = :d WHERE claim_id = :id RETURNING claim_id",
                              {"d": self.cfg["status_tombstone"], "id": claim_id})
+
+
+class MemoryUnavailable(RuntimeError):
+    """Operator action requested but the ro or wo store is not configured."""
 
 
 class MemoryService:
@@ -162,6 +252,34 @@ class MemoryService:
         except Exception as exc:  # noqa: BLE001  (memory never fails /ask)
             logger.warning("memory recall failed (%s)", type(exc).__name__)
             return []
+
+    # --- D6 operator actions (callers enforce the owner key; these raise on DB errors) ---
+    def _require_rw(self):
+        if self.reader is None or self.store is None:
+            raise MemoryUnavailable("memory store not configured (needs both the ro and wo DB URLs)")
+
+    def list_pending(self) -> list[dict]:
+        self._require_rw()
+        return self.reader.pending()
+
+    def _transition(self, claim_id: int, allowed: tuple, target: str, outcome: str) -> str:
+        self._require_rw()
+        found = self.reader.claim_status(claim_id)
+        state = _state_of(found[0] or "", self.cfg) if found else None
+        if state is None:
+            return NOT_FOUND
+        if state not in allowed or (target == self.cfg["status_live"] and found[1]):
+            return NOT_ALLOWED  # also: confirming a row past ttl_days would be a no-op (never recalled)
+        self.store.set_status(claim_id, target)
+        logger.info("memory operator %s claim %d (from %s)", outcome, int(claim_id), state)
+        return outcome
+
+    def confirm(self, claim_id: int) -> str:
+        return self._transition(claim_id, (STATE_PENDING, STATE_LEGACY), self.cfg["status_live"], CONFIRMED)
+
+    def reject(self, claim_id: int) -> str:
+        return self._transition(claim_id, (STATE_PENDING, STATE_LEGACY, STATE_LIVE), self.cfg["status_rejected"],
+                                REJECTED)
 
     def _reserve(self) -> bool:
         """Check-and-increment the daily cap under one lock acquisition (released if the write is skipped)."""
@@ -228,6 +346,8 @@ class MemoryService:
             spans.append(span)
         if self.reader.duplicate(text, spans):
             return SKIP_DUPLICATE
+        if confirm_required(self.cfg) and self.reader.pending_count() >= int(self.cfg["max_pending"]):
+            return SKIP_QUEUE_FULL
         if self._answer_id is None:
             self._answer_id = self.reader.answer() or self.store.answer_id()
         self.store.add_claim(self._answer_id, text, spans)
@@ -235,6 +355,14 @@ class MemoryService:
 
 
 _SERVICE: dict = {}
+D6_KEYS = ("status_pending", "status_rejected", "max_pending", "pending_list_limit")
+
+
+def _check_d6_keys(cfg: dict):
+    """Fail at load, not silently at write time, when confirmation is on and a D6 key is missing."""
+    missing = [k for k in D6_KEYS if k not in cfg]
+    if confirm_required(cfg) and missing:
+        raise ValueError(f"memory.store config is missing D6 keys {missing}; memory stays off (owner: R9/R1)")
 
 
 def memory_from_env(block: dict | None, env=os.environ, engine_factory=None, gate_cfg=None):
@@ -249,6 +377,7 @@ def memory_from_env(block: dict | None, env=os.environ, engine_factory=None, gat
         wo_url = (env.get(cfg["db_url_wo_env"]) or "").strip()
         if not ro_url:
             return None
+        _check_d6_keys(cfg)
         if gate_cfg is None:
             from vera.memory_gate import gate_config_from_dict
             gate_cfg = gate_config_from_dict(block)

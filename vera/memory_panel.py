@@ -21,7 +21,8 @@ def render_memory_panel(st, data: dict) -> None:
 
     if recalled:
         st.markdown("### 🧠 From VERA's memory")
-        st.caption("Auto-saved, checked, cited findings — not human-reviewed, and not who asked.")
+        st.caption("Checked, cited findings confirmed by VERA's operator (confirmed is not proof of truth). "
+                   "Never your question or who asked.")
         for item in recalled:
             claim_text = item.get("claim_text", "")
             source_title = item.get("source_title", "")

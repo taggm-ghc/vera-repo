@@ -29,7 +29,7 @@ def _run(cfg, store):
 
 
 def test_flag_default_off_and_in_config():
-    assert json.loads((ROOT / "config" / "ask-provider-chain.json").read_text())["corpus"]["licence_observations_enabled"] is False
+    assert json.loads((ROOT / "config" / "ask-provider-chain.json").read_text())["corpus"]["licence_observations_enabled"] is True  # R1 decision 16 (2026-10-10): switched on
 
 
 def test_flag_off_writes_no_observations():

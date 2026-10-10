@@ -11,7 +11,8 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from vera.corpus_admission import admit as admit_to_corpus, llm_call_for, store_from_env
 from vera.corpus_description import CorpusDescriber, generate_with_chain, load_cfg as load_corpus_description_cfg
 from vera.grounded_ask import load_corpus_cfg, load_grounding, public_sources, retrieve_all
-from vera.memory_store import load_memory_block, memory_from_env
+from vera.memory_store import CONFIRMED, NOT_FOUND, REJECTED, MemoryUnavailable, load_memory_block, memory_from_env
+from vera.memory_operator import make_verify_owner_key
 from vera.inference_chain import answer_via_chain, load_chain
 from vera.auth import (
     OPENAI_KEY_ERROR_DETAIL,
@@ -106,8 +107,8 @@ class AskResponse(BaseModel):
     cost_usd: float
     sources: list[AskSource] = []  # item #79: what the answer was grounded in (no abstracts)
     traced_sources: list[AskSource] = []  # item #79: originals traced from links but with no free abstract (not used)
-    recalled: list[dict] = []  # item #84: earlier checked findings relevant to this question (never the question)
-    memory_written: int = 0  # item #84: findings saved after the claim check and the write gate
+    recalled: list[dict] = []  # item #84: operator-confirmed findings relevant to this question (never the question)
+    memory_written: int = 0  # item #84: always 0 here (writes are background and pending operator review, D6)
     claim_check: dict | None = None  # item #79: how many cited claims were checked, kept, marked or removed
 
 
@@ -160,6 +161,83 @@ def corpus_summary():
     except Exception as exc:  # noqa: BLE001  (DB unreachable etc.: a generic state, never the error text)
         logger.warning("corpus description unavailable (%s)", type(exc).__name__)
         return CorpusDescription(summary_source="unavailable")
+
+
+# --- Item #84 D6: operator-only review of memory writes ---------------------------
+# Every route declares the owner-key dependency itself (per-call authorisation). The public VERA_API_KEY is not
+# accepted; an unset, weak or reused owner key disables these routes (503). Responses carry no host or error text.
+verify_owner_key = make_verify_owner_key(MEMORY_BLOCK)
+
+
+class PendingSource(BaseModel):
+    title: str = ""
+    url: str = ""
+
+
+class PendingClaim(BaseModel):
+    claim_id: int
+    claim_text: str
+    created_at: str = ""
+    state: str | None = None
+    sources: list[PendingSource] = []
+
+
+class PendingList(BaseModel):
+    pending: list[PendingClaim]
+
+
+class MemoryDecision(BaseModel):
+    claim_id: int
+    outcome: str
+
+
+def _operator_memory():
+    try:
+        memory = memory_from_env(MEMORY_BLOCK)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("memory unavailable for operator (%s)", type(exc).__name__)
+        memory = None
+    if memory is None:
+        raise HTTPException(status_code=503, detail="Memory store unavailable")
+    return memory
+
+
+def _operator_call(fn, *args):
+    try:
+        return fn(*args)
+    except MemoryUnavailable as exc:
+        raise HTTPException(status_code=503, detail="Memory store unavailable") from exc
+    except Exception as exc:  # noqa: BLE001  (DB errors: generic detail, type only in the log)
+        logger.warning("memory operator action failed (%s)", type(exc).__name__)
+        raise HTTPException(status_code=503, detail="Memory store unavailable") from exc
+
+
+@app.get("/memory/pending", response_model=PendingList, dependencies=[Depends(verify_owner_key)])
+def memory_pending():
+    """Operator: memory rows awaiting review (pending, and legacy auto-written rows that are no longer recalled)."""
+    memory = _operator_memory()
+    return PendingList(pending=_operator_call(memory.list_pending))
+
+
+def _decide(claim_id: int, action) -> MemoryDecision:
+    outcome = _operator_call(action, claim_id)
+    if outcome == NOT_FOUND:
+        raise HTTPException(status_code=404, detail="No memory claim with that id")
+    if outcome not in (CONFIRMED, REJECTED):
+        raise HTTPException(status_code=409, detail="That claim is not in a state that allows this action")
+    return MemoryDecision(claim_id=claim_id, outcome=outcome)
+
+
+@app.post("/memory/{claim_id}/confirm", response_model=MemoryDecision, dependencies=[Depends(verify_owner_key)])
+def memory_confirm(claim_id: int):
+    """Operator: a pending (or legacy) claim becomes recallable."""
+    return _decide(claim_id, _operator_memory().confirm)
+
+
+@app.post("/memory/{claim_id}/reject", response_model=MemoryDecision, dependencies=[Depends(verify_owner_key)])
+def memory_reject(claim_id: int):
+    """Operator: a pending, legacy or confirmed claim is never recalled and never re-queued."""
+    return _decide(claim_id, _operator_memory().reject)
 
 
 @app.get("/health")
