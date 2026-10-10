@@ -19,6 +19,7 @@ from vera.auth import (
     classify_vera_api_key,
     verify_api_key,
 )
+from vera.version_info import deployed_commit, short_commit
 from vera.public_mode import enforce_caps, record_request_cost
 from vera.pricing.config import latest_pricing_for, load_model_pricing, load_model_selection
 
@@ -164,6 +165,13 @@ def corpus_summary():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/version")
+def version():
+    """Deployed commit (Render's RENDER_GIT_COMMIT) so the live build is verifiable. No host, no secrets."""
+    commit = deployed_commit()
+    return {"commit": commit, "short": short_commit(commit)}
 
 
 def _after_response(admit_args, memory, result, question: str) -> None:

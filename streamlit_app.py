@@ -10,6 +10,7 @@ from vera.memory_panel import render_memory_panel
 from vera.public_mode import is_public_mode, post_ask, upstream_base_url
 from vera.sources_sidebar import render_sources, render_sources_sidebar
 from vera.ui_safety import safe_markdown
+from vera.version_info import UNKNOWN, deployed_commit, short_commit
 
 load_dotenv()  # picks up VERA_API_KEY from the local .env, same as main.py
 
@@ -127,3 +128,17 @@ if st.button("Ask", type="primary"):
                     st.info("Make sure the API is running: `./run.sh`")
 else:
     st.info("👆 Click 'Ask' to get started.")
+
+
+def _footer_commit(base_url: str) -> str:
+    """Short deployed commit: this process's env first, else the API's /version (short timeout, never raises)."""
+    commit = deployed_commit()
+    if commit == UNKNOWN:
+        try:
+            commit = requests.get(f"{base_url.rstrip('/')}/version", timeout=3).json().get("commit", UNKNOWN)
+        except Exception:  # noqa: BLE001  (footer only; never surface the error or the URL)
+            commit = UNKNOWN
+    return short_commit(commit)
+
+
+st.caption(f"VERA build: {_footer_commit(api_base_url)}")

@@ -254,6 +254,7 @@
     ],
     "citation_marker_pattern": "\\s*\\[\\d+(?:\\s*,\\s*\\d+)*\\]",
     "provider_separator": "+",
+    "dangling_parenthetical_words": ["as", "in", "see", "cf", "eg", "ie", "and", "or", "also", "per", "from", "implicitly", "ref", "refs", "reference", "references", "source", "sources"],
     "store": {
       "enabled": true,
       "note": "Item #84 storage/recall. One fixed question_text for every memory row (visitor questions are never stored). Forgetting: ttl_days + recency decay (half_life_days) at read time; tombstone via claims.detailed_status. Write account URL in db_url_wo_env, read account in db_url_ro_env.",

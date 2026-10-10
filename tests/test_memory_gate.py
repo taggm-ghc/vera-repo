@@ -146,3 +146,32 @@ def test_heading_still_rejected():
 @pytest.mark.parametrize("marker", ["- ", "1. ", "* ", "• "])
 def test_plain_list_marker_normalised_then_allowed(marker):
     assert run(text=marker + GOOD).allowed
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("Surveys over-state gains (as in [1]), tempered.", "Surveys over-state gains, tempered."),
+    ("Self-reports (as in [3] and [4]) capture effects.", "Self-reports capture effects."),
+    ("Ownership (as in [3] and implicitly in [1]) tempers claims.", "Ownership tempers claims."),
+    ("Benefits are modest. (see [2])", "Benefits are modest."),
+    ("Result (cf. [2]) holds.", "Result holds."),
+    ("Empty () and ( ) go.", "Empty and go."),
+])
+def test_dangling_parentheticals_removed_after_marker_strip(raw, expected):
+    assert strip_citation_markers(raw, DEFAULT_CONFIG) == expected
+
+
+@pytest.mark.parametrize("raw", [
+    "Measures (e.g., code churn) miss gains.",
+    "Sample (n=20) was small.",
+    "Published (2019) results hold.",
+    "It works (as in practice) mostly.",
+    "The method (see appendix) helps.",
+])
+def test_real_parentheticals_kept(raw):
+    assert strip_citation_markers(raw, DEFAULT_CONFIG) == raw
+
+
+def test_normalise_claim_drops_remnant_and_gate_allows():
+    from vera.memory_gate import normalise_claim
+    t = normalise_claim("* Objective measures miss gains such as reduced load (as in [1]).", DEFAULT_CONFIG)
+    assert "(" not in t and t.endswith("load.")

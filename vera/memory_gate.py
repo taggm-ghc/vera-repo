@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import re
 import unicodedata
-from dataclasses import dataclass, field, fields
+from dataclasses import MISSING, dataclass, field, fields
 from pathlib import Path
 from typing import Sequence
 
@@ -75,6 +75,8 @@ class GateConfig:
     inline_strip_patterns: tuple
     citation_marker_pattern: str
     provider_separator: str
+    # Words that, alone inside parentheses, mark a remnant of a stripped citation such as "(as in)".
+    dangling_parenthetical_words: tuple = ()
 
 
 class MemoryGateConfigError(ValueError):
@@ -84,6 +86,8 @@ class MemoryGateConfigError(ValueError):
 def gate_config_from_dict(block: dict) -> GateConfig:
     out = {}
     for f in fields(GateConfig):
+        if f.name not in block and f.default is not MISSING:
+            continue
         if f.name not in block:
             raise MemoryGateConfigError(f"config `{CONFIG_KEY}` block is missing key {f.name!r}")
         v = block[f.name]
@@ -155,9 +159,26 @@ def _personal(text: str, cfg: GateConfig) -> bool:
         re.search(p, text) for p in cfg.personal_patterns)
 
 
+def _drop_dangling_parentheticals(text: str, cfg: GateConfig) -> str:
+    """Remove parentheses left empty or holding only connector words (e.g. "(as in)") once markers are gone.
+    A parenthetical with any other word, number or symbol is real content and is kept."""
+    words = {w.casefold() for w in cfg.dangling_parenthetical_words}
+    if not words:
+        return text
+
+    def _repl(m):
+        parts = [p.replace(".", "").casefold() for p in re.split(r"[\s,;:]+", m.group(1)) if p.strip(".")]
+        return "" if all(p in words for p in parts) else m.group(0)
+
+    t = re.sub(r"\s*\(([^()]*)\)", _repl, text)
+    return re.sub(r"\s+([,.;:!?])", r"\1", t)
+
+
 def strip_citation_markers(text: str, cfg: GateConfig) -> str:
-    """Remove `[n]` / `[n, m]` citation markers; use before checking and before storing."""
-    return re.sub(cfg.citation_marker_pattern, "", text or "").strip()
+    """Remove `[n]` / `[n, m]` citation markers and the dangling parentheticals they leave behind
+    (e.g. "(as in [1])" -> nothing); use before checking and before storing."""
+    t = re.sub(cfg.citation_marker_pattern, "", text or "")
+    return _drop_dangling_parentheticals(t, cfg).strip()
 
 
 def normalise_claim(text: str, cfg: GateConfig) -> str:
