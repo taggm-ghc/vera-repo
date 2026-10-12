@@ -10,6 +10,8 @@ import argparse
 import ast
 import hashlib
 import json
+import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -45,6 +47,38 @@ def check_tests(root: Path = ROOT) -> list[str]:
         return [f"pytest exit {p.returncode}: {summary}"] + lines[-15:-1] + (p.stderr or "").strip().splitlines()[-5:]
     print(f"      {summary}")
     return []
+
+
+CATALOG_NODE = "tests/test_sql_contract.py::test_sql_columns_exist_in_live_catalog"
+
+
+def live_catalog_outcome(returncode: int, out: str) -> tuple[str, str]:
+    """Map pytest output to (outcome, reason). Only PASSED is success; the check is required (fails closed)."""
+    low = out.lower()
+    if returncode != 0:
+        return "FAILED", f"live catalog check FAILED (pytest exit {returncode})"
+    if re.search(r"\b[1-9]\d* passed\b", low) and not re.search(r"\b[1-9]\d* (skipped|failed|error)", low):
+        return "PASSED", ""
+    if re.search(r"\b[1-9]\d* skipped\b", low):
+        return "SKIPPED", "live catalog check required: DB credentials not available (or DB unreachable); skip is not a pass"
+    return "NO_TESTS", "live catalog check required: zero tests passed (none collected or run)"
+
+
+def check_live_catalog(root: Path = ROOT) -> list[str]:
+    """Required check: run only the read-only catalog test with --run-live-stages. Only PASSED passes."""
+    cmd = [sys.executable, "-m", "pytest", "-q", "-rs", CATALOG_NODE, "--run-live-stages"]
+    env = {**os.environ, "VERA_REQUIRE_LIVE_CATALOG": "1"}
+    try:
+        p = subprocess.run(cmd, cwd=root, capture_output=True, text=True, timeout=PYTEST_TIMEOUT_S, env=env)
+    except subprocess.TimeoutExpired:
+        return [f"live catalog check exceeded {PYTEST_TIMEOUT_S}s"]
+    out = p.stdout or ""
+    outcome, reason = live_catalog_outcome(p.returncode, out)
+    if outcome == "PASSED":
+        print("      live catalog check PASSED")
+        return []
+    lines = [ln for ln in out.strip().splitlines() if ln.strip()]
+    return [reason] + lines[-6:]
 
 
 def check_frozen(root: Path = ROOT) -> list[str]:
@@ -153,6 +187,8 @@ def run_offline_checks(root: Path = ROOT, run_tests: bool = True) -> dict[str, l
     results: dict[str, list[str]] = {}
     if run_tests:
         results["(a) test suite"] = check_tests(root)
+    if run_tests:
+        results["(a2) live catalog (required)"] = check_live_catalog(root)
     results["(b) frozen-file integrity"] = check_frozen(root)
     results["(c1) no env key in widgets"] = check_no_env_in_widgets(root)
     results["(c2) no unsafe_allow_html on model text"] = check_no_unsafe_html(root)

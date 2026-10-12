@@ -25,19 +25,28 @@ def test_extractor_finds_statements():
     assert ("appraisals", "rubric_version") in found
 
 
+def _unavailable(reason: str):
+    """Skip normally; fail when the release gate requires the live catalog (VERA_REQUIRE_LIVE_CATALOG=1)."""
+    import os
+    if os.environ.get("VERA_REQUIRE_LIVE_CATALOG") == "1":
+        pytest.fail(f"live catalog check required: {reason}")
+    pytest.skip(reason)
+
+
+@pytest.mark.live
 def test_sql_columns_exist_in_live_catalog():
     try:
         conn = sc.ro_connection()
     except Exception as e:  # noqa: BLE001 - any connect failure means "cannot verify", not "contract broken"
-        pytest.skip(f"live catalog unreachable ({type(e).__name__})")
+        _unavailable(f"live catalog unreachable ({type(e).__name__})")
     if conn is None:
-        pytest.skip("read-only DB credentials absent (VERA_DB_PASSWORD_vera_eval_ro / EXTERNAL_DB_URL in VERA's .env)")
+        _unavailable("read-only DB credentials absent (VERA_DB_PASSWORD_vera_eval_ro / EXTERNAL_DB_URL in VERA's .env)")
     try:
         cat = sc.live_catalog(conn)
     finally:
         conn.close()
     if not cat:
-        pytest.skip("schema vera_vjay has no visible columns for this account")
+        _unavailable("schema vera_vjay has no visible columns for this account")
     found = sc.collect()
     problems = []
     for (t, c), where in sorted(found.items()):

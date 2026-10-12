@@ -2,7 +2,7 @@
 ALWAYS rolled back. Applies additive migration 004 inside that transaction if not yet deployed (001/003 are owned by M1 and live), seeds an evidence corpus the way M3 would (sources ->
 evidence_spans), runs the pipeline, queries every table back, then rolls back so nothing persists.
 
-    VERA_INTEGRATION=1 .venv/bin/python -m pytest tests/test_m4_m5_integration.py -s
+    .venv/bin/python -m pytest tests/test_m4_m5_integration.py --run-live-stages -s
 
 Fixture evidence below is a short PARAPHRASED TEST FIXTURE for exercising the pipeline, not verified
 extractions of the cited studies; it must not be quoted as research output.
@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import text
 
-pytestmark = pytest.mark.skipif(os.getenv("VERA_INTEGRATION") != "1", reason="set VERA_INTEGRATION=1 (uses real LLM + DB)")
+pytestmark = pytest.mark.live  # real LLM + DB: pytest tests --run-live-stages
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURE = [  # (title, year, type, sub_questions, text)
