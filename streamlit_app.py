@@ -6,6 +6,7 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
+from vera.disclosure import render_disclosure
 from vera.memory_panel import render_memory_panel
 from vera.memory_review_panel import render_memory_review
 from vera.public_mode import is_public_mode, post_ask, upstream_base_url
@@ -40,6 +41,7 @@ def _show_triage(base_url: str) -> None:
 
 
 st.title("VERA - Question Answering Service")
+render_disclosure(st)  # item #74: shown in public and dev mode
 
 if PUBLIC:
     api_base_url = upstream_base_url(local_url_file=None)

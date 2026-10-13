@@ -142,7 +142,7 @@
     "retry_s": 300
   },
   "memory": {
-    "note": "Item #84 write gate (vera/memory_gate.py): structural filter thresholds and lists. Detector lists ported from AI-Internship intake_detectors.json. Not a security guarantee.",
+    "note": "Item #84 write gate (vera/memory_gate.py): structural filter thresholds and lists. Detector lists ported from AI-Internship intake_detectors.json. Not a security guarantee. calibration note: AI-Internship/p3m3/calibration-note-memory-thresholds-2026-10-11.md (statuses PROVISIONAL/UNCALIBRATED; D-038 ACCEPTED by R1 (RD-3) to 2026-10-25 or 20 owner-confirmed rows; values PROVISIONAL/UNCALIBRATED).",
     "allowed_fact_types": [
       "cited_finding"
     ],
@@ -257,7 +257,7 @@
     "dangling_parenthetical_words": ["as", "in", "see", "cf", "eg", "ie", "and", "or", "also", "per", "from", "implicitly", "ref", "refs", "reference", "references", "source", "sources"],
     "store": {
       "enabled": true,
-      "note": "Item #84 storage/recall. One fixed question_text for every memory row (visitor questions are never stored). Forgetting: ttl_days + recency decay (half_life_days) at read time; tombstone via claims.detailed_status. Write account URL in db_url_wo_env, read account in db_url_ro_env.",
+      "note": "Item #84 storage/recall. One fixed question_text for every memory row (visitor questions are never stored). Forgetting: ttl_days + recency decay (half_life_days) at read time; tombstone via claims.detailed_status. Write account URL in db_url_wo_env, read account in db_url_ro_env. Thresholds ttl_days, half_life_days, min_rank, min_matched_terms, max_query_terms, recall_k, max_writes_*: calibration note: AI-Internship/p3m3/calibration-note-memory-thresholds-2026-10-11.md (statuses PROVISIONAL/UNCALIBRATED; D-038 ACCEPTED by R1 (RD-3) to 2026-10-25 or 20 owner-confirmed rows; values PROVISIONAL/UNCALIBRATED).",
       "question_text": "VERA durable memory: claim-checked, gate-passed findings from corpus sources (trust=tool-derived,claim-checked,auto)",
       "gate_version": "g1",
       "fact_type": "cited_finding",

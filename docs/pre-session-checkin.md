@@ -1,5 +1,7 @@
 # TAI Labs Agentic AI Engineering Pre-session check-in — Tagg Maiwald
 
+> **[Annotation 2026-10-09b (R11a, job C5-VERA): superseding status.** Observed today (decisions-2026-10-09.md; VERA git log read 2026-10-09): VERA redeployed by R1 and live check plus memory drill passed (week5-submission-record.md); VERA `main` = `50644f0` (D6, #91 scaffold; /version at 69cd936; polish committed); Week 5 assignment COMPLETED (R1); Demo Day date ignored, its outcomes run ASAP; course end is 2026-10-25 (any '10-12 end' below is stale); D-029 accepted to 2026-10-25; Render is the course-scoped host only (VERA's future host is non-Render, Postgres stays; no DB backups per R1, portable SQL exports wanted, #99). Design direction (R1, 10-09): research stances are Researcher Agent flavors with their own SOPs/scripts; VERA stays a stance-neutral research service; a private VERA instance is under consideration (#98 A6). New: OEV-6..OEV-15 (VERA research-service opportunities, `AI-Internship/p3m3/oev-vera-research-service-siblings.md`) and R1 requirements for VERA fetch/extract/provenance (many MIME types and rendered-page text; author/contributor/editor/reviewer data incl. public emails; DOI and bibliographic identifiers; provenance aggregates over time to rank sources and RAG results). Current VERA status and open work: `p3m3/VERA-STATUS-2026-10-09b.md`; to-do digest: `AI-Internship/p3m3/VERA-TODO-DIGEST.md`. Pre-session record dated 8 Sep; unchanged.**]**
+
 _8 September 2026_
 
 | Item | Status |
