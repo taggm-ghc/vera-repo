@@ -12,7 +12,7 @@ Status tags: LIVE (current, maintained), RECORD (kept as written, dated annotati
 | Document | Purpose | Status |
 |---|---|---|
 | [vera-design.md](vera-design.md) | Full design, governing invariants, Addendum A (MVP boundary, milestone table, A.11 status and replan, status addendum). Original milestone targets preserved per the Provenance invariant. | LIVE |
-| [VERA-OCT-15-SPRINT-PLAN.md](VERA-OCT-15-SPRINT-PLAN.md) | Oct 15 - Nov 1 sprint plan (2026-09-30). Fallback plan, superseded in part by the 2026-10-03 MVP target. | SUPERSEDED (in part; fallback) |
+| [VERA-OCT-15-SPRINT-PLAN.md](VERA-OCT-15-SPRINT-PLAN.md) | Oct 15 - Nov 1 sprint plan (2026-09-30). Fallback plan, superseded in part by the 2026-10-03 MVP target. | RETIRED (2026-10-12; left unedited) |
 | [pre-session-checkin.md](pre-session-checkin.md) | Capstone seed and pre-session check-in (8 September 2026). | RECORD |
 | [vera-v06-design-prv.md](vera-v06-design-prv.md) | Earlier private design, Refined Version 06 (9 September 2026); vera-design.md is current. | RECORD |
 | [vera-retrieval-quality-digest-prv.md](vera-retrieval-quality-digest-prv.md) | Retrieval-quality layer digest (18 September); nothing implemented, deferred by A.9. [Corrected 2026-10-04: digest layer still unbuilt, but a search-level retrieval build (item #71) exists, uncommitted; see the digest's 2026-10-04 annotation.] | BACKLOG |
@@ -35,3 +35,5 @@ archive folders (`2026-10-01-cleanup-archive` through `-archive-10`).
 *Annotation 2026-10-02 (R11a, round 3): index completed (it previously omitted the private files) and status tags added. Pre-edit copy: `../AI-Internship/p3m3/history/2026-10-01-cleanup-archive-10/vera-repo-docs_README.md`. The pipeline cannot yet run end to end; live plans are in the sibling repo's local `AI-Internship/p3m3/`.*
 
 *Annotation 2026-10-04 (R11a orchestrator): links verified against the directory. The bibliography file is root-owned and read-only; it was not annotated. Current status of the pipeline is in `vera-design.md` (2026-10-04 annotation).*
+
+*Annotation 2026-10-12: status as of 7fc7fe1 (pushed, deploy unverified) is in the root [README.md](../README.md) and the 2026-10-12 annotation at the end of `vera-design.md`. `VERA-OCT-15-SPRINT-PLAN.md` is retired and left unedited.*

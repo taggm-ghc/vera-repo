@@ -100,11 +100,15 @@ The application interface includes:
 
 ``` text
 GET  /health
+GET  /version
 POST /ask
 GET  /corpus-summary
+GET  /memory/pending
+POST /memory/{claim_id}/confirm
+POST /memory/{claim_id}/reject
 ```
 
-`GET /health` provides a basic service health check (no key).
+`GET /health` provides a basic service health check (no key). `GET /version` (no key) returns the deployed commit (`commit`, `short`) so a deploy can be verified; it carries no host or secret.
 
 `POST /ask` is the primary research-question interface (key: `VERA_API_KEY`). Since 2026-10-07 (items #77 and
 #79): the scope router runs first; an accepted question is searched live (arXiv, OpenAlex, DuckDuckGo links
@@ -124,6 +128,10 @@ claim_check     {checked, supported, partial, removed, checker, outcome}
 
 `GET /corpus-summary` (key: `VERA_API_KEY`; item #83) describes VERA's own admitted sources: count, newest
 source time, a model-written description and topics; no titles, URLs or abstracts.
+
+The three `/memory/...` routes are owner-only (key: `VERA_OWNER_KEY`, header `X-Owner-Key`; D6). `GET /memory/pending` lists findings awaiting review, including legacy auto-written rows; `confirm` makes a finding recall-eligible and `reject` stops it being recalled. See "How VERA remembers".
+
+Every page (Ask, demo, trace eval) shows one shared data-use disclosure from `vera/disclosure.py` (item #74): answers are AI-generated and may be wrong, VERA keeps no profile of you and does not save your question or who you are, and new findings are saved as pending until the owner confirms them. The text follows the `confirm_required` memory setting.
 
 The M2-M6 research pipeline under `vera/` (with Gate C, M5 verification and the M6 judge) remains a separate,
 offline path; `/ask` reuses its search providers, Gate A and licence gate, not the whole pipeline.
@@ -218,7 +226,7 @@ A different port can be supplied when starting the service:
 ### Tests
 
 Run the offline suite with the repository's virtual environment (no database or
-network needed; two integration tests skip without credentials):
+network needed; a few integration tests skip without credentials):
 
 ``` bash
 venv/bin/python -m pytest tests
@@ -226,9 +234,9 @@ venv/bin/python -m pytest tests
 
 Tests marked `live` (real provider calls) run only with `--run-live-stages`; tests marked
 `live_api` (they call the deployed API) also need `API_BASE_URL` set, for example
-`API_BASE_URL=... venv/bin/python -m pytest tests --run-live-stages`. Plain `pytest tests` makes no live calls. The old `VERA_INTEGRATION=1` still enables `live` tests as a deprecated alias that ends 2026-10-25.
+`API_BASE_URL=... venv/bin/python -m pytest tests --run-live-stages`. Plain `pytest tests` makes no live calls. `--run-live-stages` is the only supported switch. The old `VERA_INTEGRATION=1` still enables `live` tests (with a DeprecationWarning) as a deprecated alias that stops working after 2026-10-25.
 
-Last result, 2026-10-07: 801 passed, 2 skipped (`python scripts/release_gate.py` runs the same suite plus static checks). Run `tests/` only: the script
+Last result, 2026-10-12 (at 7fc7fe1): 965 passed, 3 skipped; release gate PASS 6/6 (`python scripts/release_gate.py` runs the same suite plus the live catalog check, frozen-file hashes and static checks). Run `tests/` only: the script
 `vera/m6/test_m6_schema_sync.py` is not a pytest module and exits at import.
 Integration paths that touch the database write to the shared production
 instance, so use identifiable, removable test rows only.
@@ -257,6 +265,7 @@ secret in `.env.example`.
     `VERA_JUDGE_*` overrides (model, price, `VERA_JUDGE_ALLOW_SAME_FAMILY=1` to allow a disclosed same-family judge),
     `VERA_DEMO_SOURCE`.
 -   `VERA_API_KEY`: key required by `POST /ask`.
+-   `VERA_OWNER_KEY`: owner-only key for the `/memory/...` routes (header `X-Owner-Key`); unset = those routes stay closed.
 -   `EXTERNAL_DB_URL` / `INTERNAL_DB_URL`: Render Postgres URLs. They point at the
     **same** instance, and dev and production share one schema (`vera_vjay`), so
     "local" database work touches production data. Since 2026-10-07 both use VERA's own
@@ -280,7 +289,7 @@ secret in `.env.example`.
 One image (`Dockerfile`) runs both services; `start.sh api|ui` picks which. Port: Render's `PORT`, else 8000. Secrets live only in Render's environment settings, never in the repo or the image (`.dockerignore` keeps `.env` and `*-prv` files out). Service URLs are not recorded in this repository.
 
 1. Generate a client key locally: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`.
-2. **API service:** New → Web Service → this repo, branch `main`; Runtime Docker; Root Directory blank; plan Free; Health Check Path `/health`; Auto-Deploy Off. Environment: `OPENAI_API_KEY`, `VERA_API_KEY` (the new key), optional `GROQ_API_KEY` (free-tier `/ask`, OpenAI as fallback), optional `VERA_DB_URL_WO` (corpus admission: Render's INTERNAL database URL with the `vera_pipeline_wo` account). Optional `VERA_DB_URL_RO` (sidebar corpus description: Render's INTERNAL database URL with `vera_eval_ro`). Leave `VERA_PUBLIC_MODE` unset (public mode is the default). Template: `.env.render.api.example` (copy to the gitignored `.env.render.api`, fill in, paste with "Add from .env").
+2. **API service:** New → Web Service → this repo, branch `main`; Runtime Docker; Root Directory blank; plan Free; Health Check Path `/health`; Auto-Deploy Off. Environment: `OPENAI_API_KEY`, `VERA_API_KEY` (the new key), optional `GROQ_API_KEY` (free-tier `/ask`, OpenAI as fallback), optional `VERA_DB_URL_WO` (corpus admission: Render's INTERNAL database URL with the `vera_pipeline_wo` account). Optional `VERA_DB_URL_RO` (sidebar corpus description: Render's INTERNAL database URL with `vera_eval_ro`). Optional `VERA_OWNER_KEY` (owner-only `/memory/...` routes, D6; unset = they return 503; they also need both `VERA_DB_URL_RO` and `VERA_DB_URL_WO`). Leave `VERA_PUBLIC_MODE` unset (public mode is the default). Template: `.env.render.api.example` (copy to the gitignored `.env.render.api`, fill in, paste with "Add from .env").
 3. **UI service:** New → Web Service → same repo; Runtime Docker; plan Free; Docker Command `./start.sh ui`; Health Check Path `/_stcore/health`; Auto-Deploy Off. Environment: `VERA_API_BASE_URL` (the API service's `https://` address, no trailing slash; without it the UI calls `127.0.0.1:8001` and fails), `VERA_API_KEY` (same key), `VERA_DEMO_SOURCE=fixture` (demo pages show the labelled fixture; no database on Render yet). Template: `.env.render.ui.example` (copy to `.env.render.ui`, same steps). The UI holds no provider key (no `OPENAI_API_KEY` or `GROQ_API_KEY`): it only calls the API, which chooses the provider.
 4. Check: API `/health` returns 200 and `/ask` without the key returns 401; the UI answers one question. With `GROQ_API_KEY` set, the answer's `model` field reads `groq:...` and `cost_usd` is 0; `gpt-4.1-nano` there means Groq failed and OpenAI answered. An in-scope answer lists its numbered sources; with `VERA_DB_URL_WO` set, the API log shows a `corpus admission:` line per grounded answer.
 5. Redeploy after a push: Manual Deploy → Deploy latest commit.
@@ -302,13 +311,36 @@ The bootcamp's Week 4 asks for "an eval suite your capstone runs against, visibl
 - **See it.** `streamlit run streamlit_app.py`, page **trace eval**: headline, per-check and validation tables, decision guidance (2026-10-07: paired exact McNemar tests per split and per check, Wilson intervals for check TPR/TNR, indicators and the formulas, thresholds in `config/trace_eval_guidance.json`), and a trace browser. On this snapshot only citation presence (p = 0.0039) and phantom evidence (p = 0.0002) improve significantly; the overall pass rate is not distinguishable.
 - **Limits.** Agent-authored questions (self-preference risk); a single agent coder and labeller from the same model family as the builder; 30 questions; abstracts only; the checks were frozen before the after-fix run but are heuristics. Next fix by this evidence: retrieval query translation, then scope routing.
 
+## Case study
+
+**Problem.** A fluent LLM research answer can hide where its evidence came from. The test: does retrieving real abstracts and forcing citations to them make the answer more verifiable than the same model answering alone?
+
+**Architecture and stack.** `POST /ask` runs a scope router, then a keyless live search (arXiv and OpenAlex, rank-fused), then an answer from the retrieved abstracts only with `[n]` citations, a claim check against each cited abstract, and a gated memory (checked findings are written as pending; only owner-confirmed findings are recalled). FastAPI service, Streamlit UI, one Postgres with three least-privilege accounts, free-tier-first models (Groq, then `gpt-4.1-nano`), deterministic checks for evaluation. Sections above give detail.
+
+**Before and after (one valid pair).** Same 30 frozen questions, same model (`gpt-4.1-nano`), same frozen checks (`trace-checks-v1`), one run each, 2026-10-04. Before = `baseline` (the question only, no retrieval); after = `grounded_v1` (keyless arXiv search, up to 5 abstracts, cite-only-these rule).
+
+| Measure (source) | Before | After | Test |
+|---|---|---|---|
+| Citation present (A1), 22 applicable traces | 1/22 (5%) | 10/22 (45%) | exact McNemar p = 0.0039 |
+| No phantom evidence (A4), 22 applicable traces | 4/22 (18%) | 17/22 (77%) | exact McNemar p = 0.0002 |
+| All applicable checks pass, dev (n=20) | 2/20 (10%) | 3/20 (15%) | not distinguishable |
+| All applicable checks pass, held-out (n=10) | 2/10 (20%) | 2/10 (20%) | no change |
+
+Sources: `eval_results/trace_eval_v1.json` (generated 2026-10-04), `eval_results/trace_eval_v1_validation.json`, `docs/trace_eval/`.
+
+**Caveats.** The headline pass rate did not move; the gain is in the failure mix (by the blind labels, dev traces with fabricated citations, unsourced numbers and vague "studies show" claims fell from 3, 3 and 12 to 0, 0 and 0), and retrieval became the top failure (13 of 19 grounded dev traces had at most 1 of 5 results on topic). Agent-authored questions; one agent coder and labeller from the builder's model family; 30 questions, one run; the checks are heuristics validated on dev only (they over-flag some passes, TNR 0.5 to 0.75 on four checks); one grounded capture error counts as a failure; the "after" predates the query-translation fix (item #71) and the grounded `/ask` (item #79). Directional, small n.
+
+**Not a valid pair, so not claimed.** (1) Strictly relevant results in the top 5, 0.27 to 0.77 (item #71, 22 questions): later re-scoring showed a labeller effect of about 0.32, and with one labeller the shipped chain is level with the old one (1.00 vs 1.09). (2) `eval_results/grounded_ask_v1.json` (2026-10-08, post-#79: 19 of 30 answered with checked citations, unsupported-claim rate 9 of 105 = 8.6%, Wilson 95% 4.6 to 15.5%) has no baseline on the same claim check. Cheapest measurement for a post-fix pair: rerun `scripts/trace_measure.py` on the same 30 questions and frozen checks against today's `/ask`, and run the claim check on the 20 dev baseline answers (an estimated 30 to 50 `gpt-4.1-nano` or free-tier calls, cents; not yet run).
+
+**What changed.** Citations went from near-absent (1/22) to present in about half of applicable traces (10/22), and fabricated or unsourced claims disappeared in the labelled dev set. In exchange VERA now declines when search returns nothing useful, which exposed retrieval quality as the next problem.
+
 ## Status and limitations (2026-10-04, updated 2026-10-07)
 
 Written as dated observations, not guarantees. Every measured figure carries its caveat; nothing here is a statistical claim.
 
 **What VERA does now**
 
-- **Grounded `/ask` (2026-10-07, item #79; built and tested, not yet deployed).** Live search per accepted question, link-only results followed to original papers, answers only from retrieved abstracts with [n] citations, invalid citation numbers removed, sources listed under the answer, an explicit no-sources reply instead of memory answers; corpus admission (Gate A + licence gate) after the response. See "Grounded `/ask`" above. It does not yet meet every criterion R1 set for the public default (next list).
+- **Grounded `/ask` (2026-10-07, item #79; built and tested; pushed, deploy unverified 2026-10-12).** Live search per accepted question, link-only results followed to original papers, answers only from retrieved abstracts with [n] citations, invalid citation numbers removed, sources listed under the answer, an explicit no-sources reply instead of memory answers; corpus admission (Gate A + licence gate) after the response. See "Grounded `/ask`" above. It meets the criteria R1 set for the public default, measured once (directional, small n; see the next list).
 - **Free-tier-first models for `/ask`** (item #77): Groq `openai/gpt-oss-20b`, then `openai/gpt-oss-120b`, then OpenAI `gpt-4.1-nano`; evaluation paths stay on `gpt-4.1-nano`.
 - **"What VERA draws on" sidebar** (item #78) on every page: scope, how answers are produced, and the Trace Eval evidence snapshot, read from shipped files.
 - **Corpus description and connection triage** (item #83, ported from AI-Internship). `GET /corpus-summary` (behind `VERA_API_KEY`; the UI calls it server-side) describes VERA's own admitted sources in model-written prose with topics, from titles and metadata only, through the read-only account (`VERA_DB_URL_RO`); it is regenerated only when the source count, newest source time or prompt version change (memory cache; deterministic fallback with a retry cooldown) and shown in the sidebar. When the Ask page cannot reach the API, it shows an ordered, host-free triage (address, reachable, awake, `/health`, endpoint) stopping at the earliest failing step.
@@ -317,28 +349,28 @@ Written as dated observations, not guarantees. Every measured figure carries its
 - **Scope router** (`vera/scope_router.py`, `config/scope_router.json`). A deterministic first layer plus an optional small-model classifier; declined questions never reach search or the answering model. On the frozen 50-item scope set (`config/scope_set_v1.json`, sha256-frozen, AI-authored): false refusals 1/24 (Wilson 95% 0.007 to 0.202) and false accepts 0/26 (0.000 to 0.129), identical for layer 1 alone and with the classifier. **Directional, small n.** The one false refusal cites a 2025 study that the classifier called a future date.
 - **Public mode and caps** (`vera/public_mode.py`, `config/public_mode.json`). Public mode is the default when `VERA_PUBLIC_MODE` is unset. The upstream URL comes from server configuration only, the key stays server-side and is never put in a widget, request and daily-cost caps return a generic 429 with no provider text, and model text is rendered through `safe_markdown`. Caps today are proposals: 6 requests per minute and 40 per day per client, 400 per day overall, USD 2.00 per day overall and USD 0.25 per client.
 - **Licence rule (approved by R1, 2026-10-04).** The gate rejects only ND, no-educational-use and fee-only terms; plain NC is accepted; an undeclared or unclear licence is held for review. Checked on 7 hand-written cases (`vera/licence_gate.py`).
-- **Release gate** (`python scripts/release_gate.py`). Offline: full suite, sha256 of the two frozen question files, static safety checks (no environment key passed to a widget, no `unsafe_allow_html` on model text, public mode default). `--live` additionally re-runs scope layer 1 only (zero cost) and fails on any false accept (directional, small n).
+- **Release gate** (`python scripts/release_gate.py`). Six required checks: full suite, the SQL catalog test run with `--run-live-stages` (read-only; fails closed, so a skip or zero tests fails the gate), sha256 of the frozen files, and static safety checks (no environment key passed to a widget, no `unsafe_allow_html` on model text, public mode default). `--live` additionally re-runs scope layer 1 only (zero cost) and fails on any false accept (directional, small n).
 
 ## How VERA remembers (Week 5)
 
 **What it keeps.** VERA keeps checked research findings, not people. A finding is one sentence from an answer. The claim checker marked it supported by the abstract it cites. It comes with its sources. VERA never keeps your question, who you are, or any session id.
 
-**How it gets in.** Findings are auto-saved shortly after the answer, in the background after the cited source is admitted to the corpus. They pass the claim check and the structural write gate with no human review — a recorded divergence from the Week 5 lesson's "confirm consequential writes". An owner-only confirm step is planned. The gate tests for support, allowed sources (arXiv or OpenAlex, licence accepted), identifier, and refusable content (tool dumps, instructions, personal remarks, echoed questions, time-bound claims).
+**How it gets in.** After the answer, findings from `/ask` that pass the claim check and the structural write gate are stored as pending, in the background after the cited source is admitted to the corpus. Pending findings are not recalled. Only the owner confirms or rejects them, through owner-key routes. Findings written before this change are not recalled either; they are listed for review. The gate tests for support, allowed sources (arXiv or OpenAlex, licence accepted), identifier, and refusable content (tool dumps, instructions, personal remarks, echoed questions, time-bound claims).
 
 **Where it lives.** In VERA's Postgres database, in the existing claims, answers and evidence tables, under one fixed memory label. Process memory holds no candidates.
 
-**How it comes back.** On later questions, VERA searches saved findings by text match and recency, using the read-only account. Only findings above a minimum relevance floor are shown after the answer under "From VERA's memory", with their date and source. They are displayed only; they are never fed back to the model.
+**How it comes back.** On later questions, VERA searches confirmed findings by text match and recency, using the read-only account. Only findings above a minimum relevance floor are shown after the answer under "From VERA's memory", with their date and source. They are displayed only; they are never fed back to the model.
 
-**How it is forgotten.** Findings older than 30 days are not recalled. Older findings rank lower, with a 14-day half-life. An operator can mark a finding contradicted, and it stops being recalled at once. Permanent deletion needs the owner's approval each time.
+**How it is forgotten.** Findings older than 30 days are not recalled. Older findings rank lower, with a 14-day half-life. An operator can reject a finding, and a rejected finding stops being recalled. Permanent deletion needs the owner's approval each time.
 
-**Known limits.** Stored text is the model's own sentence checked against an abstract, so a fluent false claim from a bad abstract could pass. The gate is hygiene, not a poisoning defence. When a claim cites multiple sources, one evidence span is kept per source. The daily cap (50 findings per day) is a soft per-process cap. Memory lasts until the course database expires 2026-10-17. Database operations have a 5-second connect timeout and 5-second statement timeout. The UI shows no "Saved N findings" message because findings are saved asynchronously after the response; they appear on later questions.
+**Known limits.** Stored text is the model's own sentence checked against an abstract, so a fluent false claim from a bad abstract could pass. The gate is hygiene, not a poisoning defence. When a claim cites multiple sources, one evidence span is kept per source. The daily cap (50 findings per day) is a soft per-process cap. Memory lives in the shared Postgres; the Render database was upgraded to a paid plan on 2026-10-12, so the earlier 2026-10-17 expiry no longer applies. Database operations have a 5-second connect timeout and 5-second statement timeout. The UI shows no "Saved N findings" message because findings are stored as pending after the response; they appear on later questions only once the owner confirms them.
 
 **What VERA does NOT do yet**
 
 - The full pipeline (M2 to M6) has **not been run live end to end**; the tests use fakes and fixtures.
 - The central claim (VERA's engineered answer beats a direct model answer) is **unmeasured**.
 - Grounded `/ask` (2026-10-07) now meets R1's criteria for the public default, measured once (directional, small n): each cited source is a record retrieved in that request with provider, identifier, retrieval time and licence decision; citations that map to no record are removed; an answer with no valid citation becomes an insufficient-evidence reply; each cited claim is checked against the cited abstract (`vera/claim_check.py`; unsupported sentences removed, partial ones marked; a different-family checker first; fails closed). On the 30-question trace set (`scripts/grounded_trace_run.py`, `eval_results/grounded_ask_v1.json`): unresolvable citations 0 of 57; unsupported-claim rate 9 of 105 (8.6%, Wilson 95% 4.6% to 15.5%), removed before display; partial or unsupported 37 of 105 (35%, 26.8% to 44.7%). Caveats: the checker's own error rate is unmeasured; abstracts only; false-premise questions often end as insufficient-evidence replies (corrections without citations).
-- The API and UI are deployed on Render (2026-10-07, item #73; addresses are not recorded here); the deployed version predates grounded `/ask`.
+- The API and UI are deployed on Render (first verified 2026-10-07, item #73; addresses are not recorded here); that verified deploy predates grounded `/ask`. Later commits through 7fc7fe1 (D6 owner-confirmed memory, #91 scaffold with its flag off, shared data-use disclosure #74) are pushed, deploy unverified (2026-10-12): the `/version` check was blocked. This README records only verified deploys.
 
 **Accepted residuals (risks named, not removed)**
 
@@ -362,13 +394,13 @@ VERA is under active development as a capstone project. The 2026-09-30 directive
 | Area | State (2026-10-01, corrected 2026-10-02; rows marked 2026-10-07 updated) |
 |---|---|
 | Architecture and design | Complete: `docs/vera-design.md` and Addendum A (milestone status table with the 2026-10-01 addendum at A.11). |
-| Service foundation | 2026-10-07: FastAPI `GET /health`, `POST /ask` (grounded, items #77/#79) and `GET /corpus-summary` (item #83); deployed on Render (item #73; the deployed build predates items #79 and #83 until the next deploy). |
-| Persistence | Built: Postgres schema `vera_vjay`, migrations 001-005 in `db/migrations/` (see `db/README.md`; 003 and 004 are not re-runnable). Migration 005 columns verified to exist live, read-only. (The earlier "persistence not yet implemented" line was stale.) |
+| Service foundation | 2026-10-07: FastAPI `GET /health`, `POST /ask` (grounded, items #77/#79) and `GET /corpus-summary` (item #83); deployed on Render (item #73; the last verified build predates items #79 and #83; 7fc7fe1 is pushed, deploy unverified 2026-10-12). Also `GET /version` and the owner-only `/memory/...` routes (D6). |
+| Persistence | Built: Postgres schema `vera_vjay`, migrations 001-006 in `db/migrations/` (see `db/README.md`; 003 and 004 are not re-runnable). Migration 005 columns verified to exist live, read-only. Migration 006 (`licence_observations`, additive; file under `db/migrations/pending/`, applied 2026-10-09 with owner approval; rollback script in `db/migrations/rollback/`). (The earlier "persistence not yet implemented" line was stale.) |
 | M1-M7 code | Built under `vera/` (m2_runner, m3, m4, m5, m6, m7, plus `pipeline_llm`, `pipeline_store`, `cost_ledger`) with tests. **The pipeline cannot yet run end to end**; nothing has run end to end against the live database. Missing: (a) no production code creates `runs` rows (only tests do), and the M6 adapter reads `runs.question` / `runs.final_response`, which nothing writes (`finalize_run` writes `engineered_response`), so the M6 CLI fails on a new run; (b) `sub_question_ids` is read by Gate C and the context builder but set by nothing (no M3-to-M4 adapter), so Gate C returns `insufficient`; (c) the runners are not repointed to the new accounts, and `run_m2` probably cannot run under the write-only account (static reading, not run live). The plan is `AI-Internship/p3m3/vera-plan-end-to-end-runner.md`. |
 | What is persisted | Gate C decisions per attempt (`gate_c_decisions`), claims with fine-grained status and issue codes, answers by stage with tokens, cost and latency, relations (type and confidence only), appraisals with rubric/policy version, and immutable source versions. **M2 search cost is not persisted on `search_iterations`**: it is returned in memory and appended to a file only if `VERA_COST_LOG` is set. The inputs behind an M5 `weak` label are not stored. Live rows were not queried 2026-10-02. |
-| Tests | 2026-10-07: `pytest tests`: **801 passed, 2 skipped**; release gate PASS. Includes the SQL contract test `tests/test_sql_contract.py`, whose live catalog test is opt-in (`--run-live-stages`, read-only with VERA's own `vera_eval_ro`; skipped by default in ordinary pytest; the release gate requires it and fails closed, so a skip, error or zero tests fails the gate). |
+| Tests | 2026-10-12: `pytest tests`: **965 passed, 3 skipped**; release gate PASS 6/6. Includes the SQL contract test `tests/test_sql_contract.py`, whose live catalog test is opt-in (`--run-live-stages`, read-only with VERA's own `vera_eval_ro`; skipped by default in ordinary pytest; the release gate requires it and fails closed, so a skip, error or zero tests fails the gate). |
 | DB accounts | 3 accounts applied 2026-10-01 (descriptions above). 2026-10-07: all three logins verified; `.env` uses VERA's own accounts only (`EXTERNAL_DB_URL`/`INTERNAL_DB_URL`/`VERA_DB_URL_RW` → `vera_claude_code_rw`, `VERA_DB_URL_WO` → `vera_pipeline_wo`, `VERA_DB_URL_RO` → `vera_eval_ro`); write-only grants exercised for corpus admission. The pipeline runners are not yet repointed. |
-| Version control | 2026-10-07: `main` is pushed to GitHub through the `/ask` provider chain (item #77); later work (grounded `/ask`, corpus admission and description, triage, Trace Eval guidance, sidebar) is committed only on R1's request. |
+| Version control | 2026-10-12: `main` = `origin/main` = 7fc7fe1 (#74 disclosure and rules 1-2 rewrite), after 88dca65 (#7 opt-in live tests) and 50644f0 (D6 owner-confirmed memory, #91 scaffold). Commits and pushes happen only on the owner's request. |
 | Evaluation design | Longitudinal and quarterly: 8 runs, one per quarter (default stamps Jan 2025, Apr 2025, Jul 2025, Oct 2025, Jan 2026, Apr 2026, Jul 2026, Oct 2026; **unconfirmed**), 2 tests per agent/model per run, as-of stamping by code (never in the baseline prompt), a config fingerprint, and six named contamination channels (search, fetched content, parametric knowledge, judge hindsight, rubric hindsight, cross-run carry-over). Design only: no code or schema for it exists yet. See `AI-Internship/p3m3/VERA-EVAL-BEST-PRACTICES.md` (plain path; gitignored folder). |
 | Target | Course end 2026-10-25 (corrected 2026-10-05; earlier documents say 10-12). Demo Day uses the Render deployment. |
 
@@ -378,7 +410,7 @@ A2 (Anthropic key) DECIDED 2026-10-02 by R1: dropped, no Anthropic key will be u
 verification, feeding the existing bounded revision), plan being drafted, nothing built; deleting test row `questions.question_id=7` (needs an approved action); confirming
 the 8 quarterly stamps; the staged live run; requirements freeze; provider-chain wiring for the
 pipeline stages (`/ask` is wired since item #77, 2026-10-07); pg_dump and the non-Render host choice
-(deferred to 2026-10-13..16; the Render database expires 2026-10-17; PostgreSQL stays regardless of host).
+(the Render database was upgraded to a paid plan on 2026-10-12, so the 2026-10-17 expiry no longer applies; the pg_dump and host-choice dates of 2026-10-13..16 are no longer deadline-driven; PostgreSQL stays regardless of host).
 
 **Accepted divergences (recorded):** dev and production share one Postgres instance and schema
 (separated by account only); the DB admin login is Render's original, misnamed identity; the
@@ -401,8 +433,7 @@ plain paths and are not links):
     `vera-plan-verifier-judge-disagreement.md`, `orchestration-learning-and-critique-plan.md`: milestone
     hardening, cost accounting, judge/verifier disagreement, and the critique pass (direction D1).
 
-Hard dates: MVP target Fri 2026-10-03 (aggressive); course end Mon 2026-10-12; `pg_dump` and host choice
-2026-10-13 to 2026-10-16; fallback sprint start Thu 2026-10-15; the Render database expires Sat 2026-10-17.
+Dates: MVP target Fri 2026-10-03 (aggressive); course end 2026-10-25 (corrected 2026-10-05); the fallback sprint start of Thu 2026-10-15 is retired. The Render database expiry of 2026-10-17 no longer applies (paid plan, 2026-10-12).
 
 ## Documentation Index
 
