@@ -2,9 +2,12 @@
 
 Everything shown is read from files shipped with the app (scope router config, /ask provider chain config,
 the Trace Eval results snapshot); no database, API, environment variable or host is read or shown.
+
+Owner requirement: the sidebar NEVER discloses a specific individual source, document or quote.
+Enforced structurally: snapshot_summary() returns aggregate fields only (SNAPSHOT_FIELDS), so no title, URL or id
+can reach the sidebar renderer; render_sources_sidebar() takes no sampling/rng argument.
 """
 import json
-import random
 import re
 from pathlib import Path
 
@@ -13,7 +16,7 @@ SCOPE_PATH = ROOT / "config" / "scope_router.json"
 CHAIN_PATH = ROOT / "config" / "ask-provider-chain.json"
 SELECTION_PATH = ROOT / "config" / "model-selection.json"
 SNAPSHOT_PATH = ROOT / "eval_results" / "trace_eval_v1.json"
-SAMPLE_SIZE = 5
+SNAPSHOT_FIELDS = frozenset({"count", "years", "questions", "captured"})  # aggregate only; never per-source
 _ARXIV_ID = re.compile(r"arxiv\.org/(?:abs|pdf)/(\d{2})(\d{2})\.\d{4,5}")
 _MD_SPECIAL = re.compile(r"([\\`*_{}\[\]()#+\-.!|<>~])")
 
@@ -46,20 +49,21 @@ def answer_providers(chain_path: Path = CHAIN_PATH, selection_path: Path = SELEC
 
 
 def snapshot_summary(path: Path = SNAPSHOT_PATH) -> dict | None:
-    """Distinct sources retrieved for the Trace Eval snapshot, the year span of their arXiv ids, and titles."""
+    """Aggregate facts about the Trace Eval snapshot: distinct-source count, arXiv id year span, question count, date.
+
+    Deliberately returns no per-source field (title, URL, id); see SNAPSHOT_FIELDS."""
     res = _read(path)
     if not res:
         return None
-    sources = {}
+    sources = set()
     for t in res.get("traces", []):
         for s in t.get("sources") or []:
             if s.get("url"):
-                sources[s["url"]] = s.get("title") or s["url"]
+                sources.add(s["url"])
     years = sorted({2000 + int(m.group(1)) for u in sources if (m := _ARXIV_ID.search(u))})
     questions = len({t.get("id") for t in res.get("traces", []) if t.get("id")})
     return {"count": len(sources), "years": (years[0], years[-1]) if years else None,
-            "questions": questions, "captured": str(res.get("generated_at") or "")[:10] or None,
-            "titles": list(sources.values())}
+            "questions": questions, "captured": str(res.get("generated_at") or "")[:10] or None}
 
 
 CORPUS_REFRESH_S = 600  # per browser session: how often the sidebar re-asks the API (the API caches anyway)
@@ -84,8 +88,8 @@ def render_corpus(st, data: dict | None) -> None:
         st.caption("**VERA's corpus:** description not available right now.")
         return
     when = f", newest source {plain(data['corpus_updated_at'][:10])}" if data.get("corpus_updated_at") else ""
-    st.caption(f"**VERA's corpus:** {int(data.get('source_count') or 0)} sources admitted by Gate A and the "
-               f"licence gate{when}.")
+    st.caption(f"**VERA's corpus:** {int(data.get('source_count') or 0)} sources{when}. Licence decisions cover index records and abstracts only, use the "
+               f"indexing services' published metadata terms, and were not verified with the publisher.")
     if data.get("summary"):
         st.caption(plain(data["summary"]))
     if data.get("topics"):
@@ -95,29 +99,26 @@ def render_corpus(st, data: dict | None) -> None:
                    f"{plain((data.get('summary_generated_at') or '')[:10])}; refreshed when the corpus changes.")
 
 
-def render_sources_sidebar(st, rng: random.Random | None = None) -> None:
+def render_sources_sidebar(st) -> None:
     with st.sidebar.expander("📚 What VERA draws on", expanded=False):
         render_corpus(st, _corpus(st))
         scope = scope_text()
         st.caption(f"**Scope:** {plain(scope)}" if scope else "**Scope:** not available")
         providers = answer_providers()
         st.caption("**How VERA answers (retrieval-augmented generation):** for each in-scope question the Ask page "
-                   "searches published sources live (arXiv, OpenAlex, and web results followed back to the original "
-                   "papers), answers only from the abstracts it found, cites them as [n] and lists them under the "
-                   "answer. If no usable source is found it says so instead of answering from memory. Abstracts can "
+                   "searches published sources live (arXiv, OpenAlex and web search; web results are matched to a paper's "
+                   "index record where one is found), answers only from the abstracts it found (up to 1,500 "
+                   "characters each), cites them as [n] and lists them under the answer. If no usable source is found it says so instead of answering from memory. Abstracts can "
                    "omit methods and limits, so open the sources before relying on a claim."
                    + (f" Models, in the order tried: {plain(', '.join(providers))}." if providers else ""))
         snap = snapshot_summary()
         if not snap or not snap["count"]:
-            st.caption("**Evidence snapshot:** not available")
+            st.caption("**Trace Eval sources (arXiv abstract records):** not available")
             return
         span = f", arXiv identifiers from {snap['years'][0]} to {snap['years'][1]}" if snap["years"] else ""
         when = f", captured {snap['captured']} (UTC; replaced when the evaluation is re-run)" if snap["captured"] else ""
-        st.caption(f"**Evidence snapshot (Trace Eval page):** {snap['count']} distinct arXiv abstracts retrieved "
-                   f"for {snap['questions']} test questions{span}{when}. A random sample of titles:")
-        titles = snap["titles"]
-        for title in (rng or random).sample(titles, min(SAMPLE_SIZE, len(titles))):
-            st.caption(f"• {plain(title)}")
+        st.caption(f"**Trace Eval sources (arXiv abstract records):** {snap['count']} distinct arXiv abstracts "
+                   f"retrieved for {snap['questions']} test questions{span}{when}.")
 
 
 def _link(title: str, url: str) -> str:
@@ -130,7 +131,7 @@ def _link(title: str, url: str) -> str:
 def render_sources(st, sources: list[dict], traced: list[dict], claim_check: dict | None = None) -> None:
     """Sources under an Ask answer: numbered (used) and traced originals without a free abstract (not used)."""
     if sources:
-        st.markdown("**Sources** (abstracts the answer was grounded in)")
+        st.markdown("**Sources** (index records whose abstracts, up to 1,500 characters each, the answer was grounded in)")
         for s in sources:
             date = f" ({plain(s['published'])})" if s.get("published") else ""
             st.markdown(f"[{int(s['n'])}] {_link(s.get('title') or s.get('url'), s.get('url'))}{date}")
@@ -138,10 +139,13 @@ def render_sources(st, sources: list[dict], traced: list[dict], claim_check: dic
                               if s.get(k))
             if meta:
                 st.caption(meta)
+        if any(s.get("licence_decision") for s in sources):
+            st.caption("Licence decisions cover the index record and abstract only, not the paper. They apply VERA's rules "
+                       "to the indexing service's published metadata terms (held for review when none are declared) "
+                       "and were not verified with the publisher.")
     if claim_check and claim_check.get("outcome") == "checked":
         st.caption(f"Claim check ({plain(claim_check.get('checker') or 'checker')}): {claim_check['checked']} cited "
-                   f"claims checked against the cited abstracts; {claim_check['supported']} supported, "
+                   f"claims checked by a model against the cited abstract text (first 1,500 characters); {claim_check['supported']} supported, "
                    f"{claim_check['partial']} partly supported, {claim_check['removed']} removed.")
     if traced:
-        st.caption("Also traced from web results to the original source, but no free abstract was available, so "
-                   "not used: " + "; ".join(_link(t.get("title") or t.get("url"), t.get("url")) for t in traced))
+        st.caption("Also found and matched to an index record, but the index had no abstract for it, so not used: " + "; ".join(_link(t.get("title") or t.get("url"), t.get("url")) for t in traced))
