@@ -4,8 +4,8 @@
 
 **VERA is a provenance-grounded agentic context-engineering system that
 discovers, critically evaluates, registers, and organizes evidence into
-an auditable reasoning context to produce research responses measurably
-superior to direct leading-LLM baselines.**
+an auditable reasoning context. The goal is research responses better
+than those of direct leading-LLM baselines; that comparison has not yet been run.**
 
 VERA is being developed as a capstone project for TAI Labs' Agentic AI
 Engineering program.
@@ -112,7 +112,7 @@ POST /memory/{claim_id}/reject
 
 `POST /ask` is the primary research-question interface (key: `VERA_API_KEY`). Since 2026-10-07 (items #77 and
 #79): the scope router runs first; an accepted question is searched live (arXiv, OpenAlex, DuckDuckGo links
-followed to original papers); the answer is written only from the retrieved abstracts with [n] citations, each
+resolved to index records and their abstracts); the answer is written only from the retrieved abstracts with [n] citations, each
 cited claim is checked against the cited abstract, and unsupported sentences are removed. Request:
 `{"question": "...", "mode": "normal"}`. Response:
 
@@ -122,7 +122,7 @@ model           provider:model that answered (Groq first, OpenAI fallback)
 tokens_used     integer
 cost_usd        number (0 on the Groq free tier)
 sources         [{n, title, url, published, source_type, provider, identifier, retrieved_at, licence_decision}]
-traced_sources  originals found from links but without a free abstract (listed, not used)
+traced_sources  index records found from links but without a free abstract (listed, not used; not full documents)
 claim_check     {checked, supported, partial, removed, checker, outcome}
 ```
 
@@ -159,12 +159,12 @@ apply. The unused per-task file `.vera-provider-chain.json` was removed (its Gro
 Grounded `/ask` (2026-10-07, item #79). For each question the scope router accepts, `/ask` searches arXiv,
 OpenAlex and DuckDuckGo once (`config/ask-provider-chain.json` `grounding`). Results with an abstract are
 used directly. Link-only results (DuckDuckGo, news, portals, OpenAlex records without an abstract) are
-followed to the original paper (`vera/source_resolver.py`): the page's citation DOI, arXiv, SSRN and linked
+resolved to a scholarly index record and its abstract, not the full paper (`vera/source_resolver.py`): the page's citation DOI, arXiv, SSRN and linked
 DOIs, one more hop through known scholarly hosts, then an OpenAlex title match (Jaccard >= 0.8) for portals
 that refuse the fetch; abstracts come from OpenAlex, then Semantic Scholar. All counts, hops and time limits
 are in the `resolve` block. The answer uses the grounded-v1 prompt (numbered abstracts, cite only), invalid
 citation numbers are removed with a note, and the response lists `sources` (no abstracts) and
-`traced_sources` (originals found without a free abstract, not used). With no usable source, `/ask` says so
+`traced_sources` (records found from links but without a free abstract, not used). With no usable source, `/ask` says so
 and does not answer from memory.
 
 Corpus growth (item #79 phase C). After the response, each source with an abstract goes through Gate A
@@ -317,9 +317,9 @@ The bootcamp's Week 4 asks for "an eval suite your capstone runs against, visibl
 
 **Architecture and stack.** `POST /ask` runs a scope router, then a keyless live search (arXiv and OpenAlex, rank-fused), then an answer from the retrieved abstracts only with `[n]` citations, a claim check against each cited abstract, and a gated memory (checked findings are written as pending; only owner-confirmed findings are recalled). FastAPI service, Streamlit UI, one Postgres with three least-privilege accounts, free-tier-first models (Groq, then `gpt-4.1-nano`), deterministic checks for evaluation. Sections above give detail.
 
-**Before and after (one valid pair).** Same 30 frozen questions, same model (`gpt-4.1-nano`), same frozen checks (`trace-checks-v1`), one run each, 2026-10-04. Before = `baseline` (the question only, no retrieval); after = `grounded_v1` (keyless arXiv search, up to 5 abstracts, cite-only-these rule).
+**Baseline vs grounded variant (one valid pair, not a before/after of a fix).** Same 30 frozen questions, same model (`gpt-4.1-nano`), same frozen checks (`trace-checks-v1`), one run each, both captured on 2026-10-04, before item #71. Variant 1 = `baseline` (the question only, no retrieval); variant 2 = `grounded_v1` (keyless arXiv search, up to 5 abstracts, cite-only-these rule).
 
-| Measure (source) | Before | After | Test |
+| Measure (source; variant comparison, not a before/after of a fix) | Baseline | Grounded_v1 | Test |
 |---|---|---|---|
 | Citation present (A1), 22 applicable traces | 1/22 (5%) | 10/22 (45%) | exact McNemar p = 0.0039 |
 | No phantom evidence (A4), 22 applicable traces | 4/22 (18%) | 17/22 (77%) | exact McNemar p = 0.0002 |
@@ -328,11 +328,11 @@ The bootcamp's Week 4 asks for "an eval suite your capstone runs against, visibl
 
 Sources: `eval_results/trace_eval_v1.json` (generated 2026-10-04), `eval_results/trace_eval_v1_validation.json`, `docs/trace_eval/`.
 
-**Caveats.** The headline pass rate did not move; the gain is in the failure mix (by the blind labels, dev traces with fabricated citations, unsourced numbers and vague "studies show" claims fell from 3, 3 and 12 to 0, 0 and 0), and retrieval became the top failure (13 of 19 grounded dev traces had at most 1 of 5 results on topic). Agent-authored questions; one agent coder and labeller from the builder's model family; 30 questions, one run; the checks are heuristics validated on dev only (they over-flag some passes, TNR 0.5 to 0.75 on four checks); one grounded capture error counts as a failure; the "after" predates the query-translation fix (item #71) and the grounded `/ask` (item #79). Directional, small n.
+**Caveats.** The headline pass rate did not move; the gain is in the failure mix (by the blind labels, dev traces with fabricated citations, unsourced numbers and vague "studies show" claims: 3, 3 and 12 for the baseline, 0, 0 and 0 for grounded_v1), and retrieval became the top failure (13 of 19 grounded dev traces had at most 1 of 5 results on topic). Agent-authored questions; one agent coder and labeller from the builder's model family; 30 questions, one run; the checks are heuristics validated on dev only (they over-flag some passes, TNR 0.5 to 0.75 on four checks); one grounded capture error counts as a failure; the grounded_v1 variant predates the query-translation fix (item #71) and the grounded `/ask` (item #79). Directional, small n.
 
 **Not a valid pair, so not claimed.** (1) Strictly relevant results in the top 5, 0.27 to 0.77 (item #71, 22 questions): later re-scoring showed a labeller effect of about 0.32, and with one labeller the shipped chain is level with the old one (1.00 vs 1.09). (2) `eval_results/grounded_ask_v1.json` (2026-10-08, post-#79: 19 of 30 answered with checked citations, unsupported-claim rate 9 of 105 = 8.6%, Wilson 95% 4.6 to 15.5%) has no baseline on the same claim check. Cheapest measurement for a post-fix pair: rerun `scripts/trace_measure.py` on the same 30 questions and frozen checks against today's `/ask`, and run the claim check on the 20 dev baseline answers (an estimated 30 to 50 `gpt-4.1-nano` or free-tier calls, cents; not yet run).
 
-**What changed.** Citations went from near-absent (1/22) to present in about half of applicable traces (10/22), and fabricated or unsourced claims disappeared in the labelled dev set. In exchange VERA now declines when search returns nothing useful, which exposed retrieval quality as the next problem.
+**What the comparison shows (two variants captured together, not a before/after of a fix).** The baseline cited a source in 1/22 applicable traces and the grounded variant in 10/22, about half; the grounded variant had no fabricated citations, unsourced numbers or vague "studies show" claims in the labelled dev set. In exchange the grounded variant declines when search returns nothing useful, which exposed retrieval quality as the next problem.
 
 ## Status and limitations (2026-10-04, updated 2026-10-07)
 
@@ -340,7 +340,7 @@ Written as dated observations, not guarantees. Every measured figure carries its
 
 **What VERA does now**
 
-- **Grounded `/ask` (2026-10-07, item #79; built and tested; pushed, deploy unverified 2026-10-12).** Live search per accepted question, link-only results followed to original papers, answers only from retrieved abstracts with [n] citations, invalid citation numbers removed, sources listed under the answer, an explicit no-sources reply instead of memory answers; corpus admission (Gate A + licence gate) after the response. See "Grounded `/ask`" above. It meets the criteria R1 set for the public default, measured once (directional, small n; see the next list).
+- **Grounded `/ask` (2026-10-07, item #79; built and tested; pushed, deploy unverified 2026-10-12).** Live search per accepted question, link-only results resolved to index records and their abstracts (not full papers), answers only from retrieved abstracts with [n] citations, invalid citation numbers removed, sources listed under the answer, an explicit no-sources reply instead of memory answers; corpus admission (Gate A + licence gate) after the response. See "Grounded `/ask`" above. It meets the criteria R1 set for the public default, measured once (directional, small n; see the next list).
 - **Free-tier-first models for `/ask`** (item #77): Groq `openai/gpt-oss-20b`, then `openai/gpt-oss-120b`, then OpenAI `gpt-4.1-nano`; evaluation paths stay on `gpt-4.1-nano`.
 - **"What VERA draws on" sidebar** (item #78) on every page: scope, how answers are produced, and the Trace Eval evidence snapshot, read from shipped files.
 - **Corpus description and connection triage** (item #83, ported from AI-Internship). `GET /corpus-summary` (behind `VERA_API_KEY`; the UI calls it server-side) describes VERA's own admitted sources in model-written prose with topics, from titles and metadata only, through the read-only account (`VERA_DB_URL_RO`); it is regenerated only when the source count, newest source time or prompt version change (memory cache; deterministic fallback with a retry cooldown) and shown in the sidebar. When the Ask page cannot reach the API, it shows an ordered, host-free triage (address, reachable, awake, `/health`, endpoint) stopping at the earliest failing step.
@@ -348,7 +348,7 @@ Written as dated observations, not guarantees. Every measured figure carries its
 - **Search providers.** arXiv and OpenAlex (keyless, merged by reciprocal rank fusion). A DOAJ provider exists but is switched off in config: in two blind measurements (2026-10-04) it added no directly relevant result the others missed, and in the second it displaced two relevant ones. Zero-hit query relaxation is also built but off: it lowered strict relevance (directional, one labeller, 22 questions). DuckDuckGo Lite is **discovery-only**: VERA keeps only the target URL, that page's own headline and its domain, at low volume (5 s gap, daily cap of 8 queries, at most 2 of the top 5 results; a challenge page counts as a failure and is never evaded). DuckDuckGo's params page says its parameters are intended for individual use; that terms note is why volume stays low and the provider can be switched off (`search.duckduckgo_lite.enabled: false`). Discovered pages are not auto-fetched. **Google Scholar is a link-out only**: a person clicks a button in their own browser; VERA never queries it. Measured on 22 questions, one AI labeller (item #71, before the OpenAlex and DOAJ additions are separated out): strictly relevant results in the top 5 rose from 0.27 to 0.77 per question; directional, small n, not re-measured since.
 - **Scope router** (`vera/scope_router.py`, `config/scope_router.json`). A deterministic first layer plus an optional small-model classifier; declined questions never reach search or the answering model. On the frozen 50-item scope set (`config/scope_set_v1.json`, sha256-frozen, AI-authored): false refusals 1/24 (Wilson 95% 0.007 to 0.202) and false accepts 0/26 (0.000 to 0.129), identical for layer 1 alone and with the classifier. **Directional, small n.** The one false refusal cites a 2025 study that the classifier called a future date.
 - **Public mode and caps** (`vera/public_mode.py`, `config/public_mode.json`). Public mode is the default when `VERA_PUBLIC_MODE` is unset. The upstream URL comes from server configuration only, the key stays server-side and is never put in a widget, request and daily-cost caps return a generic 429 with no provider text, and model text is rendered through `safe_markdown`. Caps today are proposals: 6 requests per minute and 40 per day per client, 400 per day overall, USD 2.00 per day overall and USD 0.25 per client.
-- **Licence rule (approved by R1, 2026-10-04).** The gate rejects only ND, no-educational-use and fee-only terms; plain NC is accepted; an undeclared or unclear licence is held for review. Checked on 7 hand-written cases (`vera/licence_gate.py`).
+- **Licence rule (approved by R1, 2026-10-04).** The gate rejects only ND, no-educational-use and fee-only terms; plain NC is accepted; an undeclared or unclear licence is held for review. Checked on 7 hand-written cases (`vera/licence_gate.py`). VERA records no declared licence for Semantic Scholar abstracts. They can currently be used in answers before any licence check is enforced (the decision shown with each source is recorded, not applied to what the answer model sees); at corpus admission they are held for review, and the memory write gate refuses findings that cite them.
 - **Release gate** (`python scripts/release_gate.py`). Six required checks: full suite, the SQL catalog test run with `--run-live-stages` (read-only; fails closed, so a skip or zero tests fails the gate), sha256 of the frozen files, and static safety checks (no environment key passed to a widget, no `unsafe_allow_html` on model text, public mode default). `--live` additionally re-runs scope layer 1 only (zero cost) and fails on any false accept (directional, small n).
 
 ## How VERA remembers (Week 5)
@@ -462,7 +462,7 @@ this README, `db/README.md`, `.env.example` and `environment-log-prv.md` with th
 
 ## Demo-Day Success Criterion
 
-The project succeeds if VERA can demonstrate that it:
+This is the project's goal, not a result: the comparison against leading LLMs has not been run (see "Status and limitations"). The project succeeds if VERA can demonstrate that it:
 
 > produces a grounded research response significantly superior in
 > quality to direct responses to the same research question from GPT-6
