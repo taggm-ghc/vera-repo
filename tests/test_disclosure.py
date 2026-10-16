@@ -66,3 +66,12 @@ def test_flag_off_selects_unconfirmed_text(tmp_path):
     cfg.write_text(json.dumps({"memory": {"store": {"confirm_required": False}}}))
     assert disclosure.disclosure_text(cfg) == disclosure.DISCLOSURE_TEXT_UNCONFIRMED
     assert disclosure.disclosure_text(tmp_path / "missing.json") == disclosure.DISCLOSURE_TEXT
+
+
+def test_source_scope_statement_is_honest():
+    """DEC-EI1: answers are grounded only on index records and abstracts, and licence decisions are not verified with the publisher."""
+    for t in (disclosure.DISCLOSURE_TEXT, disclosure.DISCLOSURE_TEXT_UNCONFIRMED):
+        low = t.lower()
+        assert "index records and abstracts" in low and "not on full papers" in low
+        assert "search snippets" not in low and "checked findings" not in low
+        assert "not verified with the publisher" in low

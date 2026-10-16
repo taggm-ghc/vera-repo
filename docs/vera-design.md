@@ -2,6 +2,8 @@
 
 > **[Annotation 2026-10-09b (R11a, job C5-VERA): superseding status.** Observed today (decisions-2026-10-09.md; VERA git log read 2026-10-09): VERA redeployed by R1 and live check plus memory drill passed (week5-submission-record.md); VERA `main` = `50644f0` (D6, #91 scaffold; /version at 69cd936; polish committed); Week 5 assignment COMPLETED (R1); Demo Day date ignored, its outcomes run ASAP; course end is 2026-10-25 (any '10-12 end' below is stale); D-029 accepted to 2026-10-25; Render is the course-scoped host only (VERA's future host is non-Render, Postgres stays; no DB backups per R1, portable SQL exports wanted, #99). Design direction (R1, 10-09): research stances are Researcher Agent flavors with their own SOPs/scripts; VERA stays a stance-neutral research service; a private VERA instance is under consideration (#98 A6). New: OEV-6..OEV-15 (VERA research-service opportunities, `AI-Internship/p3m3/oev-vera-research-service-siblings.md`) and R1 requirements for VERA fetch/extract/provenance (many MIME types and rendered-page text; author/contributor/editor/reviewer data incl. public emails; DOI and bibliographic identifiers; provenance aggregates over time to rank sources and RAG results). Current VERA status and open work: `p3m3/VERA-STATUS-2026-10-09b.md`; to-do digest: `AI-Internship/p3m3/VERA-TODO-DIGEST.md`. Design note: the requirements above are mapped to this design in VERA-STATUS-2026-10-09b.md s3. Observation: this design has no contributor/role/organisation/DOI/CSL-JSON fields and no multi-format fetch spec as of 2026-10-09; its 'Fetch/extract: Reuse' row and 'bounded to text' scope (extraction-to-text route) are unchanged. Addendum A.11's note that the Render Postgres is the near-term host stands as course-scoped only.**]**
 
+> **[Annotation 2026-10-14 (Codex reconciliation, DEC-CX1): qualifies the 2026-10-09b annotation above, which is preserved unchanged.]** Its "memory drill passed" refers to the 2026-10-09 drill (week5-submission-record.md). The rows that drill wrote are recorded as legacy pre-D6 rows, which are not recall-eligible, and the deployed commit was not verified at the time. It is not a cross-session recall proof for the current owner-confirmed (D6) build. As of 2026-10-14, cross-session recall on the D6 builds has not passed a live proof (README.md, "Recall status").
+
 **Provenance-grounded agentic context engineering for auditable research synthesis**
 
 Prepared September 2026
@@ -14,7 +16,7 @@ Prepared September 2026
 
 ## Capstone one-liner
 
-VERA is a provenance-grounded agentic context-engineering system that discovers, critically evaluates, registers, and organizes evidence into an auditable reasoning context to produce research responses measurably superior to direct leading-LLM baselines.
+VERA is a provenance-grounded agentic context-engineering system that discovers, critically evaluates, registers, and organizes evidence into an auditable reasoning context. Its goal is research responses measurably better than direct leading-LLM baselines; that comparison has not yet been run.
 
 ## North star
 
@@ -48,7 +50,7 @@ VERA is deliberately bounded to text. It does not address multimodal representat
 
 | Question | Answer |
 | --- | --- |
-| What does it do? | Discovers candidate evidence, identifies what evidence the question requires, selectively acquires and registers sources, critically appraises claims and source processes, models support and contradiction, determines whether the evidence set is adequate, constructs an auditable reasoning context, and generates and critiques a grounded response. |
+| What does it do? | Discovers candidate evidence, identifies what evidence the question requires, selects which sources warrant acquisition and acquires and registers the complete document of each selected source (target; see "Current state vs required"), critically appraises claims and source processes, models support and contradiction, determines whether the evidence set is adequate, constructs an auditable reasoning context, and generates and critiques a grounded response. |
 | Who is it for? | A researcher using AI to assemble and reason over an auditable evidence base for a bounded research question. |
 | What must it handle well first? | Given a bounded research question, what evidence is needed, which candidate evidence is worth acquiring, what evidence is trustworthy and applicable, whether the evidence set is sufficient, and what conclusions are warranted by it? |
 | What would make a proud demo? | A grounded response measurably superior to direct leading-LLM baselines, with every consequential evidence and reasoning decision inspectable and traceable to source, evidence, provenance, method, and uncertainty. |
@@ -73,7 +75,7 @@ The differentiated capability is context engineering, extended to include the cr
 2. Interpret the question and create an Evidence Requirements Map that specifies material subquestions, evidence types, temporal scope, authority needs, counterevidence needs, and coverage state.
 3. Plan one or more search strategies and discover candidate sources.
 4. **Gate A:** prioritize candidates before full acquisition using query fit, expected evidentiary value, source cues, novelty, cost/risk, and uncertainty, while favoring recall over premature exclusion.
-5. Selectively fetch content into quarantine/staging; compute content hash and register source/version/provenance before semantic use.
+5. For each selected candidate, resolve the original document and version and acquire the complete accessible document (`full_document`) into quarantine/staging; compute content hash and register source/version/provenance and acquisition status before semantic use (see "Full-document acquisition"; target, see "Current state vs required").
 6. Run bounded deterministic content-integrity checks and preserve exact finding spans.
 7. Segment relevant content into semantic evidence units with exact source locations.
 8. Critically appraise source/process, data quality, evidentiary quality, applicability, temporal validity, independence, uncertainty, meta-drift, and reference-relative bias where supported.
@@ -126,6 +128,125 @@ For bounded research, Gate A should usually prioritize recall over precision —
 | Coverage contribution | Estimate which open Evidence Requirement the candidate may satisfy. |
 | Acquisition cost/risk | Account for fetch cost, parsing difficulty, duplication, malformed content, and obvious unusability. |
 | Uncertainty | Preserve how little is known before acquisition and avoid converting uncertainty into rejection. |
+
+## Full-document acquisition (required architecture, owner ruling 2026-10-14)
+
+The required acquisition target is `full_document` for every source selected for evidentiary acquisition. It is the required target, not an optional future step and not a target applied only when convenient. Acquisition is selective about **which** sources warrant retrieval (Gate A). It is not selective about **whether** a selected source's complete document is acquired. Discovery metadata, index records, snippets, summaries and abstracts help evaluate candidates and set acquisition priority. They are not substitutes for the source document.
+
+### Pipeline stages
+
+1. **Discovery.** Search providers return candidates as snippets, index metadata, abstracts or summaries.
+2. **Candidate evaluation and selection.** Gate A uses those lesser representations to choose which candidates to acquire (`fetch` / `defer` / `reject`). The Gate A decision and its reason are recorded for every candidate; only `fetch` candidates enter acquisition.
+3. **Resolution of the original document and version.** For each selected candidate, resolve the original document (not an index page, mirror or portal) and its specific version (for example a DOI, an arXiv version, or a publisher version of record).
+4. **Acquisition (to staging).** Acquire the complete accessible document, subject to applicable rights and access controls, into quarantine/staging. Record source identity, provenance, acquisition status (with a failure reason when it fails), version type, version identifier and content hash before any semantic use.
+5. **Rights assessment.** Record each licence record with its provenance and scope, and the resulting rights disposition. The document's own licence statement may be read from the staged copy. Content leaves quarantine/staging only when the disposition is `permitted` (see Storage and licence); otherwise the disposition is recorded and the staged content is not used. A rights assessment may also run before stage 4, on licence records available from discovery or resolution. If it already finds that the disposition does not permit staging, stage 4 is skipped and the acquisition status is `blocked_rights`.
+6. **Inspection and evaluation.** Run integrity checks and critical appraisal on the acquired document before any of its contents are admitted as substantive evidence. Record the inspection outcome and the representation type actually found.
+7. **Passage-level evidence admission.** Gate B admits, qualifies or rejects specific passages of the inspected document, each with its exact location.
+8. **Citation and claim check against the examined passages.** Each cited claim is checked against the admitted passages it cites, not against an abstract or index record.
+9. **Memory gate.** Only findings that passed the claim check against examined passages are offered to the memory write gate (`vera/memory_gate.py`); storage stays with `vera/memory_store.py` and owner confirmation (AGENTS.md rule 2).
+
+### Data model: separate dimensions
+
+Each candidate, and each acquired or attempted source, carries the following dimensions. Each dimension is recorded in its own field. No value is copied from another dimension without the check that sets it: for example, representation type `full_document` is set only by an inspection that `passed`. The separation of dimensions is required (DEC-FDA1). The vocabulary below is **ratified as design baseline 2026-10-14 (OD-1; recorded as DEC-OD1); not implemented**. No fields, API changes or DDL exist or are authorised by this ratification. The gap analysis quotes these lists and defines none of its own; this section is the one canonical vocabulary.
+
+| Dimension | Vocabulary | Definition |
+| --- | --- | --- |
+| Gate A decision (applies to every candidate) | `fetch` | Selected for evidentiary acquisition. Only these candidates get an acquisition status. |
+| | `defer` | Not selected now; may be reconsidered. Recorded with its Gate A reason (today `candidates.gate_a_decision`). It has no acquisition status: it is not `not_attempted`, because acquisition was never due. |
+| | `reject` | Not selected. Recorded with its Gate A reason. It has no acquisition status. |
+| Representation type (what artifact is held) | `discovery_snippet` | A search-result excerpt or ranking snippet written or cut by the search provider. |
+| | `index_metadata` | A bibliographic or index record (title, authors, date, identifiers, venue) from an index such as OpenAlex, with no body text. |
+| | `abstract` | The author-written or publisher-provided abstract, whether taken from the document or from an index. |
+| | `summary` | A summary written by a third party or a model, not by the author. |
+| | `landing_page` | A publisher, repository or DOI landing page about the document, not the document itself (what the M2 path usually stores today). |
+| | `unclassified` | An acquired artifact that has not yet been inspected. It is never treated as `full_document`. |
+| | `full_document` | The complete accessible body of the resolved original document, at an identified version. Assigned only when the inspection outcome is `passed`. |
+| Acquisition status (what happened when VERA tried to acquire the full document; Gate A `fetch` candidates only) | `not_attempted` | The source was selected, but no acquisition has been tried yet. |
+| | `in_progress` | Acquisition has started and has not finished. |
+| | `acquired` | Bytes were retrieved in full, hashed and staged. It says nothing about whether the bytes are the document; that is the inspection outcome. |
+| | `failed` + reason | Acquisition was tried and did not succeed. A reason is required: `not_resolved`, `timeout`, `fetch_error`, `too_large` (the body exceeds the byte cap; the cap is a threshold and needs a calibration note), `unsupported_format` (for example a PDF while no PDF parser exists), `parse_error`, `truncated` (the transfer ended before the body was complete). |
+| | `blocked_rights` | Acquisition into staging did not proceed because a rights assessment made before acquisition found that the disposition does not permit even staging. The disposition (`restricted`, `unresolved` or `conflicting`) is recorded separately and is the reason. This status records only that acquisition stopped. It is not a rights finding. |
+| | `blocked_access` | The document exists but cannot be reached, for example a paywall, login, bot challenge or refused request. VERA never bypasses an access control. |
+| Inspection outcome (what inspection found in an `acquired` artifact) | `not_inspected` | Acquired, not yet inspected. Not admissible. |
+| | `passed` | Integrity checks and appraisal passed: the artifact is the resolved document, at the expected version, complete. |
+| | `failed` + reason | A reason is required: `not_the_document` (a landing page, abstract page, paywall or cookie wall), `wrong_document` (title or identifier does not match the candidate), `version_mismatch` (a different version from the one resolved), `incomplete_body` (body sections missing), `unreadable` (no usable text extracted). The representation type records what was actually found, for example `landing_page`. |
+| Rights and licence provenance (who says what the licence is) | `verified_at_source` | The licence was checked with the rights holder or at the original document (publisher page, the repository's licence record for the exact deposited version checked against that version, or the document's own licence statement). |
+| | `asserted_by_intermediary` | The licence is stated only by an index or aggregator. This is an assertion, not a verification. |
+| | `unknown` | No licence information was found. |
+| Rights disposition (the outcome of the rights assessment; separate from licence provenance and licence scope) | `permitted` | The assessment finds that the intended acquisition, storage and use of the content is allowed. |
+| | `restricted` | The assessment finds that the terms forbid or limit the intended acquisition, storage or use. |
+| | `unresolved` | The assessment has not reached a finding, for example because it is incomplete or because licence provenance is `unknown`. |
+| | `conflicting` | Sources of licence information disagree. It never resolves to `permitted` without verification at source. It changes only after a check at source: to `permitted` if the at-source terms permit the intended use, otherwise to `restricted`. The conflicting records and the resolution are kept. |
+| Licence scope (attribute of each licence record) | `metadata`, `abstract`, `content` | What the licence record covers. A `metadata` or `abstract` licence never clears `content`. |
+| Version identity (named dimension; made of the two attributes below) | Version type plus version identifier | Which version of the work was acquired. Kept distinct from acquisition, representation, inspection, licence provenance, rights disposition and scope. |
+| Version type (attribute) | `preprint`, `accepted_manuscript`, `version_of_record`, `unknown` | The kind of version acquired. Distinct from the version identifier. Which types are acceptable as evidence is OD-2. |
+| Version identifier (attribute) | Identifier plus version | The specific version acquired: DOI, arXiv id with version suffix or other version-specific identifier, plus the retrieval timestamp and resolved URL. Different versions are different source versions. Distinct from the database's storage version number (`sources.version`). |
+| Content hash | Hash of acquired bytes and of extracted text | Computed when the document is staged. Original acquired content is immutable (Provenance invariant); any change produces a new version record. |
+| Quoted passages with locations | Passage text plus location | Each passage admitted or quoted has its exact text and its location in the hashed version (character offsets, plus page, section or paragraph where available). Quotation invariant limits apply. |
+
+**Proposed, not adopted (owner decisions pending, 2026-10-14).** Two amendments to the attributes above are proposals only; the DEC-OD1 dimensions and values stay as ratified. (OD-12c) Record the extractor name and version with the content hash, because a different extractor version gives a different extracted-text hash; completeness would stay recorded by the acquisition status `truncated` and the inspection outcome `incomplete_body`, not by the hash. (OD-12b) Add an "intended operation" attribute to each rights assessment (`acquire`, `retain`, `index`, `embed`, `model_context`, `quote`), with one disposition per operation; the existing scope rule (a `metadata` or `abstract` licence never clears `content`) is unchanged. OD-12b also asks whether an index's own metadata licence counts as `verified_at_source` for scope `metadata`. If adopted, the `permitted`, `restricted` and `conflicting` disposition rows would name "the operation the assessment names" in place of the current wording. Neither is applied to the table until the owner decides.
+
+**Why one combined enumeration is inadequate.** These dimensions vary independently. An abstract can be held because acquisition is `not_attempted`, `failed`, `blocked_rights` or `blocked_access`, and each needs a different follow-up. A file can be `acquired` and still fail inspection as a `landing_page`. A `full_document` can be `acquired` with a licence that is `verified_at_source` or only `asserted_by_intermediary`, and with any of the four rights dispositions. Only a licence record of scope `content` that is `verified_at_source`, together with disposition `permitted`, lets it be stored beyond staging or used. A single value such as "abstract / full text / failed / blocked" cannot say what was held, why the full document is missing, or whether the licence was verified or what the rights disposition is. It hides exactly the facts that the evidence admission and failure rules below must check. A combined enum would also tempt code to treat "best representation held" as success. Version, hash and passage locations are attributes of a specific acquired artifact, not states, so they cannot be values of an enum at all.
+
+### Evidence admission rule
+
+Substantive evidence comes only from passages of a `full_document` whose acquisition status is `acquired`, whose inspection outcome is `passed`, whose licence record of scope `content` has provenance `verified_at_source`, and whose rights disposition is `permitted`. The last two are independent, and both are required: `restricted`, `unresolved` and `conflicting` dispositions stop admission, and the stop is recorded with its disposition. Discovery snippets, index metadata, abstracts and summaries are used only for candidate evaluation, selection and acquisition priority. They are never admitted as substantive evidence, and claims are never grounded or checked against them. Quotations and citations point to the examined passage locations in the hashed version.
+
+### Claim-to-passage-to-version chain (acceptance criterion)
+
+Every substantive citation or quotation, in `/ask` answers, memory rows, M3 to M5 outputs and evaluation reports, must satisfy all of the following:
+
+1. The claim resolves to one or more passage records.
+2. Each passage resolves to exactly one immutable source version (a `sources` row), never only to a canonical source.
+3. The recomputed hash of that version's content equals its recorded content hash.
+4. The passage text equals the version's content at the recorded offsets.
+5. The version satisfies the evidence admission rule above.
+6. The claim check was made against those passage texts, not against an abstract, snippet or index record.
+7. The whole chain can be rebuilt from database records alone.
+
+Proposed (OD-12a, not adopted until the owner decides): the admission rule would be implemented as one admission predicate over the recorded dimensions, called by `/ask` citation building, the M3 entry, the memory write gate and owner confirmation. Its result would be derived when needed and not stored as a separate field (DEC-EI1: derived, never asserted). Under that design a source that fails the predicate would not be used as evidence, and the reason would be recorded. The chain requirement above is REQUIRED; the single-predicate design is proposed; neither is implemented (REQUIRED, DESIGNED, NOT IMPLEMENTED).
+
+### Evidentiary-inspection ceiling (required, owner ruling DEC-EI1, 2026-10-14)
+
+Owner ruling (verbatim): "No substantive source citation or quotation may claim a level of evidentiary inspection greater than the source content actually acquired, verified, and examined."
+
+- **Derived, never asserted.** The evidentiary level that any citation or quotation displays is derived from the recorded acquisition status, representation type, licence provenance and scope, rights disposition and inspection outcome, plus whether the cited passage was located in the hashed version. It is never set independently: not from a provider literal, a code path's assumption, a default value or a model's statement.
+- **The ceiling is the minimum.** The displayed level is the minimum of what was acquired, what was verified and what was examined. A `full_document` that is `acquired` but `not_inspected` shows as not examined. A full document whose content licence is not `verified_at_source`, or whose rights disposition is not `permitted`, cannot be shown as used evidence. A claim checked against an abstract shows as checked against an abstract, not as verified.
+- **Scope.** VERA's answers, API fields, UI labels, claim-check summaries, memory rows, logs, evaluation reports, docs and presentation material. Words such as "fetched", "full text", "full content", "verified", "original" and "supported" are used only when the records support them.
+- The derivation is a function over the recorded dimensions, computed when the label is shown. It is not a stored field and not a combined enumeration.
+- **Explicit label (owner ruling DEC-R9d, 2026-10-14; surface list per reconciliation item CX-4).** Every substantive citation carries an explicit inspection-scope label computed by this derivation. This covers API sources and traced sources, UI source lists, memory recall and owner review lists, claim-check and verification reports, and evaluation files. The label is never inferred upward from a provider name, a source identifier or an existing static label such as `stored_text_kind`; such fields may only lower it. Where no acquisition record exists, the label is the lowest level the records support, for example "abstract or index record; full document not acquired". Existing records are not rewritten; their current display carries the label (DEC-R9c). The deterministic ceiling test joins the release gate once implemented (DEC-R9e). Until then, Rule 9 is NOT COVERED by the release gate.
+
+### Failure rule
+
+When full-document acquisition fails or is blocked, when inspection fails, or when the rights disposition is not `permitted`, VERA records the outcome with its status, reason and disposition. It never presents metadata, a snippet, a summary or an abstract as acquired full-document evidence. For each source, the API response and the UI show the representation type actually used, its acquisition status, its inspection outcome and its rights disposition. A source without an acquired full document is shown as not used as evidence, or the answer is qualified or marked as insufficient evidence through Gate C.
+
+### Owner confirmation: revalidation and conditional atomic transition
+
+Owner confirmation makes a pending (or legacy pre-D6) memory finding recall-eligible. It is an integrity decision as well as a protected status transition. Before the transition, the service re-checks, from database records only and in one read-only snapshot:
+
+1. the row's state (`pending` or `legacy_auto`) and that it has not expired;
+2. that every cited evidence span exists and belongs to one immutable source version;
+3. that each version's recomputed content hash matches its record, and that each exact span's text matches the content at its offsets (a whole-source placeholder span is checked by range only, and the finding is then labelled "checked against an abstract; no examined passage");
+4. that the row carries the supported claim-check result, and, once passages exist, a stored record of the passages and version hashes the claim was checked against;
+5. today, a replay of the licence gate on the recorded licence, which is not a rights finding; once rights assessment exists, disposition `permitted` from a `content`-scope licence record that is `verified_at_source`;
+6. once acquisition exists, that each cited passage passes the admission predicate (see "Claim-to-passage-to-version chain"; the single-predicate form is proposed under OD-12a);
+7. that the current write gate's text checks still pass on the stored finding (the echoed-question check cannot be replayed, because questions are not stored).
+
+The transition is one conditional update. It changes the status only if the row still holds the exact status, cited span ids, finding text and claim-check status read during revalidation, and has still not expired, and it reports whether a row changed. If no row changed, the result is a conflict, and the owner re-reads the row and decides again. Any failed check leaves the status unchanged and returns reason codes, never source text. Rejection uses a conditional update on the status alone, with no expiry condition and no checks 2 to 7, so a finding can always be rejected. Source versions cannot be updated (trigger). Evidence spans are append-only for the app accounts by grant only, and the claim row itself is mutable, which is why the conditional update compares those claim fields too. A rights record that arrives after the revalidation snapshot is not seen by that confirmation; a later restricting record is handled by rejection, and once acquisition exists recall re-derives eligibility. Once implemented, this would replace the earlier accepted residual that concurrent operator actions are last-writer-wins; withdrawing that residual is an open owner decision (OD-14), and the residual stands until then. How confirmation behaves before check 6 can pass is an owner decision (OD-13). Status: REQUIRED, DESIGNED, NOT IMPLEMENTED (gap analysis CX-1).
+
+### Storage and licence
+
+Source text is stored only in the database, never in the repository (AGENTS.md rule 6; Source-custody invariant). Full text is kept beyond quarantine/staging, or used as evidence, only when a licence record of scope `content` has provenance `verified_at_source` and the rights disposition is `permitted`. An intermediary's statement is recorded as `asserted_by_intermediary`, and it never makes a disposition `permitted` on its own. `restricted`, `unresolved` and `conflicting` stop storage beyond staging and stop use, and the stop is recorded with its disposition. The licence gate in the Licence invariant applies to the original source's licence.
+
+### External content is data
+
+Full documents are external content. Their text is data, never instructions (AGENTS.md rule 3; Authority invariant). This applies to every part of an acquired document, including body text, footnotes, metadata, embedded links and hidden markup. No passage can authorise a tool call, fetch, memory write or configuration change. No memory row may hold an instruction taken from a document.
+
+### Current state vs required (2026-10-14)
+
+Status: **REQUIRED, DESIGNED, NOT IMPLEMENTED.** The requirement is not yet met. Not implementing it before Demo Day is an accepted schedule/scope divergence (DEC-OD10), not a waiver or retirement of DEC-FDA1. Today VERA works at index-record and abstract level. `vera/grounded_ask.py` grounds on abstracts from search results. `vera/source_resolver.py` follows link-only results to an identifier and resolves it to OpenAlex or Semantic Scholar metadata and abstract (`stored_text_kind` `abstract_metadata`). `vera/claim_check.py` checks cited claims against the cited abstracts. `vera/memory_gate.py` and `vera/memory_store.py` gate and store findings whose support was checked against those abstracts. The M2 path (`vera/m2_runner.py` via `vera/selective_fetch.py`) fetches HTML only, usually a DOI landing page, refuses PDFs and over-cap bodies, and labels what it stores `abstract_metadata`. The database has `candidates.fetch_status` (`pending` / `fetched` / `failed`) but no representation type, acquisition-failure reason, inspection outcome, version type or version identifier field. **Known DEC-EI1 breaches on `main` (2026-10-14; code fixes, under the code freeze):** `vera/corpus_admission.py:130` sets `candidates.fetch_status='fetched'` for a search snippet that was never fetched; the seed-fallback provider labels an agent snippet `stored_text_kind` `full_content` (`vera/search_providers.py:1026`); the M5 claim verifier reports `verified` / `revised_verified` (`vera/m5/claim_verification.py:131`, `vera/m4_m5_runner.py:59`) without saying it checked M2 text that is usually a landing page; memory attaches one "evidence span" over the whole stored abstract text per cited source (`vera/memory_store.py:336`), so a memory row cites no examined passage; and the sidebar said web results are "followed back to the original papers" and "traced from web results to the original source" when they are followed only to an index record (and its abstract, where one exists) (EI-5; reworded under DEC-FL2, commit pending the owner's approval; not deployed, and the live build still shows the old labels; related wording in `vera/disclosure.py` and `vera/memory_panel.py` was clarified under the same lift; the defect closes only when the corrected strings are verified on `main` and in the live build). Today's licence gate (accept / hold for review / reject) judges intermediary-asserted terms. Under the baseline its outcomes are at most dispositions `permitted` / `unresolved` / `restricted` with provenance `asserted_by_intermediary` or `unknown`, never `verified_at_source`, so none meets the evidence admission rule. Licences recorded for abstracts are often intermediary assertions (for example OpenAlex's metadata licence) or unknown. Abstract-level grounding is the current state, not the intended end state. The gap analysis is kept in the owner's planning records outside this repository. Any implementation remains subject to the existing code freeze and the owner's approval controls; this section authorises no code or deployment.
+
+Two further gaps are recorded (Codex audit reconciliation, DEC-CX1). First, owner confirmation (`POST /memory/{id}/confirm`) is today a protected status transition only. It checks the row's state and expiry, then updates the status in a separate statement. It does not re-check spans, source version or hash, rights or eligibility, and the read and the update are not one atomic conditional operation. Second, the offline M3 stage reads every stored source's content for extraction with no representation or eligibility check, so it can process abstracts and landing pages as if they were documents. Both are recorded in the gap analysis (CX-1, CX-3) and stay under the code freeze.
 
 ## Critical appraisal layer
 
@@ -297,7 +418,7 @@ VERA preserves validated historical observations about search, appraisal, eviden
 | Capability | Approach | Capstone responsibility |
 | --- | --- | --- |
 | Search | Reuse tool/API | Plan queries, discover candidates, register provenance, maintain search iterations. |
-| Fetch/extract | Reuse | Selective acquisition into quarantine and source versioning. |
+| Fetch/extract | Build (REQUIRED, DESIGNED, NOT IMPLEMENTED) | Full-document acquisition of each selected source into quarantine, with source versioning and acquisition status. |
 | Deterministic integrity | Build small scripts | Inspect synthetic poison/injection patterns and exact spans. |
 | Segmentation | Simple implementation/library | Create evidence units with exact source spans. |
 | Critical appraisal | Build bounded evaluators/rubrics | Evaluate source process, data/evidence quality, applicability, uncertainty, lineage, and directness. |
@@ -340,6 +461,8 @@ The public service contract exposes the research answer together with enough evi
 ```
 
 Detailed provenance, uncertainty, reasoning, and evaluation records remain available to the system's audit layer. A generic scalar confidence field is not the governing contract; dimension-level quality and uncertainty remain inspectable.
+
+**Current implementation (2026-10-14): abstract-grounded; no full-document acquisition.** The contract above is the target. Today `/ask` writes answers from retrieved index records and their abstracts or search snippets and checks each cited claim against the cited abstract or snippet (full-document acquisition: REQUIRED, DESIGNED, NOT IMPLEMENTED; DEC-FDA1, DEC-OD10). Each returned source carries source-record provenance only: provider, identifier, retrieval time and the licence gate's decision on the metadata licence VERA records for the provider (not verified at source). It carries no immutable document version, no content hash, no passage location and no explicit inspection-scope label. The label is a recorded requirement (see "Evidentiary-inspection ceiling").
 
 ## TRACE-oriented and comparative evaluation
 
@@ -407,7 +530,7 @@ Capabilities such as richer bias analysis, full meta-drift implementation, gener
 - `GET /health` and `POST /ask` operate through FastAPI with validated structured outputs.
 - Each research question produces explicit evidence requirements before retrieval.
 - Search candidates are prioritized before acquisition, with uncertainty preserved and Gate A tuned to avoid premature exclusion of plausible high-value evidence.
-- Selected content is staged, hashed, and registered before semantic admission.
+- The complete accessible document of each selected source is staged, hashed, and registered before semantic admission; failed or blocked acquisition is recorded, never replaced by an abstract. (REQUIRED, DESIGNED, NOT IMPLEMENTED for Demo Day: an accepted schedule/scope divergence (DEC-OD10), not a waiver or retirement of DEC-FDA1; see "Current state vs required")
 - At least one deterministic content-integrity tool is invoked by the agent.
 - Semantic evidence is traceable to exact source version and span.
 - Source/process appraisal, data/evidence quality, applicability, independence, uncertainty, bias, and integrity remain separable canonical signals.
@@ -493,7 +616,7 @@ The three decision gates are deliberately simplified for the MVP:
 | Service contract | `GET /health` and validated `POST /ask` through FastAPI. |
 | Evidence requirements | Create a small, explicit map of the material findings or subquestions needed to answer the bounded research question. |
 | Candidate discovery | Search the web and register candidate title, URL, snippet/rank, query/run, and Gate A decision. |
-| Selective acquisition | Fetch selected textual content, stage it, compute a content hash, and preserve retrieval provenance. |
+| Full-document acquisition | For each source selected by Gate A, acquire the complete accessible document, stage it, compute a content hash, and preserve retrieval provenance, version and acquisition status; record failures (see "Full-document acquisition"). (REQUIRED, DESIGNED, NOT IMPLEMENTED for Demo Day: an accepted schedule/scope divergence (DEC-OD10), not a waiver or retirement of DEC-FDA1; see "Current state vs required") |
 | Semantic evidence | Extract machine-addressable evidence spans tied to the exact source version. |
 | Critical appraisal | Evaluate each consequential evidence unit with a fixed, inspectable rubric. Minimum dimensions: relevance, source/process quality, claim support, applicability, uncertainty, and support/challenge relation. |
 | Context decisions | Apply Gate B and retain the decision, rationale, contributing evidence, method/rubric version, and provenance. |

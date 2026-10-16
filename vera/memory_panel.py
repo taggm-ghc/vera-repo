@@ -1,6 +1,17 @@
 """Item #84: Minimal UI display of VERA's recalled findings from memory."""
 
 
+def _recalled_caption(confirm_required=None) -> str:
+    """Visitor-facing caption: names no back-end component; claims owner confirmation only when it is required."""
+    if confirm_required is None:
+        from vera.disclosure import confirm_required as _flag
+        confirm_required = _flag()
+    confirmed = (", and were confirmed by VERA's owner (confirmed is not proof of truth). " if confirm_required
+                 else ". They were not individually confirmed by VERA's owner. ")
+    return ("Findings that passed VERA's automated checks against the abstract or index record they cite"
+            + confirmed + "Never your question or who asked.")
+
+
 def render_memory_panel(st, data: dict) -> None:
     """Display recalled findings from memory. Handles missing keys gracefully.
 
@@ -21,8 +32,7 @@ def render_memory_panel(st, data: dict) -> None:
 
     if recalled:
         st.markdown("### 🧠 From VERA's memory")
-        st.caption("Checked, cited findings confirmed by VERA's operator (confirmed is not proof of truth). "
-                   "Never your question or who asked.")
+        st.caption(_recalled_caption())
         for item in recalled:
             claim_text = item.get("claim_text", "")
             source_title = item.get("source_title", "")
@@ -38,4 +48,4 @@ def render_memory_panel(st, data: dict) -> None:
                 st.caption(f"Saved {plain(saved_at)}")
 
     if memory_written > 0:
-        st.success(f"Saved {memory_written} checked finding{'s' if memory_written != 1 else ''} to memory")
+        st.success(f"Saved {memory_written} finding{'s' if memory_written != 1 else ''} for owner review (pending)")
